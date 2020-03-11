@@ -28,7 +28,7 @@ const preprocess = sveltePreprocess({
 export default {
   input: "src/main.js",
   output: {
-    sourcemap: true,
+    sourcemap: false,
     format: "iife",
     name: "app",
     file: "public/build/bundle.js"
