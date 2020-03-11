@@ -1,22 +1,14 @@
-# Svelte HMR and Sapper Export
+# Alternative Olympics Medal Table
 
-Trying to get the best of both worlds: fast and easy svelte development with Sapper bake out html deploy.
+Based on Russel's awesome [svelte-hmr-sapper repo](https://github.com/russellgoldenberg/svelte-hmr-sapper)
 
 ## Development
 
+To get running locally:
+
 ```bash
-npm run dev
+npm install // install the npm dependencies
+npm run dev // start the server!
 ```
 
 Modify content in `src` and `static`.
-
-## Deploy
-
-For github deploy:
-
-```bash
-npm run deploy
-make github
-```
-
-You need to modify the basepath in `package.json` depending on where it is hosted.
