@@ -2,7 +2,7 @@ PHONY: github aws-sync aws-cache pudding
 
 github:
 	rm -rf docs
-	cp -r __sapper__/export/svelte-hmr-sapper docs
+	cp -r __sapper__/export/olympics-alternative-medals docs
 	git add -A
 	git commit -m "update dev version"
 	git push
