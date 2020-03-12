@@ -83,7 +83,7 @@
 		max-width: 90em;
 		margin: 0 auto;
 		padding: 3em 4em;
-		color: #181d22;
+		color: #1d1e24;
 		font-family: 'Inter', sans-serif;
 		/* background: #f3f8fb; */
 	}
