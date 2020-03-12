@@ -33,7 +33,10 @@
     "d3-interpolate": "^1.4.0",
     "d3-scale": "^3.2.1",
     "lodash-es": "^4.17.15",
+    "node-sass": "^4.13.1",
     "polka": "^0.5.2",
+    "prettier": "^1.19.1",
+    "prettier-plugin-svelte": "^0.7.0",
     "rollup-plugin-svelte": "^5.1.1",
     "sapper": "^0.27.10"
   },

@@ -9,7 +9,6 @@ import dsv from "@rollup/plugin-dsv";
 import { terser } from "rollup-plugin-terser";
 import hmr, { autoCreate } from "rollup-plugin-hot";
 
-const nollup = !!process.env.NOLLUP;
 const watch = !!process.env.ROLLUP_WATCH;
 const useLiveReload = !!process.env.LIVERELOAD;
 
@@ -19,7 +18,7 @@ const production = !dev;
 const hot = watch && !useLiveReload;
 
 const preprocess = sveltePreprocess({
-  stylus: true,
+  scss: true,
   postcss: {
     plugins: [require("autoprefixer")]
   }
@@ -28,7 +27,7 @@ const preprocess = sveltePreprocess({
 export default {
   input: "src/main.js",
   output: {
-    sourcemap: false,
+    sourcemap: true,
     format: "iife",
     name: "app",
     file: "public/build/bundle.js"
@@ -52,7 +51,7 @@ export default {
     }),
     commonjs(),
 
-    dev && !nollup && serve(),
+    dev && serve(),
     useLiveReload && livereload("public"),
     production && terser(),
     hot &&
