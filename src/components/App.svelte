@@ -8,12 +8,12 @@
 	import { parseData, sortBy } from "./utils.js"
 	import rawData from "./../data/data.json"
 
-	let data = []
+	// let data = []
 
-	onMount(async () => {
+	// onMount(async () => {
 		// const res = await fetch(dataUrl)
-		data = parseData(rawData)
-	})
+	const data = parseData(rawData)
+	// })
 
 	$: countries = data
 		.filter(d => d.rank)
@@ -83,7 +83,7 @@
 		max-width: 90em;
 		margin: 0 auto;
 		padding: 3em 4em;
-		color: #34495e;
+		color: #181d22;
 		font-family: 'Inter', sans-serif;
 		/* background: #f3f8fb; */
 	}

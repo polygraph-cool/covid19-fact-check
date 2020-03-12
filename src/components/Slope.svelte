@@ -30,6 +30,7 @@
   $: xScale = scaleLinear()
     .domain([0, sortedData.length])
     .range([0, 96])
+
   const rowHeight = 40
   $: yScale = scaleLinear()
     .domain([0, data.length])

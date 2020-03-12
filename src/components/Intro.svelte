@@ -21,7 +21,6 @@
 
   $: selectedCountryData = dataByCountry[selectedCountry] || {}
   $: medianGdp = median(data.map(d => d.gdp)) || 0
-  $: console.log(medianGdp, selectedCountryData.gdp/ medianGdp)
 
   const metrics = ["rank", "gdpRank", "populationRank"]
   $: onChangeSelectedMetric(metrics[Math.min(index, metrics.length - 1)])
