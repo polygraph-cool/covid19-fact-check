@@ -3,11 +3,10 @@
   import { flip } from 'svelte/animate';
 	import { fade, fly } from 'svelte/transition';
 	import { expoIn } from 'svelte/easing';
-	import Scroller from '@sveltejs/svelte-scroller'
+	import Scroller from "./Scroller.svelte"
 	import { max, mean, range } from 'd3-array'
 	import { scaleLinear } from 'd3-scale'
 	import { format } from 'd3-format'
-	import { map } from 'lodash-es'
 
 	import { sum } from './utils.js'
 	import Number from "./Number.svelte"
@@ -29,7 +28,8 @@
 	})
 
 	let selectedCountryScores = {}
-	$: map(sportsInterestData, (countries, sport) => {
+	$: Object.keys(sportsInterestData).map(sport => {
+		const countries = sportsInterestData[sport]
 		selectedCountryScores[sport] = countries[selectedCountry]
 	})
 

@@ -1,7 +1,7 @@
 <script>
-	import Scroller from '@sveltejs/svelte-scroller'
   import { median } from 'd3-array'
 
+	import Scroller from "./Scroller.svelte"
 	import Medal from "./Medal.svelte"
 	import StackedRanks from "./StackedRanks.svelte"
 	import MapBubbles from "./MapBubbles.svelte"
