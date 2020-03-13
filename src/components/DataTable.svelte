@@ -17,7 +17,7 @@
   ]
   $: _ = ["rank", "gdpRank", "populationRank"].forEach((key, index) => {
     // let domain = extent(data.map(d => d[key]))
-    let domain = key == "medals" ? [0, 121] : [60, 1]
+    let domain = key == "rank" ? [26, 1] : [60, 1]
     colorScales[key] = scaleLinear()
       .domain(domain)
       .range(["#fff", maxColors[index]])
@@ -27,23 +27,32 @@
 
 <div class="group">
   <div class="header row">
-    <div class="name"></div>
-    <div class="full">
-      Rank
-    </div>
-  </div>
-  <div class="header row">
     <div class="name">
       Country
     </div>
-    <div class="medals cell">
+    <div class="medals cell supercell">
       By medals won
     </div>
-    <div class="gdp cell">
+    <div class="gdp cell supercell">
       With equal GDP
     </div>
-    <div class="population cell">
+    <div class="population cell supercell">
       With equal population
+    </div>
+  </div>
+  <div class="header row">
+    <div class="name"></div>
+    <div class="medals cell split-cell">
+      <div class="subcell">Rank</div>
+      <div class="subcell">Medals</div>
+    </div>
+    <div class="gdp cell split-cell">
+      <div class="subcell">Rank</div>
+      <div class="subcell">Medals</div>
+    </div>
+    <div class="population cell split-cell">
+      <div class="subcell">Rank</div>
+      <div class="subcell">Medals</div>
     </div>
   </div>
   {#each sortedData as country}
@@ -117,5 +126,24 @@
     flex: 0 0 4em;
     font-size: 0.9;
     font-weight: 300;
+  }
+  .header .supercell {
+    /* margin-left: 1em; */
+    padding-bottom: 0;
+  }
+
+  .split-cell {
+    /* border-top: 1px solid;
+    margin-left: 1em */
+    padding-top: 0.2em;
+  }
+  .subcell {
+    font-size: 0.8em;
+  }
+  .subcell:nth-child(1) {
+    font-weight: 600;
+  }
+  .subcell:nth-child(2) {
+    flex: 0 0 4rem;
   }
 </style>
