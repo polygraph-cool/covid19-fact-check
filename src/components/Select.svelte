@@ -1,6 +1,7 @@
 <script>
   export let value
   export let options
+  $:console.log(value)
 
   let isOpen = true
   let searchString = null
@@ -11,7 +12,7 @@
 </script>
 
 <div class="group">
-  <div class="label" on:click={() => isOpen = true}>
+  <!-- <div class="label" on:click={() => isOpen = true}>
     { value }
   </div>
   {#if isOpen}
@@ -24,7 +25,12 @@
         </div>
       {/each}
     </div>
-  {/if}
+  {/if} -->
+  <select {value} on:change={e => { value = e.target.value }}>
+    {#each options as option}
+      <option>{ option }</option>
+    {/each}
+  </select>
 </div>
 
 <style>
@@ -39,5 +45,12 @@
   .dropdown {
     position: absolute;
     background: white;
+  }
+
+  select {
+    padding: 0.2em 0 0.2em 0.5em;
+    font-size: 1em;
+    border-width: 0 0 1px 0;
+    background: #f3f8fb;
   }
 </style>

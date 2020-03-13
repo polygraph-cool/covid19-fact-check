@@ -69,7 +69,7 @@
       //   behavior: 'smooth'
       // })
       smoothScrollTo(yOffset, 1300, component)
-    }, 1000)
+    }, 600)
   })()
 
   $: doesNeedResort = metric != currentSortMetric
@@ -94,7 +94,7 @@
           class="row"
           class:active={selectedCountry == name}
           style={`transform: translateY(${y}px)`}
-          animate:flip="{{ duration: 2000, delay: 1000 + i * 10 }}"
+          animate:flip="{{ duration: 2000, delay: 100 + i * 10 }}"
           >
           <div class="row-label">
             <div class="flag">

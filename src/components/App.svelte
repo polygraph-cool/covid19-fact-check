@@ -1,11 +1,11 @@
 
 <script>
 	import { onMount } from 'svelte'
-	import Select from "svelte-select"
+	// import Select from "svelte-select"
 
 	import Intro from "./Intro.svelte"
 	import DataTable from "./DataTable.svelte"
-	// import Select from "./Select.svelte"
+	import Select from "./Select.svelte"
 	import SportsSection from "./SportsSection.svelte"
 	import { parseData, sortBy } from "./utils.js"
 	import rawData from "./../data/data.json"
@@ -29,7 +29,6 @@
 	$: selectedCountry = "Hungary"
 	const onChangeSelectedMetric = metric => selectedMetric = metric
 
-	$:console.log(selectedCountry)
 </script>
 
 <main>
@@ -39,18 +38,8 @@
 	<h3>
 		How is <Select
 			class="select"
-			selectedValue={selectedCountry}
-			on:select={res => selectedCountry = res.detail.value}
-			items={countries}
-			isClearable={false}
-			containerStyles="
-			display: inline-block;
-			z-index: 100;
-			border-width: 0;
-			border-bottom-width: 1px;
-			padding: 0 0 0.1em 0.3em;
-			vertical-align: sub;
-			"
+			bind:value={selectedCountry}
+			options={countries}
 		/> doing in the Olympics?
 	</h3>
 
@@ -97,14 +86,14 @@
 		line-height: 1.1em;
 		font-weight: 900;
 		max-width: 90%;
-		margin-bottom: 0.5em;
+		margin-bottom: 0.4em;
 	}
 	h2 {
 		font-size: 2.3em;
 		line-height: 1.1em;
 		font-weight: 500;
 		max-width: 90%;
-		margin: 0 0 3em;
+		margin: 0 0 4em;
 	}
 	h3 {
 		font-size: 2.3em;
