@@ -108,15 +108,14 @@
 	}
 </script>
 
+<p>
+	Different countries are more interested in some sports than others. For example, people in { selectedCountry } are very interested in { mostInterestedSport } — does that translate to higher medal counts?
+</p>
+<p>
+	Let's look at the interest of people in { selectedCountry } for each Olympic sport, and the number of medals { selectedCountry } has earned.
+</p>
+
 <div class="group">
-
-		<p>
-			Different countries are more interested in some sports than others. For example, people in { selectedCountry } are very interested in { mostInterestedSport } — does that translate to higher medal counts?
-		</p>
-		<p>
-			Let's look at the interest of people in { selectedCountry } for each Olympic sport, and the number of medals { selectedCountry } has earned.
-		</p>
-
 	<Scroller bind:offset>
 		<div slot="foreground">
 			<section class="sports">

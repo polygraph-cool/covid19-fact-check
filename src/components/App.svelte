@@ -93,14 +93,14 @@
 		line-height: 1.1em;
 		font-weight: 500;
 		max-width: 90%;
-		margin: 0 0 4em;
+		margin: 0 0 0.9em;
 	}
 	h3 {
 		font-size: 2.3em;
 		line-height: 1.1em;
 		font-weight: 500;
 		max-width: 90%;
-		margin-bottom: 0.9em;
+		margin-bottom: 1.2em;
 	}
 
 	/* .right:before {
