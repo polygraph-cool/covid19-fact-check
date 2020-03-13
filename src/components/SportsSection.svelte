@@ -165,7 +165,8 @@
 	}
 	.sport {
 		position: relative;
-		padding: 2.6em 2em;
+		padding: 2.6em 1.6em;
+		flex: 0 0 15em;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
