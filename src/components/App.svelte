@@ -1,9 +1,11 @@
 
 <script>
 	import { onMount } from 'svelte'
+	import Select from "svelte-select"
 
 	import Intro from "./Intro.svelte"
 	import DataTable from "./DataTable.svelte"
+	// import Select from "./Select.svelte"
 	import SportsSection from "./SportsSection.svelte"
 	import { parseData, sortBy } from "./utils.js"
 	import rawData from "./../data/data.json"
@@ -26,6 +28,8 @@
 
 	$: selectedCountry = "Hungary"
 	const onChangeSelectedMetric = metric => selectedMetric = metric
+
+	$:console.log(selectedCountry)
 </script>
 
 <main>
@@ -33,14 +37,22 @@
 		Alternative Olympics Medal Table
 	</h1>
 	<h3>
-		How is { selectedCountry } doing in the Olympics?
+		How is <Select
+			class="select"
+			selectedValue={selectedCountry}
+			on:select={res => selectedCountry = res.detail.value}
+			items={countries}
+			isClearable={false}
+			containerStyles="
+			display: inline-block;
+			z-index: 100;
+			border-width: 0;
+			border-bottom-width: 1px;
+			padding: 0 0 0.1em 0.3em;
+			vertical-align: sub;
+			"
+		/> doing in the Olympics?
 	</h3>
-
-	<select value={selectedCountry} on:change={e => selectedCountry = e.target.value}>
-		{#each countries as country}
-			<option>{ country }</option>
-		{/each}
-	</select>
 
 
 	<!-- <select value={selectedMetric} on:change={e => selectedMetric = e.target.value}>
@@ -55,13 +67,6 @@
 		<h2>
 			What about specific sports?
 		</h2>
-
-		<p>
-			Different countries are more interested in some sports than others. For example, people in the United States are very interested in basketball — does that translate to higher medal counts?
-		</p>
-		<p>
-			Let's look at the interest of people in { selectedCountry } for each Olympic sport, and the number of medals { selectedCountry } has earned.
-		</p>
 
 		<SportsSection {...{selectedCountry}} />
 	</div>
@@ -128,5 +133,12 @@
 	}
 	.sports {
 		margin: 9em 0;
+	}
+
+	.select :global(.selectedItem) {
+    padding: 0;
+	}
+	.select :global(input) {
+    width: auto;
 	}
 </style>

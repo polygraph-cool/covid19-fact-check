@@ -8,7 +8,7 @@
 	import { scaleLinear } from 'd3-scale'
 	import { format } from 'd3-format'
 
-	import { sum } from './utils.js'
+	import { sortBy, sum } from './utils.js'
 	import Number from "./Number.svelte"
 	import rawSportsInterestData from "./../data/sportsInterestData.json"
   import rawSportsMedalData from "./../data/sportsMedalData.json"
@@ -37,6 +37,13 @@
 	$: sports.map(sport => {
 		totalSportsMedals[sport] = sum(Object.values(sportsMedalData[sport]))
 	})
+	$: sportsSortedByInterest = sports.map(sport => ([
+		sport,
+		selectedCountryScores[sport],
+	])).sort(sortBy(1))
+	$: console.log(sportsSortedByInterest)
+
+	$: mostInterestedSport = (sportsSortedByInterest[0] || [])[0]
 
 	$: scoreScales = {}
 	$: sports.map(sport => {
@@ -102,6 +109,14 @@
 </script>
 
 <div class="group">
+
+		<p>
+			Different countries are more interested in some sports than others. For example, people in { selectedCountry } are very interested in { mostInterestedSport } — does that translate to higher medal counts?
+		</p>
+		<p>
+			Let's look at the interest of people in { selectedCountry } for each Olympic sport, and the number of medals { selectedCountry } has earned.
+		</p>
+
 	<Scroller bind:offset>
 		<div slot="foreground">
 			<section class="sports">

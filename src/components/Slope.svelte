@@ -13,6 +13,7 @@
   export let selectedCountry
 
   let component
+  let currentSortMetric = "rank"
 
   $: continents = [...new Set(data.map(d => d.continent))]
     .filter(d => d !== undefined)
@@ -20,7 +21,8 @@
 
   $: countryIndices = {}
   $: sortedData = [...data]
-    .sort(sortBy(metric))
+    // .sort(sortBy(metric))
+    .sort(sortBy(currentSortMetric))
     .reverse()
 
   $: sortedData.map((d,i) => {
@@ -29,7 +31,7 @@
 
   $: xScale = scaleLinear()
     .domain([0, sortedData.length])
-    .range([0, 96])
+    .range([0, 92])
 
   const rowHeight = 40
   $: yScale = scaleLinear()
@@ -67,12 +69,25 @@
       //   behavior: 'smooth'
       // })
       smoothScrollTo(yOffset, 1300, component)
-    }, 1700)
+    }, 1000)
   })()
+
+  $: doesNeedResort = metric != currentSortMetric
+
+  const rankLabels = {
+    rank: "rank by medals won",
+    gdpRank: "rank with equal GDP",
+    populationRank: "rank with equal population",
+  }
 </script>
 
 <div class="container">
   <div class="group" bind:this={component}>
+    {#if doesNeedResort}
+      <button class="sort" on:click={() => currentSortMetric = metric}>
+        Re-sort countries by { rankLabels[metric] }
+      </button>
+    {/if}
     <div class="wrapper" style={`height: ${(data.length + 1) * rowHeight}px`}>
       {#each countryData as { name, id2, y, start, end, startX, endX, left, right }, i (name)}
         <div
@@ -89,7 +104,7 @@
           </div>
           <div class="row-items">
             <div class="row-slider"
-              style={`transform: translateX(${endX}%)`}>
+              style={`transform: translateX(${endX}%); z-index: 100`}>
               <div
                 class="country"
                 class:active={selectedCountry == name}
@@ -111,16 +126,16 @@
               height={rowHeight}
               viewBox="0 -1 100 2"
               preserveAspectRatio="none"
-              style={`transform: translateX(${start < end ? "2em" : "0"})`}>
+              style={`transform: translateX(${start > end ? "2em" : "0"})`}>
               <path
                 class="arrow-line"
                 d={[
                   "M", left, 0,
-                  "L", right - (start < end ? 5 : 0), 0,
+                  "L", right, 0,
                 ].join(" ")}
                 vector-effect="non-scaling-stroke"
               />
-              {#if start < end}
+              {#if start > end}
                 <path
                   class="arrow-line"
                   d={[
@@ -131,7 +146,7 @@
                   vector-effect="non-scaling-stroke"
                 />
               {/if}
-              {#if start > end}
+              {#if start < end}
                 <path
                   class="arrow-line"
                   d={[
@@ -321,5 +336,20 @@
   svg,
   path {
     transition: all 1s ease-out;
+  }
+
+  .sort {
+    background: white;
+    padding: 0.5em 1.5em;
+    position: absolute;
+    bottom: 1em;
+    right: 2em;
+    z-index: 200;
+    appearance: none;
+    border: 1px solid #eaeaee;
+    font-weight: 600;
+    color: #4e4597;
+    cursor: pointer;
+    box-shadow: 0 13px 11px -3px #cccccc33, 0 2px 2px #cccccc66;
   }
 </style>
