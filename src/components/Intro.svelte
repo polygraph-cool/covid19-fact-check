@@ -2,6 +2,7 @@
   import { median } from 'd3-array'
 
 	import Scroller from "./Scroller.svelte"
+	import Histogram from "./Histogram.svelte"
 	import Medal from "./Medal.svelte"
 	import StackedRanks from "./StackedRanks.svelte"
 	import MapBubbles from "./MapBubbles.svelte"
@@ -11,10 +12,10 @@
 
   export let data
   export let selectedCountry
-  export let selectedMetric
-  export let onChangeSelectedMetric
 
   let index = 0
+  const metrics = ["rank", "gdpRank", "populationRank"]
+  $: selectedMetrics = metrics.slice(0, index + 1)
 
   let dataByCountry = {}
   $: data.forEach(country => dataByCountry[country.name] = country)
@@ -22,8 +23,6 @@
   $: selectedCountryData = dataByCountry[selectedCountry] || {}
   $: medianGdp = median(data.map(d => d.gdp)) || 0
 
-  const metrics = ["rank", "gdpRank", "populationRank"]
-  $: onChangeSelectedMetric(metrics[Math.min(index, metrics.length - 1)])
 </script>
 
 <div class="Intro">
@@ -45,6 +44,12 @@
             But the resources for each team aren't equal.
             For example, { selectedCountry }'s GDP is <Number number={ selectedCountryData.gdp > medianGdp ? selectedCountryData.gdp / medianGdp : medianGdp / selectedCountryData.gdp } numberFormat="0.1f" /> times { selectedCountryData.gdp > medianGdp ? "larger" : "smaller" } than the median GDP, which might translate to { selectedCountryData.gdp > medianGdp ? "better" : "worse" } equipment, etc.
           </p>
+
+          <Histogram
+            metric="gdp"
+            {...{data, selectedCountry}}
+          />
+
           <div class="medal-section">
             <Medal rank={selectedCountryData.gdpRank} medals={selectedCountryData.gdpMedals} />
             <div class="medal-section-blurb">
@@ -56,6 +61,11 @@
           <p>
             What if we looked at Population? Smaller countries are less likely to produce an exceptional athlete.
           </p>
+
+          <Histogram
+            metric="population"
+            {...{data, selectedCountry}}
+          />
 
           <div class="medal-section">
             <Medal rank={selectedCountryData.populationRank} medals={selectedCountryData.populationMedals} />
@@ -69,22 +79,23 @@
   </div>
   <div class="right">
     <div class="sticky">
-      <!-- <MapBubbles
-        metric={selectedMetric}
-        selectedCountry={selectedCountry}
-      /> -->
+      <MapBubbles
+        {data}
+        {selectedCountry}
+        metric={selectedMetrics.slice(-1)[0]}
+      />
       <!-- <StackedRanks
         step={index}
-        overrideStep={overrideStep}
-        selectedCountry={selectedCountry}
+        {overrideStep}
+        {selectedCountry}
         onChangeStep={newStep => overrideStep = newStep}
       /> -->
 
-      <Slope
-        data={data}
-        metric={selectedMetric}
-        selectedCountry={selectedCountry}
-      />
+      <!-- <Slope
+        {data}
+        {selectedCountry}
+        {selectedMetrics}
+      /> -->
     </div>
   </div>
 </div>
@@ -107,7 +118,7 @@
 	}
 	.sticky {
 		position: sticky;
-		top: 0;
+		top: 2em;
 		right: 0;
 	}
 	.left {

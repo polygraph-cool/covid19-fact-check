@@ -1,99 +1,75 @@
 
 <script>
 	import { onMount } from 'svelte'
-	// import Select from "svelte-select"
+	import Timeline from "./Timeline.svelte"
+	import Clusters from "./Clusters.svelte"
+	import Quadrant from "./Quadrant.svelte"
+	import Bubbles from "./Bubbles.svelte"
+	import List from "./List.svelte"
 
-	import Intro from "./Intro.svelte"
-	import DataTable from "./DataTable.svelte"
-	import Select from "./Select.svelte"
-	import SportsSection from "./SportsSection.svelte"
-	import { parseData, sortBy } from "./utils.js"
 	import rawData from "./../data/data.json"
 
 	// let data = []
 
 	// onMount(async () => {
 		// const res = await fetch(dataUrl)
-	const data = parseData(rawData)
+	const data = rawData
 	// })
-
-	$: countries = data
-		.filter(d => d.rank)
-		.map(d => d.name)
-		.sort()
-	// TODO: what to do about countries w/o medals
-
-	// $: selectedMetric = metrics[0]
-	let selectedMetric = "rank"
-
-	$: selectedCountry = "Hungary"
-	const onChangeSelectedMetric = metric => selectedMetric = metric
 
 </script>
 
 <main>
 	<h1>
-		Alternative Olympics Medal Table
+		Misinformation + COVID 2019
 	</h1>
-	<h3>
-		How is <Select
-			class="select"
-			bind:value={selectedCountry}
-			options={countries}
-		/> doing in the Olympics?
-	</h3>
-
-
-	<!-- <select value={selectedMetric} on:change={e => selectedMetric = e.target.value}>
-		{#each metrics as metric}
-			<option>{ metric }</option>
-		{/each}
-	</select> -->
-
-	<Intro {...{data, selectedCountry, selectedMetric, onChangeSelectedMetric}} />
-
-	<div class="sports">
-		<h2>
-			What about specific sports?
-		</h2>
-
-		<SportsSection {...{selectedCountry}} />
-	</div>
-
 	<h2>
-		Let's look at the data in detail:
+		Understand what false claims are spreading; what you may have unknowingly read.
 	</h2>
 
-	<!-- <MapBubbles metric="gdpRank" selectedCountry={selectedCountry} /> -->
-
-	<!-- <MapBubbles metric="populationRank" selectedCountry={selectedCountry} /> -->
-
-	<DataTable data={data} selectedCountry={selectedCountry} />
+	<Clusters {data} />
+	<!-- <Timeline {data} /> -->
+	<!-- <Quadrant {data} /> -->
+	<!-- <Bubbles {data} /> -->
+	<List {data} />
 </main>
 
 <style>
-	@import url('https://rsms.me/inter/inter.css');
+	/* @import url('https://rsms.me/inter/inter.css'); */
+	:global(body) {
+		background: #edeef3;
+	}
+	:global(body),
+	:global(button) {
+		font-family: 'Product Sans', sans-serif;
+	}
 	main {
-		max-width: 90em;
+		max-width: 70em;
+		width: 100%;
 		margin: 0 auto;
-		padding: 3em 4em;
+		padding: 6em 4em;
 		color: #1d1e24;
-		font-family: 'Inter', sans-serif;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
 		/* background: #f3f8fb; */
 	}
   h1 {
+		/* font-size: 3em;
+		line-height: 1.6em; */
+		font-weight: 300;
+		/* max-width: 90%; */
+		margin-bottom: 0;
+		/* font-weight: 900; */
 		font-size: 4em;
 		line-height: 1.1em;
-		font-weight: 900;
-		max-width: 90%;
-		margin-bottom: 0.4em;
 	}
 	h2 {
+		font-weight: 300;
 		font-size: 2.3em;
-		line-height: 1.1em;
-		font-weight: 500;
-		max-width: 90%;
-		margin: 0 0 0.9em;
+		line-height: 1.3em;
+		color: grey;
+		max-width: 30em;
 	}
 	h3 {
 		font-size: 2.3em;

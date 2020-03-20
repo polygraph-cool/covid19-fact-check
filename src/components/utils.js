@@ -1,4 +1,5 @@
 import { max, median } from "d3-array"
+import { timeDay } from "d3-time"
 
 export const getOrdinal = d => {
   const t = d % 10;
@@ -9,10 +10,14 @@ export const getOrdinal = d => {
     "th"
 }
 
-export const sortBy = (key, isReverse=false) => (a,b) => (
-  isReverse
-  ? Number.isFinite(a[key]) ? b[key] > a[key] ? -1 : 1 : 1
-  : Number.isFinite(a[key]) ? b[key] > a[key] ? 1 : -1 : 1
+export const sortBy = (key, isReverse=false, secondaryKey) => (a,b) => (
+  (
+    a[key] > b[key] ? -1 :
+    a[key] < b[key] ?  1 :
+    a[secondaryKey] > b[secondaryKey] ? -1 :
+    a[secondaryKey] < b[secondaryKey] ?  1 :
+    0
+  ) * (isReverse ? -1 : 1)
 )
 
 export const sum = arr => (
@@ -112,3 +117,32 @@ export const parseData = (data=[]) => {
 
   return parsedData
 }
+
+
+export const getUniformBins = (arr, accessor, values, step) => (
+  [...values, values.slice(-1)[0] + step].map(value => {
+    const start = value
+    const stop = value + step
+    let bin = arr.filter(d => (
+      accessor(d) >= start
+      && accessor(d) < stop
+    ))
+    bin.x0 = start
+    bin.x1 = stop
+    return bin
+  })
+)
+
+export const getUniformBinsDays = (arr, accessor, values) => (
+  values.map(value => {
+    const start = value
+    const stop = timeDay.offset(1)(value)
+    let bin = arr.filter(d => (
+      accessor(d) >= start
+      && accessor(d) < stop
+    ))
+    bin.x0 = start
+    bin.x1 = stop
+    return bin
+  })
+)
