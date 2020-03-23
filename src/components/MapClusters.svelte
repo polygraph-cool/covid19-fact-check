@@ -210,17 +210,17 @@
   }
   .earth {
     fill: #fff;
-    stroke: #a6a6b4;
+    stroke: #b4b7c9;
     stroke-width: 2;
   }
   .graticules {
     fill: none;
-    stroke: #a6a6b4;
+    stroke: #b4b7c9;
     stroke-width: 1;
   }
   .country-path {
-    fill: #d7dfe4;
-    stroke: #a6a6b4;
+    fill: #e0e2f3;
+    stroke: #b4b7c9;
     stroke-width: 1;
   }
   .boundary {
