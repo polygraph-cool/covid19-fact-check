@@ -2,7 +2,7 @@ PHONY: github aws-sync aws-cache pudding
 
 github:
 	rm -rf docs
-	cp -r __sapper__/export/covid-19 docs
+	cp -r __sapper__/export/covid19-fact-check docs
 	git add -A
 	git commit -m "update dev version"
 	git push
