@@ -1,19 +1,22 @@
 <script>
   import { draw, fade } from "svelte/transition"
-  import { scaleOrdinal, scaleLinear, scaleSqrt } from "d3-scale"
+  import { scaleOrdinal, scaleLinear, scaleSqrt, scaleTime } from "d3-scale"
   import { extent, range } from "d3-array"
   import { color } from "d3-color"
   import { forceSimulation, forceX, forceY, forceCollide, forceRadial } from "d3-force"
-  import { timeParse } from "d3-time-format"
+  import { timeFormat, timeParse } from "d3-time-format"
   import { geoArmadillo } from "d3-geo-projection"
   import { timeDay } from "d3-time"
   import { geoEqualEarth, geoOrthographic, geoPath, geoCentroid, geoGraticule10 } from "d3-geo"
   import countryShapes from "./countries.json"
   import { getPositionFromAngle } from "./utils"
+  import data from "./../data/data2.json"
 
-  export let data
+  // export let data
   console.log(data.length, data[0])
   const parseDate = timeParse("%Y-%m-%d")
+  const formatDate = timeFormat("%A %B %-d, %Y")
+  const dateAccessor = d => parseDate(d["best_date_"])
 
   const width = 1300
   const height = 700
@@ -40,6 +43,7 @@
     countryCentroids[shape.properties["postal"]] = pathGenerator.centroid(shape)
 
     return {
+      name: shape.properties["geounit"],
       shape: pathGenerator(shape),
       centroid: pathGenerator.centroid(shape),
       ...countryData,
@@ -50,45 +54,47 @@
   }).filter(d => d.centroid[0])
 
 
-  $: topics = [...new Set(data.map(d => d.category))].filter(d => d)
+  // $: topics = [...new Set(data.map(d => d.category))].filter(d => d)
 
-  $: ageScale = scaleLinear()
-    .domain([1, 60])
-    .range([0.3, 1])
+  $: ageScale = scaleTime()
+    .domain(extent(data.map(dateAccessor)))
+    .range(["#fff", "#778beb"])
+    console.log(extent(data.map(dateAccessor)))
 
   $: rScale = scaleSqrt()
     .domain(extent(data.map(d => d.claims.length)))
-    .range([8, 20])
+    .range([2, 20])
 
-  $: topicsCountScale = scaleLinear()
-    .domain(extent(topics.map(topic => (
-      data.filter(d => d.category == topic).length
-    ))))
-    .range([360 / topics.length, 360 / topics.length * 6])
+  // $: topicsCountScale = scaleLinear()
+  //   .domain(extent(topics.map(topic => (
+  //     data.filter(d => d.category == topic).length
+  //   ))))
+  //   .range([360 / topics.length, 360 / topics.length * 6])
 
-  const colors = ["#58B19F", "#778beb", "#e77f67", "#FDA7DF", "#cf6a87", "#A3CB38", "#786fa6", "#4b7bec", "#778ca3", "#0fb9b1"]
-  const darkerColors = colors.map(c => (
-    color(c)
-      .darker(0.6)
-      .formatHex()
-  ))
-  let topicColors = {}
-  let topicBorderColors = {}
-  $: topics.forEach((topic, i) => {
-    topicColors[topic] = colors[i % colors.length]
-    topicBorderColors[topic] = darkerColors[i % colors.length]
-  })
+  // const colors = ["#58B19F", "#778beb", "#e77f67", "#FDA7DF", "#cf6a87", "#A3CB38", "#786fa6", "#4b7bec", "#778ca3", "#0fb9b1"]
+  // const darkerColors = colors.map(c => (
+  //   color(c)
+  //     .darker(0.6)
+  //     .formatHex()
+  // ))
+  // let topicColors = {}
+  // let topicBorderColors = {}
+  // $: topics.forEach((topic, i) => {
+  //   topicColors[topic] = colors[i % colors.length]
+  //   topicBorderColors[topic] = darkerColors[i % colors.length]
+  // })
 
   $: claims = data.map(d => {
     if (!d["primary_country"]) return
     const [x, y] = countryCentroids[d["primary_country"]] || []
     if (!x && !y) return
-    if (!topicColors[d.category]) return
+    // if (!topicColors[d.category]) return
     // const daysAgo = timeDay.range(parseDate(d["best_date"]), new Date()).length
     // console.log(daysAgo, parseDate(d["best_date"]))
-    const parsedColor = color(topicColors[d.category])
-      // .darker(ageScale(daysAgo))
-      .formatHex()
+    // const parsedColor = color(topicColors[d.category])
+      // // .darker(ageScale(daysAgo))
+      // .formatHex()
+    const parsedColor = ageScale(dateAccessor(d))
 
     return {
       ...d,
@@ -97,7 +103,7 @@
       color: parsedColor,
       // opacity: ageScale(daysAgo),
       opacity: 1,
-      darkerColor: topicBorderColors[d.category],
+      // darkerColor: topicBorderColors[d.category],
     }
   }).filter(d => d)
 
@@ -107,11 +113,11 @@
       // .force("x", forceX(d => d.x).strength(1))
       .force("x", forceX(d => d.x).strength(0.2))
       .force("y", forceY(d => d.y).strength(0.2))
-      .force("collide", forceCollide(d => d.r + 2.6))
+      .force("collide", forceCollide(d => d.r + 1.2).strength(1))
       // .force("r", forceRadial(d => d.distance).strength(5))
       .stop()
 
-    range(0, 200).forEach(i => simulation.tick())
+    range(0, 300).forEach(i => simulation.tick())
     console.log(bubbles)
 
     return bubbles
@@ -150,8 +156,23 @@
           d={country.shape}
           class="country-path"
         >
-          <title>{ country.name }: { country.value }</title>
+          <title>{ country.name }</title>
         </path>
+      {/each}
+
+      {#each bubbles as { title, x, y, r, color, darkerColor, opacity, best_date_, claims }}
+        <circle
+          cx={x}
+          cy={y}
+          r={r}
+          fill={color}
+          stroke={darkerColor}
+          {opacity}
+        >
+          <title>
+            { formatDate(parseDate(best_date_)) }: { title } - { claims.length } claims
+          </title>
+        </circle>
       {/each}
     </g>
 
@@ -170,21 +191,6 @@
       style="mix-blend-mode: multiply"
     /> -->
 
-
-    {#each bubbles as { title, x, y, r, color, darkerColor, opacity, category }}
-      <circle
-        cx={x}
-        cy={y}
-        r={r}
-        fill={color}
-        stroke={darkerColor}
-        {opacity}
-      >
-        <title>
-          { title }, { category }
-        </title>
-      </circle>
-    {/each}
 
   <!-- <text transform={`translate(${ width / 2 }, 20)`} style={"font-weight: 600"}>
     Medical Consensus

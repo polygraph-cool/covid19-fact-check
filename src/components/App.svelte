@@ -49,7 +49,7 @@
 		width: 100%;
 		margin: 0 auto;
 		padding: 6em 4em;
-		color: #1d1e24;
+		color: #1f2025;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -70,7 +70,7 @@
 		font-weight: 300;
 		font-size: 2.3em;
 		line-height: 1.3em;
-		color: grey;
+		color: #888ca1;
 		max-width: 30em;
 	}
 	h3 {
