@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte'
 	import Timeline from "./Timeline.svelte"
 	import Clusters from "./Clusters.svelte"
+	import MapClusters from "./MapClusters.svelte"
 	import Quadrant from "./Quadrant.svelte"
 	import Bubbles from "./Bubbles.svelte"
 	import List from "./List.svelte"
@@ -26,7 +27,8 @@
 		Understand what false claims are spreading; what you may have unknowingly read.
 	</h2>
 
-	<Clusters {data} />
+	<MapClusters {data} />
+	<!-- <Clusters {data} /> -->
 	<!-- <Timeline {data} /> -->
 	<!-- <Quadrant {data} /> -->
 	<!-- <Bubbles {data} /> -->
