@@ -22,7 +22,8 @@
   }
   let hoveredClaim = null
 
-  const width = window.innerWidth * 0.9
+  if (typeof window == 'undefined') window = {}
+  const width = (window.innerWidth || 1200) * 0.9
   const height = width * 0.65
   const countryNameMap = {
     USA: "United States of America",

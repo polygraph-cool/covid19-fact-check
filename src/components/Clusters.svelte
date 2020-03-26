@@ -14,7 +14,8 @@
   // export let data
   // console.log(data.length, data[0])
 
-  const width = window.innerWidth * 0.9
+  if (typeof window == 'undefined') window = {}
+  const width = (window.innerWidth || 1200) * 0.9
   const height = width * 0.5
 
   const types = sources
