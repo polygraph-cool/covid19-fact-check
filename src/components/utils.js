@@ -29,8 +29,9 @@ export const flatten = arr => (
   arr.reduce((a,b) => [...a, ...b])
 )
 
+const windowGlobal = typeof window !== "undefined" && window
 // grabbed from https://stackoverflow.com/questions/17722497/scroll-smoothly-to-specific-element-on-page
-export const smoothScrollTo = (elementY, duration, element=window) => {
+export const smoothScrollTo = (elementY, duration, element=windowGlobal) => {
   var startingY = element.scrollTop;
   var diff = elementY - startingY;
   var start;
