@@ -318,7 +318,7 @@
     margin-bottom: 3.6em;
     padding-top: 1em;
     padding-bottom: 1.2em;
-    background: #EDEEF3;
+    background: #f4f5fa;
     box-shadow: 0px 8px 10px -8px rgba(52, 73, 94, .2), 0 1px 1px rgba(52, 73, 94, 0.1);
     z-index: 100;
   }
@@ -328,6 +328,14 @@
     font-size: 1.2em;
     line-height: 1em;
     border: none;
+  }
+  .count {
+    color: #9093a1;
+    text-align: left;
+    margin: 0.6em 0 -0.7em 1.8em;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 0.9em;
   }
 
   @keyframes popIn {
