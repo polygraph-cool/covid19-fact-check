@@ -7,23 +7,22 @@
   import { timeDay } from "d3-time"
   import { forceSimulation, forceX, forceY, forceCollide, forceRadial } from "d3-force"
   import { getPositionFromAngle, getUniformBinsDays } from "./utils"
+  import { data, dateAccessor, parseDate, sources, sourceAccessor, sourceColors } from "./data-utils"
 
-  export let data
-  console.log(data.length, data[0])
+  // export let data
 
-  const width = 900
-  const height = 700
-  const parseDate = timeParse("%Y-%m-%d")
-  const formatDate = timeFormat("%Y-%m-%d")
-  // const tickFormat = d => timeDay.range(d, new Date).length + 1 + " days ago"
+  const width = 1200
+  const height = 200
+  // const parseDate = timeParse("%Y-%m-%d")
+  const formatDate = timeFormat("%-m/%-d/%Y")
   const tickFormat = timeFormat("%b %-d")
-  const xAccessor = d => parseDate(d["best_date"])
+  // const tickFormat = d => timeDay.range(d, new Date).length + 1 + " days ago"
 
   // $: consenses = [...new Set(data.map(d => d["medical_consensus"]))]
   $: consenses = ["Not relevant", "Mixed", "Clear"]
   $: harms = ["Unknown", "Low", "Medium", "High"]
 
-  $: xExtent = extent(data.map(xAccessor))
+  $: xExtent = extent(data.map(dateAccessor))
   $: xValues = timeDay.range(...xExtent).map(formatDate)
   $: xScale = scaleTime()
     .domain(xExtent)
@@ -63,29 +62,37 @@
     ))))
     .range([360 / topics.length, 360 / topics.length * 6])
 
-  const colors = ["#0fb9b1", "#778beb", "#e77f67", "#FDA7DF", "#cf6a87", "#58B19F", "#A3CB38", "#786fa6", "#4b7bec", "#778ca3"]
-  const darkerColors = colors.map(c => (
-    color(c)
-      .darker(0.6)
-      .formatHex()
-  ))
-  let topicColors = {}
-  let topicBorderColors = {}
-  $: topics.forEach((topic, i) => {
-    topicColors[topic] = colors[i % colors.length]
-    topicBorderColors[topic] = darkerColors[i % colors.length]
-  })
+  // const colors = ["#0fb9b1", "#778beb", "#e77f67", "#FDA7DF", "#cf6a87", "#58B19F", "#A3CB38", "#786fa6", "#4b7bec", "#778ca3"]
+  // const darkerColors = colors.map(c => (
+  //   color(c)
+  //     .darker(0.6)
+  //     .formatHex()
+  // ))
+  // let topicColors = {}
+  // let topicBorderColors = {}
+  // $: topics.forEach((topic, i) => {
+  //   topicColors[topic] = colors[i % colors.length]
+  //   topicBorderColors[topic] = darkerColors[i % colors.length]
+  // })
 
-  $: console.log(xValues)
+  $: ageScale = scaleTime()
+    .domain(xExtent)
+    .range(["#FDA7DF", "#778beb"])
+
   $: bins = xValues.map(date => ({
     data: data
-      .filter(d => d.topic)
-      .filter(d => d["best_date"] == date)
-      .sort((a,b) => b.topic > a.topic ? 1 : -1)
+      // .filter(d => d.topic)
+      .filter(d => d["date"] == date)
+      // .sort((a,b) => b.topic > a.topic ? 1 : -1)
+      .sort((a,b) => (
+        sources.indexOf(sourceAccessor(b)[0])
+        - sources.indexOf(sourceAccessor(a)[0])
+      ))
       .map((d, i) => ({
         ...d,
-        y: height + i * -6,
-        color: topicColors[d.topic],
+        y: height + i * -5,
+        // color: ageScale(dateAccessor(d)),
+        color: sourceColors[sourceAccessor(d)[0]] || "#adb2be",
       })),
     date,
     x: xScale(parseDate(date)),
@@ -125,19 +132,19 @@
   //   return bubbles
   // })()
 
-  const distanceLabels = {
-    "Low": "Not very harmful",
-    "Medium": "Harmful",
-    "High": "Very harmful",
-  }
+  // const distanceLabels = {
+  //   "Low": "Not very harmful",
+  //   "Medium": "Harmful",
+  //   "High": "Very harmful",
+  // }
 </script>
 
 <svg {width} {height}>
   {#each bins as { data, x, date }}
     {#each data as { title, y, color, darkerColor, topic }}
       <line
-        x1={x - 4}
-        x2={x + 4}
+        x1={x - 2.5}
+        x2={x + 2.5}
         y1={y}
         y2={y}
         stroke={color}
@@ -187,18 +194,18 @@
 
 <style>
   svg {
-    margin-top: 10em;
-    margin-left: 3em;
+    max-width: 100%;
+    margin: 1em 0 10em;
     overflow: visible;
   }
   .boundary {
     fill: none;
-    stroke: rgb(173, 178, 190);
+    stroke: #adb2be;
     stroke-width: 0.5;
     stroke-dasharray: 9 5;
   }
   text {
-    fill: rgb(85, 91, 107);
+    fill: #555b6b;
     text-anchor: middle;
     text-transform: uppercase;
     letter-spacing: 0.1em;

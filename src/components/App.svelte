@@ -1,4 +1,3 @@
-
 <script>
 	import { onMount } from 'svelte'
 	import Timeline from "./Timeline.svelte"
@@ -8,47 +7,72 @@
 	import Bubbles from "./Bubbles.svelte"
 	import List from "./List.svelte"
 
+  import { organizations } from "./data-utils"
 	import rawData from "./../data/data.json"
 
 	// let data = []
 
 	// onMount(async () => {
 		// const res = await fetch(dataUrl)
-	const data = rawData
+	// const data = rawData
 	// })
+
+	const types = [
+		"map", "clusters", "timeline"
+	]
+	let selectedType = types[0]
 
 </script>
 
 <main>
+	<select class="select" bind:value={selectedType}>
+		{#each types as type}
+			<option>{ type }</option>
+		{/each}
+	</select>
 	<h1>
 		Misinformation + COVID 2019
 	</h1>
 	<h2>
 		Understand what false claims are spreading; what you may have unknowingly read.
 	</h2>
+	<p>
+		We compiled fact-checks from over 100 organizations around the world to combat misinformation about Covid-19.
+	</p>
+	<div class="orgs">
+		{#each organizations as organization}
+			<div class="org">
+				{ organization }
+			</div>
+		{/each}
+	</div>
 
-	<MapClusters {data} />
-	<!-- <Clusters {data} /> -->
-	<!-- <Timeline {data} /> -->
-	<!-- <Quadrant {data} /> -->
-	<!-- <Bubbles {data} /> -->
-	<List {data} />
+	{#if selectedType == "map"}
+		<MapClusters />
+	{:else if selectedType == "clusters"}
+		<Clusters />
+	{:else if selectedType == "timeline"}
+		<Timeline />
+	{/if}
+	<!-- <Quadrant /> -->
+	<!-- <Bubbles /> -->
+	<List />
 </main>
 
 <style>
 	/* @import url('https://rsms.me/inter/inter.css'); */
 	:global(body) {
-		background: #edeef3;
+		background: #f4f5fa;
 	}
 	:global(body),
 	:global(button) {
 		font-family: 'Product Sans', sans-serif;
 	}
 	main {
-		max-width: 70em;
+		/* max-width: 70em; */
 		width: 100%;
-		margin: 0 auto;
-		padding: 6em 4em;
+		margin: 3em auto;
+		/* padding: 6em 4em; */
 		color: #1f2025;
 		display: flex;
 		flex-direction: column;
@@ -81,6 +105,13 @@
 		margin-bottom: 1.2em;
 	}
 
+	p {
+		max-width: 60em;
+		margin: 1em auto;
+		font-size: 1.3em;
+		line-height: 1.6em;
+	}
+
 	/* .right:before {
 		content: "";
 		position: absolute;
@@ -107,5 +138,20 @@
 	}
 	.select :global(input) {
     width: auto;
+	}
+
+	.orgs {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-wrap: wrap;
+		max-width: 80em;
+		margin-bottom: 2em;
+	}
+	.org {
+		margin: 0.5em 1em;
+		font-size: 0.7em;
+		line-height: 1.1em;
+		opacity: 0.4;
 	}
 </style>

@@ -5,15 +5,15 @@
   import { color } from "d3-color"
   import { forceSimulation, forceX, forceY, forceCollide, forceRadial } from "d3-force"
   import { getPositionFromAngle } from "./utils"
+  import { data, dateAccessor, parseDate, sources, sourceAccessor, sourceColors } from "./data-utils"
 
-  export let data
   console.log(data.length, data[0])
 
   const width = 700
   const height = 700
 
   $: rScale = scaleSqrt()
-    .domain(extent(data.map(d => d.num_claims)))
+    .domain(extent(data.map(d => 3)))
     .range([5, 10])
   let distances = {}
   $: ["High", "Medium", "Low"].map((category, i) => {
@@ -30,18 +30,20 @@
     "Mortality [inc. gravity]": "Mortality",
     "Causes [inc. vectors and risk factors]": "Causes",
   }
-  let topicAngles = {}
+  let typeAngles = {}
   $: topicsCountScale = scaleLinear()
     .domain(extent(topics.map(topic => (
       data.filter(d => d.topic == topic).length
     ))))
     .range([360 / topics.length, 360 / topics.length * 6])
   $: angleCounter = 0
-  $: topics.forEach((topic, i) => {
-    const topicCount = data.filter(d => d.topic == topic).length
-    angleCounter += topicsCountScale(topicCount)
-    topicAngles[topic] = angleCounter
+  $: sources.forEach((type, i) => {
+    const topicCount = data.filter(d => d.type == type).length
+    // angleCounter += topicsCountScale(topicCount)
+    angleCounter += (360 / sources.length)
+    typeAngles[type] = angleCounter
   })
+  $:console.log(typeAngles)
 
   const colors = ["#0fb9b1", "#778beb", "#e77f67", "#FDA7DF", "#cf6a87", "#58B19F", "#A3CB38", "#786fa6", "#4b7bec", "#778ca3"]
   const darkerColors = colors.map(c => (
@@ -49,16 +51,18 @@
       .darker(0.6)
       .formatHex()
   ))
-  let topicColors = {}
-  let topicBorderColors = {}
-  $: topics.forEach((topic, i) => {
-    topicColors[topic] = colors[i % colors.length]
-    topicBorderColors[topic] = darkerColors[i % colors.length]
+  let typeColors = {}
+  let typeBorderColors = {}
+  $: sources.forEach((type, i) => {
+    typeColors[type] = colors[i % colors.length]
+   typeBorderColors[type] = darkerColors[i % colors.length]
   })
 
   $: claims = data.map(d => {
-    const angle = topicAngles[d.topic]
-    const distance = distances[d.harm_to_health] - 360 / 8
+    const mainSource = sourceAccessor(d)[0]
+    const angle = typeAngles[mainSource]
+    const distance = 230
+    // const distance = distances[d.harm_to_health] - 360 / 8
     if (!distance) {
         return
     }
@@ -67,11 +71,11 @@
 
     return {
       ...d,
-      r: rScale(d.num_claims),
+      r: 3,
       x, y,
       angle, distance,
-      color: topicColors[d.topic],
-      darkerColor: topicBorderColors[d.topic],
+      color: typeColors[mainSource] || "lightgrey",
+      darkerColor: typeBorderColors[mainSource],
     }
   }).filter(d => d)
 
@@ -82,11 +86,11 @@
       .force("x", forceX(d => d.x).strength(0.05))
       .force("y", forceY(d => d.y).strength(0.05))
       .force("collide", forceCollide(d => d.r + 2.6))
-      .force("r", forceRadial(d => d.distance).strength(5))
+      .force("r", forceRadial(d => d.distance).strength(1))
       .stop()
 
     range(0, 200).forEach(i => simulation.tick())
-
+console.log(bubbles)
     return bubbles
   })()
 
@@ -147,15 +151,15 @@
         id={`topic-label-path`}
         transform={`rotate(90)`}
       />
-    {#each topics as topic, i}
+    {#each sources as type, i}
       <text transition:fade={{ duration: 1000 + 300 * i }}>
         <textPath
-          href={`#topic-label-path`}
-          class="topic-label"
-          startOffset={`${(topicAngles[topic] * 100) / 360}%`}
-          style={`fill: ${topicColors[topic]}`}
+          href={`#type-label-path`}
+          class="type-label"
+          startOffset={`${(typeAngles[type] * 100) / 360}%`}
+          style={`fill: ${typeColors[type]}`}
           >
-          { topicLabels[topic] || topic }
+          { topicLabels[type] || type }
         </textPath>
       </text>
     {/each}
@@ -177,7 +181,7 @@
     font-size: 0.7em;
     font-weight: 100;
   }
-  .topic-label {
+  .type-label {
     text-anchor: middle;
     text-transform: uppercase;
     letter-spacing: 0.1em;
