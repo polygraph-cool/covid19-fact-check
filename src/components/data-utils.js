@@ -1,4 +1,5 @@
-import { timeFormat, timeParse } from "d3-time-format"
+import { timeParse } from "d3-time-format"
+import { flatten } from "./utils"
 import rawData from "./../data/data3.json"
 
 export const data = rawData
@@ -264,3 +265,5 @@ export const countriesAccessor = d => (
       countryNameMap[country] || country
     ))
 )
+
+export const countries = [...new Set(flatten(data.map(countriesAccessor)))]

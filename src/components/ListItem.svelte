@@ -52,26 +52,14 @@
       <!-- <div class="source">
         { item.who }
       </div> -->
-      {#if matchingSources.length}
-        <div class="source">
-          from <b>{ matchingSources.join(", ") }</b>
-        </div>
-      {/if}
       <div class="rating">
         <svg class="rating-svg" width="1em" viewBox="0 0 9 9">
           {@html ratingPaths[rating] }
         </svg>
         { rating }
       </div>
-      <div class="country">
-        { countries.join(" & ") }
-      </div>
 
       <div class="org">
-        <!-- <div class="flag">
-          {@html flags[langFlagMap[language_code] || language_code || ""] }
-        </div> -->
-        <!-- { item.country }, -->
         <div class="org-label">
           Fact checked by
         </div>
@@ -81,9 +69,22 @@
           { org }
         {/if}
       </div>
-      <!-- <div>
-        { explanation }
-      </div> -->
+      <div class="bottom-bar">
+        <!-- <div>
+          { explanation }
+        </div> -->
+        <div class="source">
+          {#if matchingSources.length}
+            from <b>{ matchingSources.join(", ") }</b>
+          {/if}
+        </div>
+
+
+        <div class="country">
+          { countries.join(" & ") }
+        </div>
+      </div>
+
 
     </a>
   </div>
@@ -120,7 +121,7 @@
   .title {
     display: block;
     margin-top: 1.8em;
-    font-size: 1.6em;
+    font-size: 1.4em;
     line-height: 1.4em;
     font-family: Georgia, serif;
     color: inherit;
@@ -137,12 +138,6 @@
     right: 1em;
     color: #8888a5;
     /* margin-bottom: 1em; */
-  }
-  .source {
-    position: absolute;
-    bottom: -1.7em;
-    color: white;
-    font-size: 0.9em;
   }
   .topic {
     margin-bottom: 0.5em;
@@ -179,6 +174,7 @@
     fill: white;
     /* margin-top: 0.3em; */
     margin-right: 0.5em;
+    overflow: visible;
   }
   .org {
     /* display: flex; */
@@ -199,7 +195,25 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
   }
+  .bottom-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: absolute;
+    bottom: -1.7em;
+    left: 0;
+    left: 1.8em;
+    right: 2.5em;
+    color: white;
+    font-size: 0.9em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
   .country {
-    margin-bottom: 0.6em;
+    text-overflow: ellipsis;
+    padding-left: 1em;
+    overflow: hidden;
+    text-align: right;
   }
 </style>

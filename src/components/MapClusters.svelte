@@ -4,11 +4,13 @@
   import { scaleOrdinal, scaleLinear, scaleSqrt, scaleTime } from "d3-scale"
   import { extent, range } from "d3-array"
   import { color } from "d3-color"
+  import { timer } from "d3-timer"
   import { Delaunay } from "d3-delaunay"
   import { forceSimulation, forceX, forceY, forceCollide, forceRadial } from "d3-force"
   import { timeFormat, timeParse } from "d3-time-format"
   import { geoArmadillo } from "d3-geo-projection"
   import { timeDay } from "d3-time"
+  import { easeCubicOut } from "d3-ease"
   import { geoEqualEarth, geoOrthographic, geoPath, geoCentroid, geoGraticule10 } from "d3-geo"
   import countryShapes from "./countries.json"
   import { debounce, getDistanceBetweenPoints, getPositionFromAngle } from "./utils"
@@ -25,116 +27,139 @@
   $: height = width * 0.65
   $: bubbleSize = width * 0.0026
   let highlightIndex = 0
-  let bubbles = []
-  let onMouseMove
+  let timeElapsed = 0
+  let initTransitionProgress = 0
 
   // $: width = windowWidth * 0.9
   // $: height = width * 0.65
 
   // const debouncedOnMouseOver = debounce(onMouseOver, 50)
+  const duration = 12000
+
 
   onMount(() => {
-    const interval = setInterval(() => highlightIndex += 1, 2000)
+    const interval = setInterval(() => highlightIndex += 1, 3000)
+
+    // initTransitionProgress = 0
+    // const initTimer = timer(elapsed => {
+    //   initTransitionProgress = Math.min(
+    //     1,
+    //     easeCubicOut(elapsed / duration)
+    //   );
+
+    //   drawCanvas()
+
+    //   if (initTransitionProgress > 1) {
+    //     initTimer.stop()
+    //   }
+    // });
     return () => {
       clearInterval(interval)
+      // initTimer.stop()
     }
   })
+
+    const sphere = ({type: "Sphere"})
+    $: projection = geoArmadillo()
+      .fitSize([width, height], sphere)
+      .rotate([-9, 0])
+
+    $: svgPathGenerator = geoPath(projection)
+    const countryCentroids = {}
+    $: countries = countryShapes.features.map(shape => {
+      const countryData = data.find(d => (
+        countryAccessor(data) == shape.properties["geounit"]
+      )) || {}
+      countryCentroids[shape.properties["geounit"]] = svgPathGenerator.centroid(shape)
+
+      return {
+        name: shape.properties["geounit"],
+        shape,
+        centroid: svgPathGenerator.centroid(shape),
+        ...countryData,
+      }
+    }).filter(d => d.centroid[0])
+
+    $: ageScale = scaleTime()
+      .domain(extent(data.map(dateAccessor)))
+      .range(["#fff", "#778beb"])
+
+    let sourceOffsets = {}
+    sources.forEach((source, i) => {
+      const angle = 360 / sources.length * i
+      sourceOffsets[source] = getPositionFromAngle(angle, 10)
+    })
+
+    $: claims = data.map((d, i) => {
+      const country = countryAccessor(d)
+      if (!country) return
+      const [x, y] = countryCentroids[country] || []
+      if (!x && !y) {
+
+        return
+      }
+
+      const mainSource = sourceAccessor(d)[0]
+      const sourceOffset = sourceOffsets[mainSource] || [0, 0]
+
+      const parsedColor = sourceColors[mainSource] || "#adb2be"
+
+      return {
+        ...d,
+        r: bubbleSize,
+        x: x + sourceOffset[0],
+        y: y + sourceOffset[1],
+        color: parsedColor,
+        // opacity: ageScale(daysAgo),
+        opacity: 1,
+        // darkerColor: topicBorderColors[d.category],
+      }
+    }).filter(d => d)
+
+    $: bubbles = (() => {
+      let bubbles = [...claims]
+      let simulation = forceSimulation(bubbles)
+        // .force("x", forceX(d => d.x).strength(1))
+        .force("x", forceX(d => d.x).strength(0.2))
+        .force("y", forceY(d => d.y).strength(0.2))
+        .force("collide", forceCollide(d => d.r + 0.9).strength(1))
+        // .force("r", forceRadial(d => d.distance).strength(5))
+        .stop()
+
+      range(0, 300).forEach(i => simulation.tick())
+      return bubbles
+    })()
+
+    $: delaunay = Delaunay.from(
+      bubbles,
+      d => d.x,
+      d => d.y,
+    )
+
+    $: onMouseMove = e => {
+      const x = e.clientX
+        - canvasElement.getBoundingClientRect().left
+      const y = e.clientY
+        - canvasElement.getBoundingClientRect().top
+
+      const mousePosition = [x, y]
+      const pointIndex = delaunay.find(...mousePosition)
+      if (pointIndex == -1) return null
+      const distance = getDistanceBetweenPoints(
+        mousePosition,
+        [bubbles[pointIndex].x, bubbles[pointIndex].y],
+      )
+      if (distance < 30) {
+        hoveredClaim = bubbles[pointIndex]
+      } else {
+        hoveredClaim = null
+      }
+    }
+
 
   const drawCanvas = () => {
-  const sphere = ({type: "Sphere"})
-  const projection = geoArmadillo()
-    .fitSize([width, height], sphere)
-    .rotate([-9, 0])
-
-  const svgPathGenerator = geoPath(projection)
-  const countryCentroids = {}
-  const countries = countryShapes.features.map(shape => {
-    const countryData = data.find(d => (
-      countryAccessor(data) == shape.properties["geounit"]
-    )) || {}
-    countryCentroids[shape.properties["geounit"]] = svgPathGenerator.centroid(shape)
-
-    return {
-      name: shape.properties["geounit"],
-      shape,
-      centroid: svgPathGenerator.centroid(shape),
-      ...countryData,
-    }
-  }).filter(d => d.centroid[0])
-
-  const ageScale = scaleTime()
-    .domain(extent(data.map(dateAccessor)))
-    .range(["#fff", "#778beb"])
-
-  let sourceOffsets = {}
-  sources.forEach((source, i) => {
-    const angle = 360 / sources.length * i
-    sourceOffsets[source] = getPositionFromAngle(angle, 10)
-  })
-
-  const claims = data.map(d => {
-    const country = countryAccessor(d)
-    if (!country) return
-    const [x, y] = countryCentroids[country] || []
-    if (!x && !y) {
-
-      return
-    }
-
-    const mainSource = sourceAccessor(d)[0]
-    const sourceOffset = sourceOffsets[mainSource] || [0, 0]
-
-    const parsedColor = sourceColors[mainSource] || "#adb2be"
-
-    return {
-      ...d,
-      r: bubbleSize,
-      x: x + sourceOffset[0],
-      y: y + sourceOffset[1],
-      color: parsedColor,
-      // opacity: ageScale(daysAgo),
-      opacity: 1,
-      // darkerColor: topicBorderColors[d.category],
-    }
-  }).filter(d => d)
-
-  bubbles = [...claims]
-  let simulation = forceSimulation(bubbles)
-    // .force("x", forceX(d => d.x).strength(1))
-    .force("x", forceX(d => d.x).strength(0.2))
-    .force("y", forceY(d => d.y).strength(0.2))
-    .force("collide", forceCollide(d => d.r + 0.9).strength(1))
-    // .force("r", forceRadial(d => d.distance).strength(5))
-    .stop()
-
-  range(0, 300).forEach(i => simulation.tick())
-
-  const delaunay = Delaunay.from(
-    bubbles,
-    d => d.x,
-    d => d.y,
-  )
-
-  onMouseMove = e => {
-    const x = e.clientX
-      - canvasElement.getBoundingClientRect().left
-    const y = e.clientY
-      - canvasElement.getBoundingClientRect().top
-
-    const mousePosition = [x, y]
-    const pointIndex = delaunay.find(...mousePosition)
-    if (pointIndex == -1) return null
-    const distance = getDistanceBetweenPoints(
-      mousePosition,
-      [bubbles[pointIndex].x, bubbles[pointIndex].y],
-    )
-    if (distance < 30) {
-      hoveredClaim = bubbles[pointIndex]
-    } else {
-      hoveredClaim = null
-    }
-  }
     if (!canvasElement) return
+    console.log("drawCanvas")
     const ctx = canvasElement.getContext("2d")
     const path = geoPath(projection, ctx)
     const drawPath = shape => {
@@ -166,9 +191,15 @@
 
     drawPath(sphere)
     stroke("#c9cde2")
-    bubbles.forEach(({x, y, r, color}) => {
+    bubbles.forEach(({x, y, r, color}, i) => {
+      const transitionR = bubbleSize * Math.max(
+        0,
+        // initTransitionProgress + 0.1 - (i / bubbles.length)
+        1,
+      )
+
       ctx.beginPath()
-      ctx.arc(x, y, r, 0, 2 * Math.PI, false)
+      ctx.arc(x, y, transitionR, 0, 2 * Math.PI, false)
       fill(color)
     })
   }
@@ -185,7 +216,6 @@
   })()
 
   $: highlightedClaim = hoveredClaim || bubbles[highlightIndex]
-  $:console.log(highlightedClaim, highlightIndex)
 </script>
 
 <!-- <svelte:window bind:innerWidth={windowWidth} /> -->
@@ -196,6 +226,7 @@
   bind:clientWidth={width}>
   <canvas {width} {height} bind:this={canvasElement} />
   {#if highlightedClaim}
+    <ItemTooltip item={highlightedClaim} {...highlightedClaim} y={highlightedClaim.y - bubbleSize} />
     <ItemTooltip item={highlightedClaim} {...highlightedClaim} y={highlightedClaim.y - bubbleSize} />
     <div
       class="hovered-claim-highlight"
