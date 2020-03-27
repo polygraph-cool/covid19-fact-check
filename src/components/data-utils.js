@@ -208,7 +208,7 @@ export const organizationLogos = {
 const tagMap = {
   // "Face masks": [ "face mask" ],
   "Prevention": [ "gloves", "prevent", "gargling", "disinfectant", "protect", "will not kill", "dies at a temperature" ],
-  "Cures": [ "cure", "cured", "gargling", "remedy", "treat", ],
+  "Cures": [ "cure", "cured", "gargling", "remedy", "treat", "treatment", ],
   "Lockdown": [ "lock down", "stay inside", "suspend operations", "confinement", "quarantine", "quarantined", ],
   "Vaccines": [ "vaccines", ],
   "Respirator": [ "respirators", ],
@@ -239,3 +239,28 @@ export const tagsAccessor = d => {
   ))
   return matchingTags
 }
+
+
+const countryNameMap = {
+  USA: "United States of America",
+  "United States": "United States of America",
+  UK: "United Kingdom",
+  BiH: "Bosnia and Herzegovina",
+  "South africa": "South Africa",
+  Spasin: "Spain",
+  Mayanmar: "Myanmar",
+  "India/Srilanka": "Sri Lanka",
+  Kaxakhstan: "Kazakhstan",
+  Korea: "South Korea",
+  // "Hong Kong":
+}
+export const countryAccessor = d => {
+  const country = (d["country"] || "").split(",")[0]
+  return countryNameMap[country] || country
+}
+export const countriesAccessor = d => (
+  (d["country"] || "").split(",")
+    .map(country => (
+      countryNameMap[country] || country
+    ))
+)

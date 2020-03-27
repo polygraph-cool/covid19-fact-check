@@ -56,7 +56,7 @@
 	{/if}
 	<!-- <Quadrant /> -->
 	<!-- <Bubbles /> -->
-	<List />
+	<!-- <List /> -->
 </main>
 
 <style>

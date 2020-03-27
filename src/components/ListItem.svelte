@@ -1,6 +1,6 @@
 <script>
   import { timeFormat } from "d3-time-format"
-  import { parseDate, dateAccessor, organizationAccessor, organizationLogos, ratingAccessor, ratingPaths, sourceAccessor, sourceColors } from "./data-utils"
+  import { parseDate, dateAccessor, countriesAccessor, organizationAccessor, organizationLogos, ratingAccessor, ratingPaths, sourceAccessor, sourceColors } from "./data-utils"
   import { getOrdinal } from "./utils"
 
   // import flags from "./flags/all.js"
@@ -22,6 +22,7 @@
   $: date = dateAccessor(item)
   $: org = organizationAccessor(item)
   $: orgLogo = organizationLogos[org]
+  $: countries = countriesAccessor(item)
 </script>
 
 
@@ -61,6 +62,9 @@
           {@html ratingPaths[rating] }
         </svg>
         { rating }
+      </div>
+      <div class="country">
+        { countries.join(" & ") }
       </div>
 
       <div class="org">
@@ -194,5 +198,8 @@
     line-height: 1.3em;
     letter-spacing: 0.1em;
     text-transform: uppercase;
+  }
+  .country {
+    margin-bottom: 0.6em;
   }
 </style>

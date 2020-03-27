@@ -167,3 +167,10 @@ export const debounce = (func, wait, immediate) => {
 		if (callNow) func.apply(context, args);
 	};
 };
+
+export const getDistanceBetweenPoints = ([x1, y1]=[], [x2, y2]=[]) => (
+  Math.sqrt(
+    Math.pow(x1 - x2, 2)
+    + Math.pow(y1 - y2, 2)
+  )
+)
