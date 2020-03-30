@@ -1,4 +1,5 @@
 <script>
+  import { draw, fade } from "svelte/transition"
   import ListItem from "./ListItem.svelte"
   import { dateAccessor, titleAccessor, organizations } from "./data-utils"
 
@@ -35,8 +36,8 @@
   </div>
 
   <div class="grid">
-    {#each lastFactChecks as item}
-      <div class="grid-item">
+    {#each lastFactChecks as item, i}
+      <div class="grid-item" transition:fade={{ duration: 2000, delay: i * 100 }}>
         <ListItem
           {item}
         />
@@ -101,7 +102,7 @@
   .grid {
     position: relative;
     flex: 1;
-    height: 15em;
+    height: 16em;
     /* position: absolute;
     right: 0;
     left: 0;
