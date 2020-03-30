@@ -29,6 +29,7 @@
   let highlightIndex = 0
   let timeElapsed = 0
   let initTransitionProgress = 0
+  let hasHovered = false
 
   // $: width = windowWidth * 0.9
   // $: height = width * 0.65
@@ -156,6 +157,7 @@
     } else {
       hoveredClaim = null
     }
+    hasHovered = true
   }
 
 
@@ -219,7 +221,7 @@
     debouncedDrawCanvas()
   })()
 
-  $: highlightedClaim = hoveredClaim || bubbles[highlightIndex]
+  $: highlightedClaim = hoveredClaim || (!hasHovered && bubbles[highlightIndex])
 </script>
 
 <!-- <svelte:window bind:innerWidth={windowWidth} /> -->

@@ -250,7 +250,7 @@ export const tagsAccessor = d => {
 }
 
 
-const countryNameMap = {
+export const countryNameMap = {
   USA: "United States of America",
   "United States": "United States of America",
   UK: "United Kingdom",
@@ -263,13 +263,15 @@ const countryNameMap = {
   Korea: "South Korea",
   // "Hong Kong":
 }
-export const countryAccessor = d => d["Country 1"]
+export const countryAccessor = d => countryNameMap[d["Country 1"]] || d["Country 1"]
 export const countriesAccessor = d => [
   d["Country 1"],
   d["Country 2"],
   d["Country 3"],
   d["Country 4"],
-].filter(d => d)
+]
+  .filter(d => d)
+  .map(d => countryNameMap[d] || d)
 
 export const countries = [...new Set(flatten(data.map(countriesAccessor)))]
 

@@ -6,6 +6,7 @@
   // import flags from "./flags/all.js"
 
   export let item
+  // export let searchString
 
   const formatDate = date => [
     timeFormat("%B %-d")(date),
@@ -14,6 +15,18 @@
     timeFormat("%Y")(date),
   ].join("")
 
+  const getTitlePartsWithSearchString = (title, str) => {
+    const index = title.toLowerCase().indexOf(str.toLowerCase())
+    return index != -1 ? [
+      title.slice(0, index),
+      title.slice(index, index + str.length),
+      title.slice(index + str.length),
+    ] : title
+  }
+
+  // $: titleParts = searchString
+  //   ? getTitlePartsWithSearchString(titleAccessor(item), searchString)
+  //   : titleAccessor(item, true).split("*")
   $: titleParts = titleAccessor(item, true).split("*")
 
   $: category = categoryAccessor(item)
@@ -56,9 +69,9 @@
         { item.who }
       </div> -->
       <div class="rating">
-        <svg class="rating-svg" width="1em" viewBox="0 0 9 9">
+        <!-- <svg class="rating-svg" width="1em" viewBox="0 0 9 9">
           {@html ratingPaths[rating] }
-        </svg>
+        </svg> -->
         { rating }
       </div>
 
@@ -101,6 +114,9 @@
 
         <div class="country">
           { countries.join(" & ") }
+          <svg class="country-svg" width="16" height="16" viewBox="0 0 21 25" fill="currentColor">
+            <path d="M9.75586 24.7598L9.74707 24.7529L9.72363 24.7373L9.64062 24.6807L9.33887 24.4668C9.08203 24.2812 8.71777 24.0098 8.28223 23.6631C7.70215 23.2012 6.99121 22.6016 6.23633 21.8887C5.86035 21.5332 5.47363 21.1494 5.08594 20.7402C2.7959 18.3232 0.311523 14.8301 0.311523 10.9277C0.311523 8.27539 1.36523 5.73242 3.24023 3.85645C5.11621 1.98145 7.65918 0.927734 10.3115 0.927734C12.9639 0.927734 15.5068 1.98145 17.3828 3.85645C19.2578 5.73242 20.3115 8.27539 20.3115 10.9277C20.3115 14.8301 17.8271 18.3232 15.5371 20.7402C14.8584 21.458 14.1797 22.0967 13.5596 22.6416C13.1162 23.0322 12.7031 23.374 12.3408 23.6631L11.9473 23.9707C11.6836 24.1738 11.459 24.3398 11.2842 24.4668L10.9824 24.6807L10.8994 24.7373L10.876 24.7529L10.8691 24.7578L10.8438 24.7227L10.8662 24.7598C10.5303 24.9834 10.0918 24.9834 9.75586 24.7598ZM10.3125 14.9277C12.5215 14.9277 14.3115 13.1377 14.3115 10.9287C14.3115 8.71973 12.5215 6.92871 10.3125 6.92871C8.10352 6.92871 6.3125 8.71973 6.3125 10.9287C6.3125 13.1377 8.10352 14.9277 10.3125 14.9277Z" />
+          </svg>
         </div>
       </div>
 
@@ -138,10 +154,10 @@
   }
   .title {
     display: block;
-    margin-top: 1.8em;
+    margin-top: 2em;
     font-size: 1.4em;
     line-height: 1.4em;
-    font-family: Georgia, serif;
+    /* font-family: Georgia, serif; */
     color: inherit;
     text-decoration: none;
     margin-bottom: 0.5em;
@@ -180,7 +196,7 @@
     left: 1em;
     left: -0.63em;
     padding: 0.6em 1em;
-    padding-left: 1.13em;
+    padding-left: 2.4em;
     background: #1d1e24;
     color: white;
     font-size: 0.9em;
@@ -224,7 +240,8 @@
   }
   .bottom-bar {
     display: flex;
-    align-items: center;
+    /* align-items: center; */
+    align-items: baseline;
     justify-content: space-between;
     position: absolute;
     bottom: -1.7em;
@@ -242,6 +259,11 @@
     padding-left: 1em;
     overflow: hidden;
     text-align: right;
+  }
+  .country-svg {
+    vertical-align: -10%;
+    opacity: 0.6;
+    mix-blend-mode: multiply;
   }
   .category {
     font-weight: 700;

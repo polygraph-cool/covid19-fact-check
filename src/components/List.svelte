@@ -1,7 +1,7 @@
 <script>
   import { draw, fly } from "svelte/transition"
   // import VirtualList from '@sveltejs/svelte-virtual-list';
-  import { dateAccessor, countries, countriesAccessor, ratings, ratingAccessor, sources, sourceAccessor, sourceColors, organizations, organizationAccessor, tags, tagsAccessor, titleAccessor, categoryAccessor, categories } from "./data-utils"
+  import { dateAccessor, countries, countriesAccessor, ratings, ratingAccessor, sources, sourceAccessor, sourceColors, organizations, organizationAccessor, tags, tagsAccessor, titleAccessor, categories, categoryAccessor, categoryColors } from "./data-utils"
   import { debounce, smoothScrollTo } from "./utils"
 
   import flags from "./flags/all.js"
@@ -61,7 +61,7 @@
     !searchString
     || (titleAccessor(d).toLowerCase().includes(searchString.toLowerCase()))
   )
-  $: selectedType, selectedRating, selectedOrg, selectedTag, selectedCountry, searchString, filterIteration++
+  $: selectedCategory, selectedType, selectedRating, selectedOrg, selectedTag, selectedCountry, searchString, filterIteration++
 
   $: (() => {
     let runningYs = [0, 0, 0]
@@ -147,12 +147,14 @@
       label="Category"
       options={categories}
       bind:value={selectedCategory}
+      type="inline"
+      colors={categoryColors}
       {scrollToTop}
     />
     <ListFilter
-      label="Source"
-      options={sources}
-      bind:value={selectedType}
+      label="Country"
+      options={countries}
+      bind:value={selectedCountry}
       {scrollToTop}
     />
     <ListFilter
@@ -162,23 +164,23 @@
       {scrollToTop}
     />
     <ListFilter
+      label="Source"
+      options={sources}
+      bind:value={selectedType}
+      {scrollToTop}
+    />
+    <ListFilter
       label="Fact-checker"
       options={organizations}
       bind:value={selectedOrg}
       {scrollToTop}
     />
-    <ListFilter
+    <!-- <ListFilter
       label="Tags"
       options={tags}
       bind:value={selectedTag}
       {scrollToTop}
-    />
-    <ListFilter
-      label="Country"
-      options={countries}
-      bind:value={selectedCountry}
-      {scrollToTop}
-    />
+    /> -->
   </div>
   <div bind:this={containerElement}>
     <ListTimeline
@@ -190,17 +192,13 @@
   <div class="input">
     <input placeholder="Search for a fact check..." on:keydown={debouncedOnUpdateSearchString} />
     <div class="count">
-      {#if !showingItemsCount}
-        No fact checks found that match those filters
+      Showing
+      {#if showingItemsCount == itemsCount}
+        <Number number={ itemsCount } />
       {:else}
-        Showing
-        {#if showingItemsCount == itemsCount}
-          <Number number={ itemsCount } />
-        {:else}
-          <Number number={ showingItemsCount } /> of <Number number={ itemsCount } />
-        {/if}
-        fact checks about Covid-19
+        <Number number={ showingItemsCount } /> of <Number number={ itemsCount } />
       {/if}
+      fact checks about Covid-19
     </div>
   </div>
   <div class="list">
@@ -222,11 +220,15 @@
           >
           <ListItem
             item={metadata[id]}
+            {searchString}
           />
         </div>
       {/if}
     {/each}
   </div>
+  {#if !ids.filter(id => metadata[id].isShowing).length}
+    No items found with those filters
+  {/if}
 </div>
 
 <style>
@@ -298,8 +300,8 @@
   }
   .input input {
     width: calc(100% - 2.9em);
-    padding: 0.8em 1.2em;
-    font-size: 1.2em;
+    padding: 0.8em 1em;
+    font-size: 1.1em;
     line-height: 1em;
     border: none;
   }
