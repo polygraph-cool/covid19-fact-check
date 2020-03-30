@@ -36,6 +36,8 @@
   // const debouncedOnMouseOver = debounce(onMouseOver, 50)
   const duration = 12000
 
+  const windowGlobal = typeof window !== "undefined" && window
+  const pixelRatio = windowGlobal.devicePixelRatio || 1
 
   onMount(() => {
     const interval = setInterval(() => highlightIndex += 1, 3000)
@@ -136,31 +138,32 @@
       d => d.y,
     )
 
-    $: onMouseMove = e => {
-      const x = e.clientX
-        - canvasElement.getBoundingClientRect().left
-      const y = e.clientY
-        - canvasElement.getBoundingClientRect().top
+  $: onMouseMove = e => {
+    const x = e.clientX
+      - canvasElement.getBoundingClientRect().left
+    const y = e.clientY
+      - canvasElement.getBoundingClientRect().top
 
-      const mousePosition = [x, y]
-      const pointIndex = delaunay.find(...mousePosition)
-      if (pointIndex == -1) return null
-      const distance = getDistanceBetweenPoints(
-        mousePosition,
-        [bubbles[pointIndex].x, bubbles[pointIndex].y],
-      )
-      if (distance < 30) {
-        hoveredClaim = bubbles[pointIndex]
-      } else {
-        hoveredClaim = null
-      }
+    const mousePosition = [x, y]
+    const pointIndex = delaunay.find(...mousePosition)
+    if (pointIndex == -1) return null
+    const distance = getDistanceBetweenPoints(
+      mousePosition,
+      [bubbles[pointIndex].x, bubbles[pointIndex].y],
+    )
+    if (distance < 30) {
+      hoveredClaim = bubbles[pointIndex]
+    } else {
+      hoveredClaim = null
     }
+  }
 
 
   const drawCanvas = () => {
     if (!canvasElement) return
-    console.log("drawCanvas")
     const ctx = canvasElement.getContext("2d")
+    canvasElement.width = width * pixelRatio
+    canvasElement.height = height * pixelRatio
     const path = geoPath(projection, ctx)
     const drawPath = shape => {
       ctx.beginPath()
@@ -202,6 +205,7 @@
       ctx.arc(x, y, transitionR, 0, 2 * Math.PI, false)
       fill(color)
     })
+    ctx.scale(pixelRatio, pixelRatio)
   }
   const debouncedDrawCanvas = debounce(drawCanvas, 500)
   // $: (() => {{
