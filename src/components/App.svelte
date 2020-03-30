@@ -58,14 +58,6 @@
 <style>
 	/* @import url('https://rsms.me/inter/inter.css'); */
 
-	:global(body) {
-		background: var(--background-color);
-	}
-	:global(body),
-	:global(button) {
-		font-family: 'Product Sans', sans-serif;
-		/* font-family: 'Inter', sans-serif; */
-	}
 	main {
 		/* max-width: 70em; */
 		width: 100%;

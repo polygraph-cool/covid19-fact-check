@@ -64,6 +64,7 @@ import { dateAccessor, countries, countriesAccessor, ratings, ratingAccessor, so
     || (titleAccessor(d).toLowerCase().includes(searchString.toLowerCase()))
   )
   $: selectedCategory, selectedType, selectedRating, selectedOrg, selectedTag, selectedCountry, searchString, filterIteration++
+  $: isFiltered = selectedCategory || selectedType || selectedRating || selectedOrg || selectedTag || selectedCountry || searchString
 
   $: (() => {
     let runningYs = [0, 0, 0]
@@ -194,7 +195,9 @@ import { dateAccessor, countries, countriesAccessor, ratings, ratingAccessor, so
     <ListTimeline
       filter={isShowingAccessor}
       iteration={filterIteration}
+      color={selectedCategory && categoryColors[selectedCategory]}
       {data}
+      {isFiltered}
     />
   </div>
   <div class="input">

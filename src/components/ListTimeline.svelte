@@ -4,11 +4,13 @@
   import { area, line, curveMonotoneX } from "d3-shape"
   import { timeFormat, timeParse } from "d3-time-format"
   import { timeDay, timeMonth } from "d3-time"
-  import { dateAccessor, parseDate, categoryAccessor, categoryColors, countries, countriesAccessor, ratings, ratingAccessor, sources, sourceAccessor, sourceColors, organizations, organizationAccessor, tags, tagsAccessor } from "./data-utils"
+  import { dateAccessor, parseDate, categories, categoryAccessor, categoryColors, countries, countriesAccessor, ratings, ratingAccessor, sources, sourceAccessor, sourceColors, organizations, organizationAccessor, tags, tagsAccessor } from "./data-utils"
   import { debounce, sortBy } from "./utils"
 
   export let filter
   export let data
+  export let isFiltered
+  export let color
   export let iteration
 
   let height = 80
@@ -18,9 +20,6 @@
   const formatDay = timeFormat("%d/%m/%Y")
   const prettyMonth = timeFormat("%B")
   const today = new Date()
-
-  const windowGlobal = typeof window !== "undefined" && window
-  const pixelRatio = windowGlobal.devicePixelRatio || 1
 
   $: allDates = data.map(dateAccessor)
   $: xExtent = [
@@ -35,9 +34,6 @@
       days
     )
     (data)
-    .map(d => d.sort((a,b) => (
-      categoryAccessor(b) > categoryAccessor(a) ? 1 : -1
-    )))
 
   $: filteredData = data.filter(filter)
   $: filteredBins = bin()
@@ -63,6 +59,33 @@
   $: yScale = scaleLinear()
     .domain([0, max(bins.map(d => d.length))])
     .range([height, 0])
+
+  $: parsedBins = bins.map(bin => {
+    let runningY = height
+    const bars = [{
+      y: yScale(bin.length),
+      height: height - yScale(bin.length),
+    },
+    ...(!isFiltered ?
+      categories.map(category => {
+        const barHeight = height - yScale(bin.filter(d => categoryAccessor(d) == category).length)
+        runningY -= barHeight
+        return {
+          y: runningY,
+          height: barHeight,
+          color: categoryColors[category] || "#dbdbeb",
+          isCategory: true,
+        }
+      })
+    : [])
+    ]
+
+    return {
+      x: xScale(bin.x0),
+      bars,
+    }
+  })
+
 
   // const drawCanvas = () => {
   //   console.log("drawCanvas")
@@ -105,21 +128,24 @@
 
 <div class="c" bind:clientWidth={width} bind:clientHeight={height}>
   <svg {height} {width}>
-
-    {#each bins as bin, i}
-      <rect
-        class="full-area"
-        y={yScale(bin.length)}
-        height={height - yScale(bin.length)}
-        x={(xScale(bin.x0))}
-        width={itemWidth}
-      />
+    {#each parsedBins as { x, bars }, i}
+      {#each bars as { y, height, color, isCategory }}
+        <rect
+          class="full-area"
+          x={x}
+          y={y}
+          width={itemWidth}
+          height={height}
+          style={`fill: ${!isFiltered || !isCategory ? color : ""}`}
+        />
+      {/each}
       <rect
         class="filtered-area"
-        y={yScale((filteredBins[i] || []).length)}
-        height={height - yScale((filteredBins[i] || []).length)}
-        x={(xScale(bin.x0))}
+        y={isFiltered ? yScale((filteredBins[i] || []).length) : height}
+        height={isFiltered ? height - yScale((filteredBins[i] || []).length) : 0}
+        x={x}
         width={itemWidth}
+        style={`fill: ${color}`}
       />
     {/each}
     {#each xTicks as [label, offset]}
@@ -134,6 +160,13 @@
         { label }
       </text>
     {/each}
+    <line
+      class="tick-mark"
+      x1={0}
+      x2={width}
+      y1={height}
+      y2={height}
+    />
   </svg>
   <!-- <canvas
     {height}

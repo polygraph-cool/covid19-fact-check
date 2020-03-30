@@ -13,7 +13,7 @@
   import { easeCubicOut } from "d3-ease"
   import { geoEqualEarth, geoOrthographic, geoPath, geoCentroid, geoGraticule10 } from "d3-geo"
   import countryShapes from "./countries.json"
-  import { debounce, getDistanceBetweenPoints, getPositionFromAngle } from "./utils"
+  import { debounce, getDistanceBetweenPoints, getPositionFromAngle, scaleCanvas } from "./utils"
   import { dateAccessor, parseDate, countryAccessor, categories, categoryColors, categoryAccessor } from "./data-utils"
   import ItemTooltip from "./ItemTooltip.svelte"
 
@@ -25,8 +25,8 @@
   // let windowWidth = 1200
   let width = 1200
   $: height = width * 0.65
-  $: bubbleSize = width * 0.0026
-  let highlightIndex = 0
+  $: bubbleSize = width * 0.002
+  let highlightIndex = null
   let timeElapsed = 0
   let initTransitionProgress = 0
   let hasHovered = false
@@ -40,28 +40,28 @@
   const windowGlobal = typeof window !== "undefined" && window
   const pixelRatio = windowGlobal.devicePixelRatio || 1
 
-  let interval
-  onMount(() => {
-    interval = setInterval(() => highlightIndex += 1, 3000)
+  // let interval
+  // onMount(() => {
+  //   interval = setInterval(() => highlightIndex += 1, 3000)
 
-    // initTransitionProgress = 0
-    // const initTimer = timer(elapsed => {
-    //   initTransitionProgress = Math.min(
-    //     1,
-    //     easeCubicOut(elapsed / duration)
-    //   );
+  //   // initTransitionProgress = 0
+  //   // const initTimer = timer(elapsed => {
+  //   //   initTransitionProgress = Math.min(
+  //   //     1,
+  //   //     easeCubicOut(elapsed / duration)
+  //   //   );
 
-    //   drawCanvas()
+  //   //   drawCanvas()
 
-    //   if (initTransitionProgress > 1) {
-    //     initTimer.stop()
-    //   }
-    // });
-    return () => {
-      clearInterval(interval)
-      // initTimer.stop()
-    }
-  })
+  //   //   if (initTransitionProgress > 1) {
+  //   //     initTimer.stop()
+  //   //   }
+  //   // });
+  //   return () => {
+  //     clearInterval(interval)
+  //     // initTimer.stop()
+  //   }
+  // })
 
     const sphere = ({type: "Sphere"})
     $: projection = geoArmadillo()
@@ -160,18 +160,17 @@
     }
 
     hasHovered = true
-    if (interval) {
-      clearInterval(interval)
-      interval = null
-    }
+    // if (interval) {
+    //   clearInterval(interval)
+    //   interval = null
+    // }
   }
 
 
   const drawCanvas = () => {
     if (!canvasElement) return
     const ctx = canvasElement.getContext("2d")
-    canvasElement.width = width * pixelRatio
-    canvasElement.height = height * pixelRatio
+    scaleCanvas(canvasElement, ctx, width, height)
     const path = geoPath(projection, ctx)
     const drawPath = shape => {
       ctx.beginPath()
@@ -213,7 +212,6 @@
       ctx.arc(x, y, transitionR, 0, 2 * Math.PI, false)
       fill(color)
     })
-    ctx.scale(pixelRatio, pixelRatio)
   }
   const debouncedDrawCanvas = debounce(drawCanvas, 500)
   // $: (() => {{
@@ -236,7 +234,7 @@
   on:mousemove={onMouseMove}
   on:resize={debouncedDrawCanvas}
   bind:clientWidth={width}>
-  <canvas {width} {height} bind:this={canvasElement} />
+  <canvas style={`width: ${width}px; height: ${height}px`} bind:this={canvasElement} />
   {#if highlightedClaim}
     <ItemTooltip item={highlightedClaim} {...highlightedClaim} y={highlightedClaim.y - bubbleSize} />
     <ItemTooltip item={highlightedClaim} {...highlightedClaim} y={highlightedClaim.y - bubbleSize} />
@@ -256,6 +254,7 @@
   .c {
     position: relative;
     width: 90%;
+    margin: 0 auto;
     /* height: 65%; */
     /* overflow: hidden; */
   }

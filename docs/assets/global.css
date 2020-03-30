@@ -1,9 +1,9 @@
-:root {
-  --c1: blue;
-  --c2: red;
+html,
+body {
+  background: #f4f5fa;
 }
-
-a.wordmark {
-  display: block;
-  max-width: 10rem;
+body,
+button {
+  font-family: 'Product Sans', sans-serif;
+  /* font-family: 'Inter', sans-serif; */
 }

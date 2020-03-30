@@ -104,6 +104,8 @@
     display: flex;
     align-items: center;
     position: relative;
+    max-width: 80em;
+    margin: 0 auto;
   }
   h1 {
 		/* font-size: 3em;
@@ -146,9 +148,14 @@
   .sticky {
     position: sticky;
     top: 0;
-    padding: 0.5em 3em 0.5em 1em;
-    background: var(--background-color);
+    /* left: 50%;
+    transform: translateX(-50%); */
+    padding: 0.5em 3em 0.5em 0;
+    background: #f4f5fa;
     font-size: 1.2em;
+    /* max-width: 100%; */
+    /* width: 80em; */
+    margin: 0 auto;
     z-index: 100;
   }
 	.orgs {
