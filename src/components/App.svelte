@@ -57,15 +57,14 @@
 
 <style>
 	/* @import url('https://rsms.me/inter/inter.css'); */
+
 	:global(body) {
-		background: #f4f5fa;
+		background: var(--background-color);
 	}
 	:global(body),
 	:global(button) {
 		font-family: 'Product Sans', sans-serif;
-	}
-	.intro {
-		padding: 0 2em;
+		/* font-family: 'Inter', sans-serif; */
 	}
 	main {
 		/* max-width: 70em; */
@@ -75,8 +74,8 @@
 		color: #1f2025;
 		display: flex;
 		flex-direction: column;
-		align-items: center;
-		text-align: center;
+		/* align-items: center; */
+		/* text-align: center; */
 		/* background: #f3f8fb; */
 	}
 

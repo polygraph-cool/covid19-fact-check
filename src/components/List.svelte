@@ -1,7 +1,7 @@
 <script>
   import { draw, fly } from "svelte/transition"
   // import VirtualList from '@sveltejs/svelte-virtual-list';
-  import { dateAccessor, countries, countriesAccessor, ratings, ratingAccessor, sources, sourceAccessor, sourceColors, organizations, organizationAccessor, tags, tagsAccessor, titleAccessor, categories, categoryAccessor, categoryColors } from "./data-utils"
+import { dateAccessor, countries, countriesAccessor, ratings, ratingAccessor, sources, sourceAccessor, sourceColors, organizations, organizationAccessor, tags, tagsAccessor, titleAccessor, categories, categoryAccessor, categoryColors } from "./data-utils"
   import { debounce, smoothScrollTo } from "./utils"
 
   import flags from "./flags/all.js"
@@ -384,5 +384,9 @@
   .hidden {
     opacity: 0;
     pointer-events: none;
+  }
+  .card :global(.row) {
+    margin-top: auto;
+    margin-bottom: 1.2em;
   }
 </style>

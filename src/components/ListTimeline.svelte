@@ -49,9 +49,9 @@
     .domain(xExtent)
     .range([0, width])
 
-  $: itemWidth = Math.floor(
+  $: itemWidth = bins[1] ? Math.floor(
     xScale(bins[1].x0) - xScale(bins[0].x0) - 1
-  )
+  ) : 10
 
   $: xTicks = timeMonth.range(
     ...xExtent,

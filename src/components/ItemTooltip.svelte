@@ -56,8 +56,4 @@
     pointer-events: none;
     transition: all 0.3s ease-out;
   }
-  .contents :global(.row) {
-    margin-top: 1em;
-    margin-bottom: 0;
-  }
 </style>

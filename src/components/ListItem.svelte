@@ -158,9 +158,12 @@
     font-size: 1.4em;
     line-height: 1.4em;
     /* font-family: Georgia, serif; */
+    /* font-weight: 600; */
     color: inherit;
     text-decoration: none;
     margin-bottom: 0.5em;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .title b {
     background: #dfddfd;
@@ -214,8 +217,8 @@
     display: flex;
     /* align-items: center; */
     justify-content: space-between;
-    margin-top: auto;
-    margin-bottom: 1.2em;
+    margin-top: 1em;
+    margin-bottom: 0;
   }
   .column {
     /* display: flex; */
