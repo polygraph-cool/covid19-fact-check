@@ -4,7 +4,7 @@
 
   export let data
 
-  const lastFactChecks = [...data]
+  $: lastFactChecks = [...data]
     .sort((a,b) => dateAccessor(b) - dateAccessor(a))
     .slice(0, 6)
 </script>
