@@ -70,9 +70,9 @@
     const angle = 360 / types.length * i
     const [x, y] = getPositionFromAngle(angle, 100)
 
-    const bubbleCount = data.filter(d => categoryAccessor(d)[0] == type).length
+    const bubbleCount = data.filter(d => categoryAccessor(d) == type).length
     const r = Math.max(
-      Math.sqrt(bubbleCount * Math.PI * Math.pow(bubbleR * 5.09, 2) * (Math.sqrt(12) / Math.PI)) + 20,
+      Math.sqrt(bubbleCount * Math.PI * Math.pow(bubbleR * 1.09, 2) * (Math.sqrt(12) / Math.PI)) + 20,
       20
     )
     const parsedColor = typeColors[type]
@@ -198,7 +198,7 @@
             startOffset="20%"
             fill={darkerColor}
           >
-            { type }
+            { type || "Other" }
           </textPath>
         </text>
       </g>

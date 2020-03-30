@@ -66,7 +66,7 @@ export const sourceColors = {
 
 export const sources = Object.keys(sourceKeywords)
 
-export const categoryAccessor = d => d["Category"]
+export const categoryAccessor = d => d["Category"].trim()
 export const categories = [...new Set(data.map(categoryAccessor))].filter(d => d)
 const colors = ["#58B19F", "#778beb", "#e77f67", "#FDA7DF", "#cf6a87", "#A3CB38", "#786fa6", "#4b7bec", "#778ca3", "#0fb9b1"]
 let categoryColors = {}
