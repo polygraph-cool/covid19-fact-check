@@ -101,7 +101,7 @@
   .grid {
     position: relative;
     flex: 1;
-    height: 25em;
+    height: 15em;
     /* position: absolute;
     right: 0;
     left: 0;
