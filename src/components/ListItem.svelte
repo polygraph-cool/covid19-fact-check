@@ -1,6 +1,6 @@
 <script>
   import { timeFormat } from "d3-time-format"
-  import { parseDate, dateAccessor, countriesAccessor, organizationAccessor, organizationLogos, ratingAccessor, ratingPaths, sourceAccessor, sourceColors } from "./data-utils"
+  import { parseDate, dateAccessor, countriesAccessor, categoryAccessor, categoryColors, organizationAccessor, organizationLogos, ratingAccessor, ratingPaths, sourceAccessor, sourceColors, titleAccessor, urlAccessor } from "./data-utils"
   import { getOrdinal } from "./utils"
 
   // import flags from "./flags/all.js"
@@ -14,21 +14,24 @@
     timeFormat("%Y")(date),
   ].join("")
 
-  $: titleParts = item.what.split("*")
+  $: titleParts = titleAccessor(item, true).split("*")
 
+  $: category = categoryAccessor(item)
+  $: color = categoryColors[category] || "#000"
   $: matchingSources = sourceAccessor(item)
-  $: color = sourceColors[matchingSources[0]] || "#000"
   $: rating = ratingAccessor(item) || "?? " + item.rating
   $: date = dateAccessor(item)
   $: org = organizationAccessor(item)
   $: orgLogo = organizationLogos[org]
   $: countries = countriesAccessor(item)
+  $: url = urlAccessor(item)
+
 </script>
 
 
 <div class="card-wrapper" style={`background: ${color}`}>
   <div class="card-contents">
-    <a class="card-contents-inner" href={item.url} target="_blank">
+    <a class="card-contents-inner" href={url} target="_blank">
       <div class="title">
         {#each titleParts as part, i}
           {#if i % 2}
@@ -59,32 +62,47 @@
         { rating }
       </div>
 
-      <div class="org">
-        <div class="org-label">
-          Fact checked by
+      <div class="row">
+        <div class="column">
+          <div class="label">
+            Fact checked by
+          </div>
+          {#if orgLogo}
+            <img class="org-img" src={orgLogo} alt={`${org} logo`} />
+          {:else}
+            { org }
+          {/if}
         </div>
-        {#if orgLogo}
-          <img class="org-img" src={orgLogo} alt={`${org} logo`} />
-        {:else}
-          { org }
+        {#if matchingSources.length}
+          <div class="column">
+            <div class="label">
+              From
+            </div>
+            <div class="source">
+              {#each matchingSources as source, i}
+                {#if i}, {/if}
+                <b style={`color: ${sourceColors[source]}`}>
+                  { source }
+                </b>
+              {/each}
+            </div>
+          </div>
         {/if}
       </div>
+
       <div class="bottom-bar">
         <!-- <div>
           { explanation }
         </div> -->
-        <div class="source">
-          {#if matchingSources.length}
-            from <b>{ matchingSources.join(", ") }</b>
-          {/if}
-        </div>
 
+        <div class="category">
+          { category }
+        </div>
 
         <div class="country">
           { countries.join(" & ") }
         </div>
       </div>
-
 
     </a>
   </div>
@@ -176,18 +194,27 @@
     margin-right: 0.5em;
     overflow: visible;
   }
-  .org {
-    /* display: flex; */
+  .row {
+    display: flex;
+    /* align-items: center; */
+    justify-content: space-between;
     margin-top: auto;
     margin-bottom: 1.2em;
+  }
+  .column {
+    /* display: flex; */
+    /* margin-top: auto; */
     line-height: 2em;
+  }
+  .column:nth-of-type(2) {
+    text-align: right;
   }
   .org-img {
     max-width: 10em;
     max-height: 2em;
     margin-top: 0.3em;
   }
-  .org-label {
+  .label {
     padding-top: 0.3em;
     color: #8888a5;
     font-size: 0.7em;
@@ -215,5 +242,8 @@
     padding-left: 1em;
     overflow: hidden;
     text-align: right;
+  }
+  .category {
+    font-weight: 700;
   }
 </style>

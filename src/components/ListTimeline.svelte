@@ -1,27 +1,29 @@
 <script>
-  import { bin, extent, max } from "d3-array"
+  import { bin, extent, max, min } from "d3-array"
   import { scaleLinear, scaleTime } from "d3-scale"
   import { area, line, curveMonotoneX } from "d3-shape"
   import { timeFormat, timeParse } from "d3-time-format"
   import { timeDay, timeMonth } from "d3-time"
-  import { data, dateAccessor, countries, countriesAccessor, ratings, ratingAccessor, sources, sourceAccessor, sourceColors, organizations, organizationAccessor, tags, tagsAccessor } from "./data-utils"
+  import { dateAccessor, parseDate, countries, countriesAccessor, ratings, ratingAccessor, sources, sourceAccessor, sourceColors, organizations, organizationAccessor, tags, tagsAccessor } from "./data-utils"
   import { debounce } from "./utils"
 
   export let filter
-  export let iteration
+  export let data
+  // export let iteration
 
-  let height
-  let width
+  let height = 80
+  let width = 1200
   let canvasElement
 
   const formatDay = timeFormat("%d/%m/%Y")
-  const parseDay = timeParse("%d/%m/%Y")
   const prettyMonth = timeFormat("%B")
   const today = new Date()
 
-  $: xExtent = extent(
-    data.map(dateAccessor)
-  )
+  $: allDates = data.map(dateAccessor)
+  $: xExtent = [
+    min(allDates),
+    min([new Date(), max(allDates)]),
+  ]
   $: days = timeDay.range(...xExtent)
 
   $: bins = bin()
@@ -47,7 +49,6 @@
     prettyMonth(d),
     xScale(d),
   ])
-  $:console.log(xTicks)
 
   $: yScale = scaleLinear()
     .domain([0, max(bins.map(d => d.length))])
@@ -102,7 +103,7 @@
     fill: #dbdbeb;
   }
   .filtered-area {
-    fill: #000;
+    fill: #656275;
     transition: all 0.3s ease-out;
   }
   text {

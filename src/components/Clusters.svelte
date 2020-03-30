@@ -7,18 +7,18 @@
   import { timeParse } from "d3-time-format"
   import { timeDay } from "d3-time"
   import { getPositionFromAngle, debounce } from "./utils"
-  import { data, dateAccessor, parseDate, sources, sourceAccessor, sourceColors, ratings, ratingAccessor, ratingPaths, titleAccessor } from "./data-utils"
+  import { dateAccessor, parseDate, categories, categoryAccessor, categoryColors, ratings, ratingAccessor, ratingPaths, titleAccessor } from "./data-utils"
 
   import ItemTooltip from "./ItemTooltip.svelte"
 
-  // export let data
+  export let data
   // console.log(data.length, data[0])
 
   const windowGlobal = typeof window !== "undefined" && window
   const width = (windowGlobal.innerWidth || 1200) * 0.9
   const height = width * 0.5
 
-  const types = sources
+  const types = categories
   const bubbleR = Math.round(width / 300)
   let hoveredClaim = null
 
@@ -37,7 +37,7 @@
     .range([10, 20])
   $: groupRScale = scaleSqrt()
     .domain([0, max(types.map(type => (
-      data.filter(d => sourceAccessor(d)[0] == type).length
+      data.filter(d => categoryAccessor(d)[0] == type).length
     )))])
     .range([10, width * 0.4])
 
@@ -47,18 +47,17 @@
   //   ))))
   //   .range([360 / types.length, 360 / types.length * 6])
 
-  const colors = ["#58B19F", "#778beb", "#e77f67", "#FDA7DF", "#cf6a87", "#A3CB38", "#786fa6", "#4b7bec", "#778ca3", "#0fb9b1"]
-  const darkerColors = colors.map(c => (
-    color(c)
-      .darker(0.6)
-      .formatHex()
-  ))
-  let typeColors = sourceColors
+  // const darkerColors = colors.map(c => (
+  //   color(c)
+  //     .darker(0.6)
+  //     .formatHex()
+  // ))
+  let typeColors = categoryColors
   let typeBorderColors = {}
 
   $: types.forEach((type, i) => {
     // typeColors[type] = colors[i % colors.length]
-    typeBorderColors[type] = color(sourceColors[type]).darker(0.6).formatHex()
+    typeBorderColors[type] = color(typeColors[type]).darker(0.6).formatHex()
   })
 
   let ratingOffsets = {}
@@ -71,9 +70,9 @@
     const angle = 360 / types.length * i
     const [x, y] = getPositionFromAngle(angle, 100)
 
-    const bubbleCount = data.filter(d => sourceAccessor(d)[0] == type).length
+    const bubbleCount = data.filter(d => categoryAccessor(d)[0] == type).length
     const r = Math.max(
-      Math.sqrt(bubbleCount * Math.PI * Math.pow(bubbleR * 1.09, 2) * (Math.sqrt(12) / Math.PI)) + 20,
+      Math.sqrt(bubbleCount * Math.PI * Math.pow(bubbleR * 5.09, 2) * (Math.sqrt(12) / Math.PI)) + 20,
       20
     )
     const parsedColor = typeColors[type]
@@ -108,15 +107,16 @@
   })()
 
   $: claims = data.map(d => {
-    const mainSource = sourceAccessor(d)[0]
-    if (!mainSource) return
-    const groupPosition = groupPositions.find(({ type }) => type == mainSource) || {}
+    const category = categoryAccessor(d)
+    if (!category) return
+
+    const groupPosition = groupPositions.find(({ type }) => type == category) || {}
     const {x, y, r} = groupPosition
     // if (!d.category) return
     const daysAgo = timeDay.range(dateAccessor(d), new Date()).length
     const rating = ratingAccessor(d)
 
-    const parsedColor = typeColors[mainSource]
+    const parsedColor = typeColors[category]
     const darkerColor = color(parsedColor)
       .darker(0.3)
       .formatHex()
@@ -128,7 +128,7 @@
       y: y - (rAgeScale(daysAgo) * r),
       // x: x + ((ratingOffsets[rating] || [])[0] || 0),
       // y: y + ((ratingOffsets[rating] || [])[1] || 0),
-      mainSource,
+      category,
       title: titleAccessor(d),
       color: parsedColor,
       opacity: ageScale(daysAgo),

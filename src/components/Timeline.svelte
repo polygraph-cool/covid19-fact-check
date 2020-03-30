@@ -7,9 +7,9 @@
   import { timeDay } from "d3-time"
   import { forceSimulation, forceX, forceY, forceCollide, forceRadial } from "d3-force"
   import { getPositionFromAngle, getUniformBinsDays } from "./utils"
-  import { data, dateAccessor, parseDate, sources, sourceAccessor, sourceColors } from "./data-utils"
+  import { dateAccessor, parseDate, categories, categoryAccessor, categoryColors } from "./data-utils"
 
-  // export let data
+  export let data = []
 
   const width = 1200
   const height = 200
@@ -85,14 +85,14 @@
       .filter(d => d["date"] == date)
       // .sort((a,b) => b.topic > a.topic ? 1 : -1)
       .sort((a,b) => (
-        sources.indexOf(sourceAccessor(b)[0])
-        - sources.indexOf(sourceAccessor(a)[0])
+        categories.indexOf(categoryAccessor(b)[0])
+        - categories.indexOf(categoryAccessor(a)[0])
       ))
       .map((d, i) => ({
         ...d,
         y: height + i * -5,
         // color: ageScale(dateAccessor(d)),
-        color: sourceColors[sourceAccessor(d)[0]] || "#adb2be",
+        color: categoryColors[categoryAccessor(d)[0]] || "#adb2be",
       })),
     date,
     x: xScale(parseDate(date)),

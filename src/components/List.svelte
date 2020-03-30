@@ -1,7 +1,7 @@
 <script>
   import { draw, fly } from "svelte/transition"
   // import VirtualList from '@sveltejs/svelte-virtual-list';
-  import { data, dateAccessor, countries, countriesAccessor, ratings, ratingAccessor, sources, sourceAccessor, sourceColors, organizations, organizationAccessor, tags, tagsAccessor } from "./data-utils"
+  import { dateAccessor, countries, countriesAccessor, ratings, ratingAccessor, sources, sourceAccessor, sourceColors, organizations, organizationAccessor, tags, tagsAccessor, titleAccessor, categoryAccessor, categories } from "./data-utils"
   import { debounce, smoothScrollTo } from "./utils"
 
   import flags from "./flags/all.js"
@@ -9,8 +9,10 @@
   import ListFilter from "./ListFilter.svelte"
   import ListTimeline from "./ListTimeline.svelte"
   import Number from "./Number.svelte"
-  // export let data
 
+  export let data = []
+
+  let selectedCategory = null
   let selectedType = null
   let selectedRating = null
   // let selectedLang = null
@@ -25,15 +27,19 @@
   let typeColors = sourceColors
   let totalHeight = 300
 
-  $: dataWithIds = data.sort((a,b) => (
+  $: dataWithIds = [...data].sort((a,b) => (
     dateAccessor(a) > dateAccessor(b) ? -1 : 1
   )).map((d,i) =>({
       ...d,
       id: i,
     }))
+
   $: ids = dataWithIds.map(({ id }) => id)
   const metadata = {}
   $: isShowingAccessor = d => (
+    !selectedCategory
+    || (categoryAccessor(d).includes(selectedCategory))
+  ) && (
     !selectedType
     || (sourceAccessor(d).includes(selectedType))
   ) && (
@@ -53,9 +59,10 @@
   //   || (selectedLang == d["language_code"])
   ) && (
     !searchString
-    || (d["what"].toLowerCase().includes(searchString.toLowerCase()))
+    || (titleAccessor(d).toLowerCase().includes(searchString.toLowerCase()))
   )
   $: selectedType, selectedRating, selectedOrg, selectedTag, selectedCountry, searchString, filterIteration++
+
   $: (() => {
     let runningYs = [0, 0, 0]
     let runningColumnId = 0
@@ -78,7 +85,7 @@
       const height = Math.max(
           2,
           Math.round(
-            d.what.length
+            titleAccessor(d).length
             * 1.3
             // * (d.language_code == "zh" ? 3.5 : 2)
             / 30
@@ -100,10 +107,9 @@
     })
 
     totalHeight = Math.max(...runningYs)
-    // console.log(runningYs, totalHeight, metadata)
   })()
 
-  $: itemsCount = data.length
+  $: itemsCount = (data || []).length
   $: showingItemsCount = Object.values(metadata).filter(d => d.isShowing).length
 
   const scrollToTop = () => {
@@ -112,7 +118,6 @@
       block: 'start' ,
     })
     // const elementY = containerElement.offsetTop - 100
-    // console.log(elementY)
     // smoothScrollTo(elementY, 300)
   }
 
@@ -138,6 +143,12 @@
 
 <div class="c" style={`height: ${totalHeight}px`}>
   <div class="filters">
+    <ListFilter
+      label="Category"
+      options={categories}
+      bind:value={selectedCategory}
+      {scrollToTop}
+    />
     <ListFilter
       label="Source"
       options={sources}
@@ -173,6 +184,7 @@
     <ListTimeline
       filter={isShowingAccessor}
       iteration={filterIteration}
+      {data}
     />
   </div>
   <div class="input">
@@ -196,10 +208,10 @@
       {#if metadata[id]}
         <div
           class={`card card--column-${metadata[id].columnId} card-${
-            metadata[id].what.length <  60 ?   "s" :
-            metadata[id].what.length <  90 ?   "m" :
-            metadata[id].what.length < 160 ?   "l" :
-            metadata[id].what.length < 200 ?  "xl" :
+            titleAccessor(metadata[id]).length <  60 ?   "s" :
+            titleAccessor(metadata[id]).length <  90 ?   "m" :
+            titleAccessor(metadata[id]).length < 160 ?   "l" :
+            titleAccessor(metadata[id]).length < 200 ?  "xl" :
                                               "xxl"
           }`}
           class:hidden={!metadata[id].isShowing}

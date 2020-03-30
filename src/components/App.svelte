@@ -8,14 +8,18 @@
 	import List from "./List.svelte"
 
   import { organizations } from "./data-utils"
-	import rawData from "./../data/data.json"
+	// import rawData from "./../data/data.json"
 
-	// let data = []
+	const dataUrl = "https://pudding.cool/misc/covid-fact-checker/data.json"
+	let data = []
+	let isLoading = true
 
-	// onMount(async () => {
-		// const res = await fetch(dataUrl)
-	// const data = rawData
-	// })
+	onMount(async () => {
+		const res = await fetch(dataUrl)
+		const resJson = await res.json()
+		data = resJson.data
+		isLoading = false
+	})
 
 	const types = [
 		"map", "clusters", "timeline"
@@ -47,16 +51,21 @@
 		{/each}
 	</div>
 
-	{#if selectedType == "map"}
-		<MapClusters />
-	{:else if selectedType == "clusters"}
-		<Clusters />
-	{:else if selectedType == "timeline"}
-		<Timeline />
+	{#if !isLoading}
+
+		{#if selectedType == "map"}
+			<MapClusters {data} />
+		{:else if selectedType == "clusters"}
+			<Clusters {data} />
+		{:else if selectedType == "timeline"}
+			<Timeline {data} />
+		{/if}
+		<!-- <Quadrant /> -->
+		<!-- <Bubbles /> -->
+		<List {data} />
+	{:else}
+		Loading fact checks...
 	{/if}
-	<!-- <Quadrant /> -->
-	<!-- <Bubbles /> -->
-	<List />
 </main>
 
 <style>

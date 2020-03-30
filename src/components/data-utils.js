@@ -1,13 +1,17 @@
 import { timeParse } from "d3-time-format"
 import { flatten } from "./utils"
-import rawData from "./../data/data3.json"
+import rawData from "./../data/data.json"
 
 export const data = rawData
 
 export const parseDate = timeParse("%-m/%-d/%Y")
-export const dateAccessor = d => parseDate(d["date"])
+export const dateAccessor = d => parseDate(d[""])
 
-export const titleAccessor = d => d["what"].replace(/\*/g, "")
+export const titleAccessor = (d={}, doStripFormatting=true) => (
+  doStripFormatting
+  ? (d["What did you fact-check?"] || "").replace(/\*/g, "")
+  : d["What did you fact-check?"] || ""
+)
 
 const sourceKeywords = {
   Facebook: [
@@ -43,7 +47,7 @@ const sourceKeywords = {
   TV: [],
   // video: [],
 }
-const sourceColors = {
+export const sourceColors = {
   Facebook: "#4267B2",
   Twitter: "#1DA1F2",
   WhatsApp: "#4AC959",
@@ -59,13 +63,18 @@ const sourceColors = {
   TV: "#0fb9b1",
   // video: [],
 }
+
 export const sources = Object.keys(sourceKeywords)
+
+export const categoryAccessor = d => d["Category"]
+export const categories = [...new Set(data.map(categoryAccessor))].filter(d => d)
 const colors = ["#58B19F", "#778beb", "#e77f67", "#FDA7DF", "#cf6a87", "#A3CB38", "#786fa6", "#4b7bec", "#778ca3", "#0fb9b1"]
-// let sourceColors = {}
-// sources.forEach((source, i) => {
-//   sourceColors[source] = colors[i % (colors.length - 1)]
-// })
-export {sourceColors}
+let categoryColors = {}
+categories.forEach((category, i) => {
+  categoryColors[category] = colors[i % (colors.length - 1)]
+})
+categoryColors[""] = "#656275"
+export {categoryColors}
 
 export const parseSource = (str="") => {
   const words = (str.toLowerCase().match(/\S+\s*/g) || []).map(d => d.trim())
@@ -77,8 +86,8 @@ export const parseSource = (str="") => {
   return matchingSources
 }
 export const sourceAccessor = d => {
-  if (!d["who"]) return []
-  return parseSource(d["who"])
+  if (!d["Who said/posted it?"]) return []
+  return parseSource(d["Who said/posted it?"])
 }
 
 function getDomainFromUrl(url) {
@@ -100,7 +109,9 @@ function getDomainFromUrl(url) {
 
   return hostname;
 }
-const urlAccessor = d => d.url
+export const languageAccessor = d => d["Language of your fact-check"]
+
+export const urlAccessor = d => d["URL to fact-checked article (in your language)"]
 // export const domainAccessor = d => {
 //   const url = urlAccessor(d)
 //   if (
@@ -109,9 +120,6 @@ const urlAccessor = d => d.url
 //   ) return null
 //   return getDomainFromUrl(url)
 // }
-export const domainAccessor = d => d.organization
-export const domains = [...new Set(data.map(domainAccessor))].filter(d => d)
-
 const validRatings = {
   False: [
     "false",
@@ -186,14 +194,14 @@ export const ratingPaths = {
 
 export const ratings = Object.keys(validRatings)
 export const ratingAccessor = d => {
-  const rating = d.rating.toLowerCase()
+  const rating = d["Final rating"].toLowerCase()
   const matchingRating = ratings.find(validRating => (
     validRatings[validRating].includes(rating)
   ))
   return matchingRating || rating
 }
 
-export const organizationAccessor = d => d["organization"]
+export const organizationAccessor = d => d["Organization"]
 export const organizations = [...new Set(data.map(organizationAccessor))]
 
 export const organizationLogos = {
@@ -255,15 +263,13 @@ const countryNameMap = {
   Korea: "South Korea",
   // "Hong Kong":
 }
-export const countryAccessor = d => {
-  const country = (d["country"] || "").split(",")[0]
-  return countryNameMap[country] || country
-}
-export const countriesAccessor = d => (
-  (d["country"] || "").split(",")
-    .map(country => (
-      countryNameMap[country] || country
-    ))
-)
+export const countryAccessor = d => d["Country 1"]
+export const countriesAccessor = d => [
+  d["Country 1"],
+  d["Country 2"],
+  d["Country 3"],
+  d["Country 4"],
+].filter(d => d)
 
 export const countries = [...new Set(flatten(data.map(countriesAccessor)))]
+

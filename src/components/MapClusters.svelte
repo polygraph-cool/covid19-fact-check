@@ -14,10 +14,10 @@
   import { geoEqualEarth, geoOrthographic, geoPath, geoCentroid, geoGraticule10 } from "d3-geo"
   import countryShapes from "./countries.json"
   import { debounce, getDistanceBetweenPoints, getPositionFromAngle } from "./utils"
-  import { data, dateAccessor, parseDate, countryAccessor, sources, sourceColors, sourceAccessor } from "./data-utils"
+  import { dateAccessor, parseDate, countryAccessor, categories, categoryColors, categoryAccessor } from "./data-utils"
   import ItemTooltip from "./ItemTooltip.svelte"
 
-  // export let data
+  export let data = []
   // const parseDate = timeParse("%Y-%m-%d")
   const formatDate = timeFormat("%A %B %-d, %Y")
   let hoveredClaim = null
@@ -84,10 +84,10 @@
       .domain(extent(data.map(dateAccessor)))
       .range(["#fff", "#778beb"])
 
-    let sourceOffsets = {}
-    sources.forEach((source, i) => {
-      const angle = 360 / sources.length * i
-      sourceOffsets[source] = getPositionFromAngle(angle, 10)
+    let categoryOffsets = {}
+    categories.forEach((category, i) => {
+      const angle = 360 / categories.length * i
+      categoryOffsets[category] = getPositionFromAngle(angle, 6)
     })
 
     $: claims = data.map((d, i) => {
@@ -99,16 +99,16 @@
         return
       }
 
-      const mainSource = sourceAccessor(d)[0]
-      const sourceOffset = sourceOffsets[mainSource] || [0, 0]
+      const category = categoryAccessor(d)
+      const categoryOffset = categoryOffsets[category] || [0, 0]
 
-      const parsedColor = sourceColors[mainSource] || "#adb2be"
+      const parsedColor = categoryColors[category] || "#adb2be"
 
       return {
         ...d,
         r: bubbleSize,
-        x: x + sourceOffset[0],
-        y: y + sourceOffset[1],
+        x: x + categoryOffset[0],
+        y: y + categoryOffset[1],
         color: parsedColor,
         // opacity: ageScale(daysAgo),
         opacity: 1,
