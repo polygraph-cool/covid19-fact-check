@@ -12,6 +12,7 @@
 
   export let data = []
 
+  let windowWidth = 1200
   let selectedCategory = null
   let selectedType = null
   let selectedRating = null
@@ -22,6 +23,7 @@
   let searchString = ""
   let containerElement
   let inputElement
+  let listWidth = 1200
   let filterIteration = 0
 
   let typeColors = sourceColors
@@ -66,6 +68,9 @@
   $: (() => {
     let runningYs = [0, 0, 0]
     let runningColumnId = 0
+    const itemsPerRow = Math.round(windowWidth / 500)
+    const itemWidth = 378
+
     dataWithIds.forEach(d => {
       const isShowing = isShowingAccessor(d)
 
@@ -95,7 +100,7 @@
         + 170
       metadata[d.id] = {
         ...d,
-        x: runningColumnId * 378,
+        x: runningColumnId * itemWidth,
         y: runningYs[runningColumnId],
         height,
         columnId: runningColumnId,
@@ -103,9 +108,10 @@
         isShowing: true,
       }
       runningYs[runningColumnId] += height + 60
-      runningColumnId = (runningColumnId + 1) % 3
+      runningColumnId = (runningColumnId + 1) % itemsPerRow
     })
 
+    listWidth = itemWidth * (itemsPerRow * 0.98)
     totalHeight = Math.max(...runningYs)
   })()
 
@@ -141,7 +147,9 @@
   )
 </script>
 
-<div class="c" style={`height: ${totalHeight}px`}>
+<svelte:window bind:innerWidth={windowWidth} />
+
+<div class="c" style={`height: ${totalHeight}px; max-width: ${listWidth}px`}>
   <div class="filters">
     <ListFilter
       label="Category"
@@ -236,10 +244,11 @@
     /* display: flex;
     flex-direction: column; */
     position: relative;
-    max-width: 69.6em;
+    max-width: calc(100% - 12em);
+    max-width: 69em;
     width: 100%;
     margin: 9em auto 3em;
-    padding: 3em 10em 10em;
+    padding: 3em 1em 10em 10em;
   }
   .list {
     position: relative;

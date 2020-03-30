@@ -40,8 +40,9 @@
   const windowGlobal = typeof window !== "undefined" && window
   const pixelRatio = windowGlobal.devicePixelRatio || 1
 
+  let interval
   onMount(() => {
-    const interval = setInterval(() => highlightIndex += 1, 3000)
+    interval = setInterval(() => highlightIndex += 1, 3000)
 
     // initTransitionProgress = 0
     // const initTimer = timer(elapsed => {
@@ -157,7 +158,12 @@
     } else {
       hoveredClaim = null
     }
+
     hasHovered = true
+    if (interval) {
+      clearInterval(interval)
+      interval = null
+    }
   }
 
 
