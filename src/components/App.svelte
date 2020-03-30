@@ -24,8 +24,8 @@
 	const types = [
 		"map", "clusters", "timeline"
 	]
-	let selectedType = "clusters"
-	// let selectedType = types[0]
+	// let selectedType = "clusters"
+	let selectedType = types[0]
 
 </script>
 
