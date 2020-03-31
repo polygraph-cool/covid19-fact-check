@@ -39,7 +39,7 @@
 	const scrollOptions = [
     ["categories", "What categories of false claims are being spread?"],
 		["countries", "Where are the false claims coming from?"],
-		["all", "See all of the claims"],
+		["list", "See all of the claims"],
   ]
 
   const scrollToSection = id => {
@@ -107,6 +107,9 @@
   </div>
 
   <div class="focus" on:mouseover={() => isHovering = true} on:mouseleave={() => isHovering = false}>
+    <div class="focus-title">
+      Newest fact checks. <a href="#list" on:click={() => scrollToSection("list")}>See all</a>.
+    </div>
     {#each lastFactChecks as item, i (item.id || `null-${i}`)}
       {#if item.id}
         <div class={`list-item list-item--${i}`} on:click={() => focusedIndex = Math.min(data.length - 1, Math.max(0, focusedIndex + (i - 2)))}>
@@ -269,10 +272,10 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 5em;
+    height: 7em;
     background: linear-gradient(
       to bottom,
-      #f4f5fa 0%,
+      #f4f5fa 30%,
       transparent 100%
     );
     z-index: 100;
@@ -293,13 +296,25 @@
     z-index: 100;
     pointer-events: none;
   }
+  .focus-title {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    text-align: center;
+    transform: translateX(-50%);
+    z-index: 200;
+  }
+  .focus-title a {
+    color: inherit;
+  }
   .list-item {
     position: absolute;
     top: 50%;
+    left: 50%;
     height: 15em;
     text-align: left;
     width: 33em;
-    transform: translate(0, -50%);
+    transform: translate(-50%, -50%);
     transition: opacity 0.5s ease-out,
       transform 0.5s ease-out;
     font-size: 0.9em;
@@ -312,11 +327,11 @@
   }
   .list-item--0 {
     opacity: 0;
-    transform: translate(0, -275%);
+    transform: translate(-50%, -275%);
   }
   .list-item--1 {
     opacity: 0.6;
-    transform: translate(0, -175%);
+    transform: translate(-50%, -175%);
   }
   .list-item--2 {
     z-index: 10;
@@ -324,11 +339,11 @@
   }
   .list-item--3 {
     opacity: 0.6;
-    transform: translate(0, 75%);
+    transform: translate(-50%, 75%);
   }
   .list-item--4 {
     opacity: 0;
-    transform: translate(0, 175%);
+    transform: translate(-50%, 175%);
   }
   .text {
     /* padding: 0 20em; */

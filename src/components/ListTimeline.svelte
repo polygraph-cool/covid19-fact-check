@@ -188,7 +188,7 @@
     />
   </svg>
   <canvas
-    style={`width: ${width}px; height: ${height}px`}
+   {height} {width}
     bind:this={canvasElement}
   />
 </div>

@@ -50,13 +50,13 @@
 	<!-- <Bubbles /> -->
 
 	<div class="section" id="countries">
-		<p style="max-width: 20em; margin-bottom: -1em">
+		<p style="max-width: 20em; margin-bottom: -3em">
 			We also looked at what country each fact check originated in.
 		</p>
 		<MapClusters {data} {iteration} {isLoading} {organizations} {countries} />
 	</div>
 
-	<div class="section" id="all">
+	<div class="section" id="list">
 		<List {data} {countries} {organizations} />
 	</div>
 

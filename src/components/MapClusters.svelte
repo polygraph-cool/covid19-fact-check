@@ -25,7 +25,7 @@
   let canvasElement = null
   // let windowWidth = 1200
   let width = 1200
-  $: height = width * 0.65
+  $: height = width * 0.7
   $: bubbleSize = width * 0.0015
   let highlightIndex = null
   let timeElapsed = 0
@@ -131,7 +131,7 @@
         // .force("x", forceX(d => d.x).strength(1))
         .force("x", forceX(d => d.x).strength(0.2))
         .force("y", forceY(d => d.y).strength(0.2))
-        .force("collide", forceCollide(d => (bubbleSize / width) * 1.6).strength(1))
+        .force("collide", forceCollide(d => (bubbleSize / width) * 1.4).strength(1))
         // .force("r", forceRadial(d => d.distance).strength(5))
         .stop()
 
@@ -282,7 +282,7 @@
 <style>
   .c {
     position: relative;
-    width: 90%;
+    width: 95%;
     margin: 0 auto;
     /* height: 65%; */
     /* overflow: hidden; */

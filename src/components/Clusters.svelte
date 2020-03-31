@@ -17,7 +17,7 @@
   // console.log(data.length, data[0])
 
   let width = 1200
-  $: height = width * 0.5
+  $: height = width * 0.45
 
   const types = categories
   $: bubbleSize = Math.round(width / 300)
@@ -67,7 +67,7 @@
 
       const bubbleCount = data.filter(d => categoryAccessor(d) == type).length
       const r = Math.max(
-        Math.sqrt(bubbleCount * Math.PI * Math.pow(bubbleSize * 1.09, 2) * (Math.sqrt(12) / Math.PI)) + 20,
+        Math.sqrt(bubbleCount * Math.PI * Math.pow(bubbleSize * 1.1, 2) * (Math.sqrt(12) / Math.PI)) + 20,
         20
       )
       const parsedColor = typeColors[type]
@@ -90,8 +90,8 @@
     let simulation = forceSimulation(groupBubbles)
       // .force("x", forceX(d => d.x).strength(1))
       .force("x", forceX(d => d.x).strength(0.1))
-      .force("y", forceY(d => d.y).strength(0.6))
-      .force("collide", forceCollide(d => d.r * 1.1).strength(0.6))
+      .force("y", forceY(d => d.y).strength(0.5))
+      .force("collide", forceCollide(d => d.r * 1.2).strength(0.4))
       // .force("r", forceRadial(d => d.distance).strength(5))
       .stop()
 
@@ -102,7 +102,7 @@
       if (!category) return
 
       const groupPosition = groupBubbles.find(({ type }) => type == category) || {}
-      const {x, y, r} = groupPosition
+      const {x, y} = groupPosition
       // if (!d.category) return
       const daysAgo = timeDay.range(dateAccessor(d), new Date()).length
       const rating = ratingAccessor(d)
@@ -133,7 +133,7 @@
       // .force("x", forceX(d => d.x).strength(1))
       .force("x", forceX(d => d.x).strength(0.1))
       .force("y", forceY(d => d.y).strength(0.1))
-      .force("collide", forceCollide(d => d.r * 1.7))
+      .force("collide", forceCollide(d => d.r * 1.9))
       // .force("r", forceRadial(d => d.distance).strength(5))
       .stop()
 
@@ -141,7 +141,7 @@
     console.log("simu Clusters")
   }
 
-  $: data, width, (() => {
+  $: bubbles, width, (() => {
     delaunay = Delaunay.from(
       bubbles,
       d => d.x * width,
@@ -179,13 +179,21 @@
     const ctx = canvasElement.getContext("2d")
     scaleCanvas(canvasElement, ctx, width, height)
 
-    ctx.globalAlpha = 0.1
-
+    ctx.globalAlpha = 0.2
     groupBubbles.forEach(({x, y, r, color, type}, i) => {
+
+      let gradient = ctx.createRadialGradient(
+        x * width, y * width, 0, x * width, y * width, r * width,
+      )
+
+      gradient.addColorStop(0, color)
+      gradient.addColorStop(0.5, color)
+      gradient.addColorStop(1, `${color}00`)
+      ctx.fillStyle = gradient
+
       ctx.beginPath()
       ctx.arc(x * width, y * width, r * width, 0, 2 * Math.PI, false)
-
-      ctx.fillStyle = color
+      // ctx.fillStyle = color
       ctx.fill()
     })
 
@@ -197,10 +205,15 @@
 
     ctx.globalAlpha = 1
 
-    bubbles.forEach(({x, y, color}, i) => {
+    bubbles.forEach(({x, y, color, darkerColor, opacity}, i) => {
+      // ctx.globalAlpha = opacity
+      ctx.beginPath()
+      ctx.arc(x * width, y * width, bubbleSize + 1.3, 0, 2 * Math.PI, false)
+      ctx.fillStyle = darkerColor
+      ctx.fill()
+
       ctx.beginPath()
       ctx.arc(x * width, y * width, bubbleSize, 0, 2 * Math.PI, false)
-
       ctx.fillStyle = color
       ctx.fill()
     })
@@ -228,6 +241,7 @@
     const mousePosition = [x, y]
     const pointIndex = delaunay.find(...mousePosition)
     if (pointIndex == -1) return null
+
     const hoveredBubble = bubbles[pointIndex] || {}
     const distance = getDistanceBetweenPoints(
       mousePosition,
@@ -334,7 +348,8 @@
     text-transform: uppercase;
     letter-spacing: 0.1em;
     font-size: 0.7em;
-    font-weight: 100;
+    font-weight: 600;
+    user-select: none;
   }
   .topic-label {
     text-anchor: middle;
