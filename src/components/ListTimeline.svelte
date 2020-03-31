@@ -4,7 +4,7 @@
   import { area, line, curveMonotoneX } from "d3-shape"
   import { timeFormat, timeParse } from "d3-time-format"
   import { timeDay, timeMonth } from "d3-time"
-  import { dateAccessor, parseDate, categories, categoryAccessor, categoryColors, countries, countriesAccessor, ratings, ratingAccessor, sources, sourceAccessor, sourceColors, organizations, organizationAccessor, tags, tagsAccessor } from "./data-utils"
+  import { dateAccessor, parseDate, categories, categoryAccessor, categoryColors, countriesAccessor, ratings, ratingAccessor, sources, sourceAccessor, sourceColors, organizationAccessor, tags, tagsAccessor } from "./data-utils"
   import { debounce, sortBy } from "./utils"
 
   export let filter

@@ -1,5 +1,5 @@
 <script>
-  import { data, dateAccessor, parseDate, sourceAccessor, sourceColors, ratingAccessor, titleAccessor } from "./data-utils"
+  import { dateAccessor, parseDate, sourceAccessor, sourceColors, ratingAccessor, titleAccessor } from "./data-utils"
   import ListItem from "./ListItem.svelte"
 
   export let x

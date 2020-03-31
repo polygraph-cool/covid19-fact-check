@@ -5,8 +5,9 @@
   import { color } from "d3-color"
   import { forceSimulation, forceX, forceY, forceCollide, forceRadial } from "d3-force"
   import { getPositionFromAngle } from "./utils"
-  import { data, dateAccessor, parseDate, sources, sourceAccessor, sourceColors } from "./data-utils"
+  import { dateAccessor, parseDate, sources, sourceAccessor, sourceColors } from "./data-utils"
 
+  export let data = []
   console.log(data.length, data[0])
 
   const width = 700

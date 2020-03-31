@@ -7,12 +7,17 @@
 	import Quadrant from "./Quadrant.svelte"
 	import Bubbles from "./Bubbles.svelte"
 	import List from "./List.svelte"
+  import { flatten } from "./utils"
+  import { categoryAccessor, countriesAccessor, organizationAccessor } from "./data-utils"
 
-  import { organizations } from "./data-utils"
 	// import rawData from "./../data/data.json"
 
 	const dataUrl = "https://pudding.cool/misc/covid-fact-checker/data.json"
+	let iteration = 0
 	let data = []
+	let categories = []
+	let organizations = []
+	let countries = []
 	let isLoading = true
 
 	onMount(async () => {
@@ -20,6 +25,9 @@
 		const resJson = await res.json()
 		data = resJson.data
 		isLoading = false
+		organizations = [...new Set(data.map(organizationAccessor))]
+		countries = [...new Set(flatten(data.map(countriesAccessor)))]
+		iteration++
 	})
 
 	const types = [
@@ -39,18 +47,18 @@
 
 	<Intro {data} {organizations} />
 
-	{#if !isLoading}
-		{#if selectedType == "map"}
-			<MapClusters {data} />
-		{:else if selectedType == "clusters"}
-			<Clusters {data} />
-		{:else if selectedType == "timeline"}
-			<Timeline {data} />
-		{/if}
-		<!-- <Quadrant /> -->
-		<!-- <Bubbles /> -->
-		<List {data} />
-	{:else}
+	{#if selectedType == "map"}
+		<MapClusters {data} {iteration} {isLoading} {organizations} {countries} />
+	{:else if selectedType == "clusters"}
+		<Clusters {data} {organizations} {countries} />
+	{:else if selectedType == "timeline"}
+		<Timeline {data} {organizations} {countries} />
+	{/if}
+	<!-- <Quadrant /> -->
+	<!-- <Bubbles /> -->
+	<List {data} {organizations} />
+
+	{#if isLoading}
 		Loading fact checks...
 	{/if}
 </main>

@@ -18,6 +18,7 @@
   import ItemTooltip from "./ItemTooltip.svelte"
 
   export let data = []
+  export let iteration
   // const parseDate = timeParse("%Y-%m-%d")
   const formatDate = timeFormat("%A %B %-d, %Y")
   let hoveredClaim = null
@@ -25,43 +26,37 @@
   // let windowWidth = 1200
   let width = 1200
   $: height = width * 0.65
-  $: bubbleSize = width * 0.002
+  $: bubbleSize = width * 0.0015
   let highlightIndex = null
   let timeElapsed = 0
   let initTransitionProgress = 0
   let hasHovered = false
+  let hasInited = false
 
   // $: width = windowWidth * 0.9
   // $: height = width * 0.65
 
   // const debouncedOnMouseOver = debounce(onMouseOver, 50)
   const duration = 12000
+  let runningTimer
+  const initTimer = () => {
+    if (!data.length) return
+    if (hasInited) return
+    hasInited = true
+    setTimeout(() => {
+      runningTimer = timer(elapsed => {
+        initTransitionProgress = Math.min(1, easeCubicOut(elapsed / duration))
+
+        if (initTransitionProgress >= 1) {
+          runningTimer.stop()
+        }
+      })
+    })
+  }
+  $: iteration, initTimer()
 
   const windowGlobal = typeof window !== "undefined" && window
   const pixelRatio = windowGlobal.devicePixelRatio || 1
-
-  // let interval
-  // onMount(() => {
-  //   interval = setInterval(() => highlightIndex += 1, 3000)
-
-  //   // initTransitionProgress = 0
-  //   // const initTimer = timer(elapsed => {
-  //   //   initTransitionProgress = Math.min(
-  //   //     1,
-  //   //     easeCubicOut(elapsed / duration)
-  //   //   );
-
-  //   //   drawCanvas()
-
-  //   //   if (initTransitionProgress > 1) {
-  //   //     initTimer.stop()
-  //   //   }
-  //   // });
-  //   return () => {
-  //     clearInterval(interval)
-  //     // initTimer.stop()
-  //   }
-  // })
 
     const sphere = ({type: "Sphere"})
     $: projection = geoArmadillo()
@@ -70,19 +65,27 @@
 
     $: svgPathGenerator = geoPath(projection)
     const countryCentroids = {}
-    $: countries = countryShapes.features.map(shape => {
-      const countryData = data.find(d => (
-        countryAccessor(data) == shape.properties["geounit"]
-      )) || {}
-      countryCentroids[shape.properties["geounit"]] = svgPathGenerator.centroid(shape)
+    let countries = []
+    $: data, (() => {
+      countries = countryShapes.features.map(shape => {
+        const countryData = data.find(d => (
+          countryAccessor(data) == shape.properties["geounit"]
+        )) || {}
+        const centroid = svgPathGenerator.centroid(shape)
+        const scaledCentroid = [
+          centroid[0] / width,
+          centroid[1] / height,
+        ]
+        countryCentroids[shape.properties["geounit"]] = scaledCentroid
 
-      return {
-        name: shape.properties["geounit"],
-        shape,
-        centroid: svgPathGenerator.centroid(shape),
-        ...countryData,
-      }
-    }).filter(d => d.centroid[0])
+        return {
+          name: shape.properties["geounit"],
+          shape,
+          centroid: scaledCentroid,
+          ...countryData,
+        }
+      }).filter(d => d.centroid[0])
+    })()
 
     $: ageScale = scaleTime()
       .domain(extent(data.map(dateAccessor)))
@@ -91,54 +94,62 @@
     let categoryOffsets = {}
     categories.forEach((category, i) => {
       const angle = 360 / categories.length * i
-      categoryOffsets[category] = getPositionFromAngle(angle, 6)
+      categoryOffsets[category] = getPositionFromAngle(angle, 1)
     })
 
-    $: claims = data.map((d, i) => {
-      const country = countryAccessor(d)
-      if (!country) return
-      const [x, y] = countryCentroids[country] || []
-      if (!x && !y) {
+    let bubbles = []
+    const updateBubbles = () => {
+      const claims = data.map((d, i) => {
+        const country = countryAccessor(d)
+        if (!country) return
+        const [x, y] = countryCentroids[country] || []
+        if (!x && !y) return
 
-        return
-      }
+        const category = categoryAccessor(d)
+        const categoryOffset = [
+          categoryOffsets[category] ? categoryOffsets[category][0] * 2 / width : 0,
+          categoryOffsets[category] ? categoryOffsets[category][1] * 2 / width : 0,
+          // 0, 0,
+        ]
 
-      const category = categoryAccessor(d)
-      const categoryOffset = categoryOffsets[category] || [0, 0]
+        const parsedColor = categoryColors[category] || "#adb2be"
 
-      const parsedColor = categoryColors[category] || "#adb2be"
+        return {
+          ...d,
+          // r: bubbleSize,
+          x: x + categoryOffset[0],
+          y: y + categoryOffset[1],
+          color: parsedColor,
+          // opacity: ageScale(daysAgo),
+          opacity: 1,
+          // darkerColor: topicBorderColors[d.category],
+        }
+      }).filter(d => d)
 
-      return {
-        ...d,
-        r: bubbleSize,
-        x: x + categoryOffset[0],
-        y: y + categoryOffset[1],
-        color: parsedColor,
-        // opacity: ageScale(daysAgo),
-        opacity: 1,
-        // darkerColor: topicBorderColors[d.category],
-      }
-    }).filter(d => d)
-
-    $: bubbles = (() => {
-      let bubbles = [...claims]
+      bubbles = [...claims]
       let simulation = forceSimulation(bubbles)
         // .force("x", forceX(d => d.x).strength(1))
         .force("x", forceX(d => d.x).strength(0.2))
         .force("y", forceY(d => d.y).strength(0.2))
-        .force("collide", forceCollide(d => d.r + 0.9).strength(1))
+        .force("collide", forceCollide(d => (bubbleSize / width) * 1.6).strength(1))
         // .force("r", forceRadial(d => d.distance).strength(5))
         .stop()
 
       range(0, 300).forEach(i => simulation.tick())
-      return bubbles
+      console.log("simu", bubbles)
+    }
+    $: iteration, updateBubbles()
+
+    let delaunay = []
+
+    $: data, width, (() => {
+      delaunay = Delaunay.from(
+        bubbles,
+        d => d.x * width,
+        d => d.y * height,
+      )
     })()
 
-    $: delaunay = Delaunay.from(
-      bubbles,
-      d => d.x,
-      d => d.y,
-    )
 
   $: onMouseMove = e => {
     const x = e.clientX
@@ -151,7 +162,7 @@
     if (pointIndex == -1) return null
     const distance = getDistanceBetweenPoints(
       mousePosition,
-      [bubbles[pointIndex].x, bubbles[pointIndex].y],
+      [bubbles[pointIndex].x * width, bubbles[pointIndex].y * height],
     )
     if (distance < 30) {
       hoveredClaim = bubbles[pointIndex]
@@ -166,6 +177,7 @@
     // }
   }
 
+  let blankMap
 
   const drawCanvas = () => {
     if (!canvasElement) return
@@ -201,28 +213,44 @@
 
     drawPath(sphere)
     stroke("#c9cde2")
-    bubbles.forEach(({x, y, r, color}, i) => {
-      const transitionR = bubbleSize * Math.max(
+
+    blankMap = ctx.getImageData(0, 0, width, height)
+  }
+
+  const drawBubbles = () => {
+    if (!canvasElement) return
+    if (!blankMap) return
+    const ctx = canvasElement.getContext("2d")
+    ctx.putImageData(blankMap, 0, 0)
+
+// console.log("bubbles", bubbles)
+    bubbles.forEach(({x, y, color}, i) => {
+      const transitionR = bubbleSize * Math.min(1, Math.max(
         0,
-        // initTransitionProgress + 0.1 - (i / bubbles.length)
-        1,
-      )
+        // initTransitionProgress
+        initTransitionProgress * 2 - (i / bubbles.length)
+        // 1,
+      ))
 
       ctx.beginPath()
-      ctx.arc(x, y, transitionR, 0, 2 * Math.PI, false)
-      fill(color)
+      ctx.arc(x * width, y * height, transitionR, 0, 2 * Math.PI, false)
+
+      ctx.fillStyle = color
+      ctx.fill()
     })
   }
   const debouncedDrawCanvas = debounce(drawCanvas, 500)
+  const debouncedDrawBubbles = debounce(drawBubbles, 500)
   // $: (() => {{
   //   const _ = width
   //   drawCanvas()
   // }})
   // onMount(drawCanvas)
   $: debouncedDrawCanvas()
-  $: (() => {
-    const _ = width
+  $: initTransitionProgress, drawBubbles()
+  $: width, bubbles, (() => {
     debouncedDrawCanvas()
+    debouncedDrawBubbles()
   })()
 
   $: highlightedClaim = hoveredClaim || (!hasHovered && bubbles[highlightIndex])
@@ -232,19 +260,18 @@
 
 <div class="c"
   on:mousemove={onMouseMove}
-  on:resize={debouncedDrawCanvas}
   bind:clientWidth={width}>
   <canvas style={`width: ${width}px; height: ${height}px`} bind:this={canvasElement} />
   {#if highlightedClaim}
-    <ItemTooltip item={highlightedClaim} {...highlightedClaim} y={highlightedClaim.y - bubbleSize} />
-    <ItemTooltip item={highlightedClaim} {...highlightedClaim} y={highlightedClaim.y - bubbleSize} />
+    <ItemTooltip item={highlightedClaim} {...highlightedClaim} x={highlightedClaim.x * width} y={highlightedClaim.y * height - bubbleSize} />
+    <!-- <ItemTooltip item={highlightedClaim} {...highlightedClaim} y={highlightedClaim.y - bubbleSize} /> -->
     <div
       class="hovered-claim-highlight"
       style={`
-        height: ${bubbleSize * 2 + 4}px;
-        width: ${bubbleSize * 2 + 4}px;
-        margin: ${-(bubbleSize + 4)}px;
-        transform: translate(${highlightedClaim.x}px, ${highlightedClaim.y}px);
+        height: ${bubbleSize * 2.5}px;
+        width: ${bubbleSize * 2.5}px;
+        margin: ${-(bubbleSize * 1.75)}px;
+        transform: translate(${highlightedClaim.x * width}px, ${highlightedClaim.y * height}px);
       `}
     />
   {/if}

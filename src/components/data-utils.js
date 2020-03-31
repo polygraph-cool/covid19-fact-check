@@ -1,8 +1,8 @@
 import { timeParse } from "d3-time-format"
 import { flatten } from "./utils"
-import rawData from "./../data/data.json"
+// import rawData from "./../data/data.json"
 
-export const data = rawData
+// export const data = rawData
 
 export const parseDate = timeParse("%-m/%-d/%Y")
 export const dateAccessor = d => parseDate(d[""])
@@ -66,10 +66,7 @@ export const sourceColors = {
 
 export const sources = Object.keys(sourceKeywords)
 
-export const categoryAccessor = d => d["Category"].trim()
-export const categories = [...new Set(data.map(categoryAccessor))]
-  .filter(d => d)
-  .sort((a,b) => b == "Other" ? 100 : a > b ? 1 : -1)
+export const categories = ["Authorities", "Causes", "Conspiracy theory", "Cures", "Spread", "Symptoms", "Other"]
 const colors = ["#58B19F", "#778beb", "#e77f67", "#FDA7DF", "#cf6a87", "#A3CB38", "#786fa6", "#4b7bec", "#778ca3", "#0fb9b1"]
 let categoryColors = {}
 categories.forEach((category, i) => {
@@ -77,6 +74,8 @@ categories.forEach((category, i) => {
 })
 categoryColors[""] = "#656275"
 export {categoryColors}
+
+export const categoryAccessor = d => d["Category"].trim()
 
 export const parseSource = (str="") => {
   const words = (str.toLowerCase().match(/\S+\s*/g) || []).map(d => d.trim())
@@ -204,7 +203,6 @@ export const ratingAccessor = d => {
 }
 
 export const organizationAccessor = d => d["Organization"]
-export const organizations = [...new Set(data.map(organizationAccessor))]
 
 export const organizationLogos = {
   "FactCrescendo": "https://i2.wp.com/www.factcrescendo.com/wp-content/uploads/2019/07/Fact-Crescendo-Logo-01-e1569236593436.png?fit=200%2C74&ssl=1",
@@ -274,6 +272,3 @@ export const countriesAccessor = d => [
 ]
   .filter(d => d)
   .map(d => countryNameMap[d] || d)
-
-export const countries = [...new Set(flatten(data.map(countriesAccessor)))]
-

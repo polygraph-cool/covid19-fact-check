@@ -1,7 +1,7 @@
 <script>
   import { draw, fly } from "svelte/transition"
   // import VirtualList from '@sveltejs/svelte-virtual-list';
-import { dateAccessor, countries, countriesAccessor, ratings, ratingAccessor, sources, sourceAccessor, sourceColors, organizations, organizationAccessor, tags, tagsAccessor, titleAccessor, categories, categoryAccessor, categoryColors } from "./data-utils"
+import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sourceAccessor, sourceColors, organizationAccessor, tagsAccessor, titleAccessor, categories, categoryAccessor, categoryColors } from "./data-utils"
   import { debounce, smoothScrollTo } from "./utils"
 
   import flags from "./flags/all.js"
@@ -11,6 +11,8 @@ import { dateAccessor, countries, countriesAccessor, ratings, ratingAccessor, so
   import Number from "./Number.svelte"
 
   export let data = []
+  export let countries = []
+  export let organizations = []
 
   let windowWidth = 1200
   let selectedCategory = null
@@ -198,6 +200,8 @@ import { dateAccessor, countries, countriesAccessor, ratings, ratingAccessor, so
       color={selectedCategory && categoryColors[selectedCategory]}
       {data}
       {isFiltered}
+      {categories}
+      {categoryColors}
     />
   </div>
   <div class="input">

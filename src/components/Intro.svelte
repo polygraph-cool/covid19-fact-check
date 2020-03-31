@@ -2,7 +2,7 @@
   import { onMount } from "svelte"
   import { draw, fade } from "svelte/transition"
   import ListItem from "./ListItem.svelte"
-  import { dateAccessor, titleAccessor, organizations, categories, categoryColors } from "./data-utils"
+  import { dateAccessor, titleAccessor, categories, categoryColors } from "./data-utils"
 
   export let data
   let focusedIndex = 0
