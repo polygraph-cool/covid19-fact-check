@@ -304,10 +304,14 @@
     z-index: 100;
     pointer-events: none;
   }
-  .isLoading {
+  .loading {
     position: absolute;
     top: 50%;
     left: 50%;
+    /* font-weight: 600; */
+    text-align: center;
+    opacity: 0.6;
+    font-style: italic;
     transform: translate(-50%, -50%);
   }
   .focus-title {

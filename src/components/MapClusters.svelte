@@ -144,9 +144,9 @@ const spiralPositions = getSpiralPositions()
           // r: bubbleSize,
           // x: x + categoryOffset[0],
           // y: y + categoryOffset[1],
-          x: categoryPosition[0], y: categoryPosition[1],
+          // x: categoryPosition[0], y: categoryPosition[1],
           // x, y,
-          // x: offsetX, y: offsetY,
+          x: offsetX, y: offsetY,
           countryX: x, countryY: y,
           categoryPosition,
           color: parsedColor,
@@ -160,8 +160,8 @@ const spiralPositions = getSpiralPositions()
       bubbles = [...claims]
       let simulation = forceSimulation()
         // .force("x", forceX(d => d.x).strength(1))
-        .force("x", forceX(d => d.countryX).strength(0.05))
-        .force("y", forceY(d => d.countryY).strength(0.05))
+        .force("x", forceX(d => d.x).strength(0.05))
+        .force("y", forceY(d => d.y).strength(0.05))
         .force("collide", forceCollide(d => (bubbleSize / width) * 1.3).strength(1))
         // .force("r", forceRadial(d => d.distance).strength(5))
         .nodes(bubbles)
