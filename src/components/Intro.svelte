@@ -108,7 +108,9 @@
 
   <div class="focus" on:mouseover={() => isHovering = true} on:mouseleave={() => isHovering = false}>
     <div class="focus-title">
-      Newest fact checks. <a href="#list" on:click={() => scrollToSection("list")}>See all</a>.
+      Newest fact checks
+      <br />
+      <a href="#list" on:click={() => scrollToSection("list")}>See all</a>
     </div>
     {#each lastFactChecks as item, i (item.id || `null-${i}`)}
       {#if item.id}
@@ -301,10 +303,20 @@
     top: 0;
     left: 50%;
     text-align: center;
+    font-weight: 600;
+    /* text-transform: uppercase;
+    letter-spacing: 0.1em; */
     transform: translateX(-50%);
     z-index: 200;
   }
   .focus-title a {
+    position: absolute;
+    right: -3.5em;
+    top: -0.3em;
+    margin-top: 0.3em;
+    font-weight: 500;
+    /* font-size: 0.9em; */
+    opacity: 0.6;
     color: inherit;
   }
   .list-item {
