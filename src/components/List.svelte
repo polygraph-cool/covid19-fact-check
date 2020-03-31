@@ -10,6 +10,7 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
   import ListTimeline from "./ListTimeline.svelte"
   import Number from "./Number.svelte"
 
+  export let isLoading
   export let data = []
   export let countries = []
   export let organizations = []
@@ -30,6 +31,9 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
 
   let typeColors = sourceColors
   let totalHeight = 300
+
+  const pageHeight = 2000
+  let pageIndex = 1
 
   $: dataWithIds = [...data].sort((a,b) => (
     dateAccessor(a) > dateAccessor(b) ? -1 : 1
@@ -65,7 +69,9 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
     !searchString
     || (titleAccessor(d).toLowerCase().includes(searchString.toLowerCase()))
   )
-  $: selectedCategory, selectedType, selectedRating, selectedOrg, selectedTag, selectedCountry, searchString, filterIteration++
+  $: selectedCategory, selectedType, selectedRating, selectedOrg, selectedTag, selectedCountry, searchString,
+    filterIteration++,
+    pageIndex = 1
   $: isFiltered = selectedCategory || selectedType || selectedRating || selectedOrg || selectedTag || selectedCountry || searchString
 
   $: (() => {
@@ -148,52 +154,14 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
       ? Math.max(str.length * 1.3 + 0.9, 6)
       : 6
   )
+
+  $: listHeight = pageHeight * pageIndex
 </script>
 
 <svelte:window bind:innerWidth={windowWidth} />
 
-<div class="c" style={`height: ${totalHeight}px; max-width: ${listWidth}px`}>
-  <div class="filters">
-    <ListFilter
-      label="Category"
-      options={categories}
-      bind:value={selectedCategory}
-      type="inline"
-      colors={categoryColors}
-      {scrollToTop}
-    />
-    <ListFilter
-      label="Country"
-      options={countries}
-      bind:value={selectedCountry}
-      {scrollToTop}
-    />
-    <ListFilter
-      label="Rating"
-      options={ratings}
-      bind:value={selectedRating}
-      {scrollToTop}
-    />
-    <ListFilter
-      label="Source"
-      options={sources}
-      bind:value={selectedType}
-      {scrollToTop}
-    />
-    <ListFilter
-      label="Fact-checker"
-      options={organizations}
-      bind:value={selectedOrg}
-      {scrollToTop}
-    />
-    <!-- <ListFilter
-      label="Tags"
-      options={tags}
-      bind:value={selectedTag}
-      {scrollToTop}
-    /> -->
-  </div>
-  <div bind:this={containerElement}>
+<div class="c"style={`width: ${listWidth + 220}px`}>
+  <div class="top" style={`width: ${listWidth}px`} bind:this={containerElement}>
     <ListTimeline
       filter={isShowingAccessor}
       iteration={filterIteration}
@@ -203,47 +171,102 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
       {categories}
       {categoryColors}
     />
-  </div>
-  <div class="input">
-    <input placeholder="Search for a fact check..." on:keydown={debouncedOnUpdateSearchString} />
-    <div class="count">
-      Showing
-      {#if showingItemsCount == itemsCount}
-        <Number number={ itemsCount } />
-      {:else}
-        <Number number={ showingItemsCount } /> of <Number number={ itemsCount } />
-      {/if}
-      fact checks about Covid-19
-    </div>
-  </div>
-  <div class="list">
-    {#each ids.slice(0, 500) as id}
-      {#if metadata[id]}
-        <div
-          class={`card card--column-${metadata[id].columnId} card-${
-            titleAccessor(metadata[id]).length <  60 ?   "s" :
-            titleAccessor(metadata[id]).length <  90 ?   "m" :
-            titleAccessor(metadata[id]).length < 160 ?   "l" :
-            titleAccessor(metadata[id]).length < 200 ?  "xl" :
-                                              "xxl"
-          }`}
-          class:hidden={!metadata[id].isShowing}
-          style={[
-            `transform: translate(${metadata[id].x}px, ${metadata[id].y}px)`,
-            `height: ${metadata[id].height}px`,
-          ].join(";")}
-          >
-          <ListItem
-            item={metadata[id]}
-            {searchString}
-          />
+    <div class="input">
+      <input placeholder="Search for a fact check..." on:keydown={debouncedOnUpdateSearchString} />
+      {#if !isLoading}
+        <div class="count">
+          Showing
+          {#if showingItemsCount == itemsCount}
+            <Number number={ itemsCount } />
+          {:else}
+            <Number number={ showingItemsCount } /> of <Number number={ itemsCount } />
+          {/if}
+          fact checks about Covid-19
         </div>
       {/if}
-    {/each}
+    </div>
   </div>
-  {#if !ids.filter(id => metadata[id].isShowing).length}
-    No items found with those filters
-  {/if}
+  <div class="main-list">
+    <div class="filters">
+      <ListFilter
+        label="Category"
+        options={categories}
+        bind:value={selectedCategory}
+        type="inline"
+        colors={categoryColors}
+        {scrollToTop}
+      />
+      <ListFilter
+        label="Country"
+        options={countries}
+        bind:value={selectedCountry}
+        {scrollToTop}
+      />
+      <ListFilter
+        label="Rating"
+        options={ratings}
+        bind:value={selectedRating}
+        {scrollToTop}
+      />
+      <ListFilter
+        label="Source"
+        options={sources}
+        bind:value={selectedType}
+        {scrollToTop}
+      />
+      <ListFilter
+        label="Fact-checker"
+        options={organizations}
+        bind:value={selectedOrg}
+        {scrollToTop}
+      />
+      <!-- <ListFilter
+        label="Tags"
+        options={tags}
+        bind:value={selectedTag}
+        {scrollToTop}
+      /> -->
+    </div>
+    <div class="list" style={`height: ${listHeight + 210}px; width: ${listWidth}px; flex: 0 0 ${listWidth}px;`}>
+      {#each ids as id}
+        {#if metadata[id] && metadata[id].y <= (listHeight)}
+          <div
+            class={`card card--column-${metadata[id].columnId} card-${
+              titleAccessor(metadata[id]).length <  60 ?   "s" :
+              titleAccessor(metadata[id]).length <  90 ?   "m" :
+              titleAccessor(metadata[id]).length < 160 ?   "l" :
+              titleAccessor(metadata[id]).length < 200 ?  "xl" :
+                                                "xxl"
+            }`}
+            class:hidden={!metadata[id].isShowing}
+            style={[
+              `transform: translate(${metadata[id].x}px, ${metadata[id].y}px)`,
+              `height: ${metadata[id].height}px`,
+            ].join(";")}
+            in:fly={{y: 20, duration: 1200}}
+            >
+            <ListItem
+              item={metadata[id]}
+              {searchString}
+            />
+          </div>
+        {/if}
+      {/each}
+      {#if !ids.filter(id => metadata[id].isShowing).length}
+        <p class="loading">
+          {isLoading ? "Loading fact checks..." : "No items found with those filters"}
+        </p>
+      {/if}
+
+    </div>
+
+    {#if listHeight < totalHeight}
+      <button on:click={() => pageIndex++} class="load-more">
+        Show more
+      </button>
+    {/if}
+
+  </div>
 </div>
 
 <style>
@@ -251,68 +274,41 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
     /* display: flex;
     flex-direction: column; */
     position: relative;
-    max-width: calc(100% - 12em);
-    max-width: 69em;
+    /* max-width: calc(100% - 12em); */
+    /* max-width: 69em; */
     width: 100%;
-    margin: 9em auto 3em;
-    padding: 3em 1em 10em 10em;
+    padding: 1em 0;
+    margin-bottom: 9em;
+    /* overflow: hidden; */
   }
-  .list {
-    position: relative;
-    flex: 1;
+  .loading {
+    text-align: center;
+    padding: 1em;
+    font-style: italic;
+  }
+  .top {
+    position: sticky;
+    top: -155px;
     display: flex;
     flex-direction: column;
-    flex-wrap: wrap;
-    display: grid;
-    /* grid-template-columns: repeat(3, 1fr);
-    grid-auto-rows: 70px;
-    grid-gap: 2em;
-    grid-column-gap: 4em; */
-    margin-top: 3em;
-  }
-  @media (min-width: 1200px) {
-    .list {
-      grid-auto-rows: 50px;
-        /* grid-template-columns: repeat(auto-fill, minmax(30%, 1fr)); */
-    }
-  }
-  .flag {
-    display: inline-block;
-    vertical-align: middle;
-    margin-right: 0.3em;
-    width: 2em;
-    height: 1.4em;
-  }
-  .flag :global(svg) {
-    width: 100%;
-    height: 100%;
-  }
-  .filters {
-    position: sticky;
-    top: 0;
-    /* flex: 0 0 15em; */
-    flex: 0 0 0;
-    width: 15em;
-    height: 0;
-    /* height: 17em; */
-    margin-left: -17em;
-    /* margin-top: 2em; */
-    margin-right: 2em;
-    margin-bottom: -15em;
-    padding-top: 6em;
-    text-align: right;
+    align-items: flex-end;
+    justify-content: flex-end;
+    margin-left: 210px;
+    background: #f4f5fa;
+    box-shadow: 0px 8px 10px -8px rgba(52, 73, 94, .2), 0 1px 1px rgba(52, 73, 94, 0.1);
+    z-index: 100;
   }
   .input {
     position: sticky;
     top: 0;
     width: 100%;
     /* margin-top: -6.6em; */
-    margin-bottom: 3.6em;
+    /* margin-bottom: 3.6em; */
     padding-top: 1em;
     padding-bottom: 1.2em;
-    background: #f4f5fa;
-    box-shadow: 0px 8px 10px -8px rgba(52, 73, 94, .2), 0 1px 1px rgba(52, 73, 94, 0.1);
-    z-index: 100;
+    /* background: #f4f5fa;
+    box-shadow: 0px 8px 10px -8px rgba(52, 73, 94, .2), 0 1px 1px rgba(52, 73, 94, 0.1); */
+    /* z-index: 100; */
   }
   .input input {
     width: calc(100% - 2.9em);
@@ -330,9 +326,37 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
     font-size: 0.9em;
   }
 
-  @keyframes popIn {
-      0% { transform: translateY(30px); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
+  .main-list {
+    display: flex;
+  }
+  .list {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    display: grid;
+    /* grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 70px;
+    grid-gap: 2em;
+    grid-column-gap: 4em; */
+    margin-top: 3em;
+  }
+  .filters {
+    position: sticky;
+    top: 6em;
+    flex: 0 0 180px;
+    /* flex: 0 0 0; */
+    width: 180px;
+    /* height: 0; */
+    height: 37.6em;
+    /* height: 17em; */
+    /* margin-left: -17em; */
+    /* margin-top: 2em; */
+    padding-right: 30px;
+    /* margin-bottom: -15em; */
+    /* padding-top: 6em; */
+    text-align: right;
   }
   .card {
     /* max-width: 25em; */
@@ -395,5 +419,17 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
   .card :global(.row) {
     margin-top: auto;
     margin-bottom: 1.2em;
+  }
+  .load-more {
+    position: absolute;
+    bottom: -6em;
+    left: 50%;
+    appearance: none;
+    font-size: 1.3em;
+    font-weight: 600;
+    cursor: pointer;
+    background: none;
+    border: none;
+    transform: translateX(-50%);
   }
 </style>

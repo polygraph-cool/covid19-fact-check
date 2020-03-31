@@ -67,7 +67,7 @@
 
       const bubbleCount = data.filter(d => categoryAccessor(d) == type).length
       const r = Math.max(
-        Math.sqrt(bubbleCount * Math.PI * Math.pow(bubbleSize * 1.1, 2) * (Math.sqrt(12) / Math.PI)) + 20,
+        Math.sqrt(bubbleCount * Math.PI * Math.pow(bubbleSize * 1.2, 2) * (Math.sqrt(12) / Math.PI)) + 20,
         20
       )
       const parsedColor = typeColors[type]
@@ -78,7 +78,7 @@
       return {
         type,
         r: r / width,
-        labelR: Math.max(r + 20, 30) / width,
+        labelR: Math.max(r + 13, 30) / width,
         x: (x + width / 2) / width,
         y: (y + height / 2) / width,
         color: parsedColor,
@@ -151,28 +151,6 @@
 
   $: iteration, updateGroups()
 
-  const getAngleFromArcLength = (radius=1, arcLength=10) => (
-    arcLength / radius
-  )
-  // grabbed from https://stackoverflow.com/questions/6061880/html5-canvas-circle-text
-  const fillTextCircle = (ctx, text, x, y, radius, startRotation=-0.6) => {
-  //  var numRadsPerLetter = 2*Math.PI / text.length;
-  //  var numRadsPerLetter = 2*Math.PI * 0.02
-   var numRadsPerLetter = getAngleFromArcLength(radius, 10)
-   ctx.save()
-   ctx.translate(x,y)
-   ctx.rotate(startRotation)
-
-   for(var i=0;i<text.length;i++){
-      ctx.save()
-      ctx.rotate(i*numRadsPerLetter)
-
-      ctx.fillText(text[i],0,-radius)
-      ctx.restore()
-   }
-   ctx.restore()
-}
-
   const drawCanvas = () => {
     if (!canvasElement) return
     console.log("drawCanvas Clusters")
@@ -181,13 +159,12 @@
 
     ctx.globalAlpha = 0.2
     groupBubbles.forEach(({x, y, r, color, type}, i) => {
-
       let gradient = ctx.createRadialGradient(
         x * width, y * width, 0, x * width, y * width, r * width,
       )
 
       gradient.addColorStop(0, color)
-      gradient.addColorStop(0.5, color)
+      gradient.addColorStop(0.7, color)
       gradient.addColorStop(1, `${color}00`)
       ctx.fillStyle = gradient
 
@@ -276,7 +253,7 @@
           ].join(" ")}
           fill="none"
           id={`path-${type}`}
-          transform={`rotate(-80)`}
+          transform={`rotate(-75)`}
         />
         <text transition:fade={{ duration: 1000 + 300 * i }}>
           <textPath

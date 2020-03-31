@@ -215,3 +215,4 @@ export const scaleCanvas = (canvas, context, width, height) => {
   // scale the drawing context so everything will work at the higher ratio
   context.scale(ratio, ratio);
 }
+

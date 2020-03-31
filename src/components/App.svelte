@@ -2,11 +2,13 @@
 	import { onMount } from 'svelte'
 	import Intro from "./Intro.svelte"
 	import Timeline from "./Timeline.svelte"
+	import Header from "./Header.svelte"
 	import Clusters from "./Clusters.svelte"
 	import MapClusters from "./MapClusters.svelte"
 	import Quadrant from "./Quadrant.svelte"
 	import Bubbles from "./Bubbles.svelte"
 	import List from "./List.svelte"
+	import Footer from "./Footer.svelte"
   import { flatten } from "./utils"
   import { categoryAccessor, countriesAccessor, organizationAccessor } from "./data-utils"
 
@@ -31,6 +33,8 @@
 	})
 </script>
 
+<Header />
+
 <main>
 	<!-- <select class="select" bind:value={selectedType}>
 		{#each types as type}
@@ -38,10 +42,11 @@
 		{/each}
 	</select> -->
 
-	<Intro {data} {organizations} />
+	<Intro {data} {organizations} {isLoading} />
 
+	{#if !isLoading}
 	<div class="section" id="categories">
-    <p>
+    <p style="margin-bottom: 3em">
       We've grouped each of these fact-checks into categories:
     </p>
 		<Clusters {data} {iteration} />
@@ -59,11 +64,11 @@
 	<div class="section" id="list">
 		<List {data} {countries} {organizations} />
 	</div>
-
-	{#if isLoading}
-		Loading fact checks...
 	{/if}
+
 </main>
+
+<Footer />
 
 <style>
 	/* @import url('https://rsms.me/inter/inter.css'); */

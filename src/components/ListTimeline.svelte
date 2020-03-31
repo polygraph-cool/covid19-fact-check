@@ -13,7 +13,8 @@
   export let color
   export let iteration
 
-  let height = 80
+  let containerHeight = 120
+  let height = containerHeight - 20
   let width = 1200
   let canvasElement
 
@@ -21,83 +22,95 @@
   const prettyMonth = timeFormat("%B")
   const today = new Date()
 
-  $: allDates = data.map(dateAccessor)
-  $: xExtent = [
-    min(allDates),
-    min([new Date(), max(allDates)]),
-  ]
-  $: days = timeDay.range(...xExtent)
+  let bins = []
+  let filteredBins = []
+  let xTicks = []
+  let xScale
+  let yScale
+  let itemWidth = 10
 
-  $: bins = bin()
-    .value(d => dateAccessor(d))
-    .thresholds(
-      days
-    )
-    (data)
+  const updateBins = () => {
+    const allDates = data.map(dateAccessor)
+    const xExtent = [
+      min(allDates),
+      min([new Date(), max(allDates)]),
+    ]
+    const days = timeDay.range(...xExtent)
 
-  $: filteredData = data.filter(filter)
-  $: filteredBins = bin()
-    .value(d => dateAccessor(d))
-    .thresholds(days)
-    (filteredData)
+    bins = bin()
+      .value(d => dateAccessor(d))
+      .thresholds(
+        days
+      )
+      (data)
 
-  $: xScale = scaleTime()
-    .domain(xExtent)
-    .range([0, width])
+    const filteredData = data.filter(filter)
+    filteredBins = bin()
+      .value(d => dateAccessor(d))
+      .thresholds(days)
+      (filteredData)
 
-  $: itemWidth = bins[1] ? Math.floor(
-    xScale(bins[1].x0) - xScale(bins[0].x0) - 1
-  ) : 10
+    xScale = scaleTime()
+      .domain(xExtent)
+      .range([0, width])
 
-  $: xTicks = timeMonth.range(
-    ...xExtent,
-  ).map(d => [
-    prettyMonth(d),
-    xScale(d),
-  ])
+    itemWidth = bins[1] ? Math.floor(
+      xScale(bins[1].x0) - xScale(bins[0].x0) - 1
+    ) : 10
 
-  $: yScale = scaleLinear()
-    .domain([0, max(bins.map(d => d.length))])
-    .range([height, 0])
+    xTicks = timeMonth.range(
+      ...xExtent,
+    ).map(d => [
+      prettyMonth(d),
+      xScale(d),
+    ])
 
-  // $: parsedBins = bins.map(bin => {
-  //   let runningY = height
-  //   const bars = [{
-  //     y: yScale(bin.length),
-  //     height: height - yScale(bin.length),
-  //   },
-  //   ...(!isFiltered ?
-  //     categories.map(category => {
-  //       const barHeight = height - yScale(bin.filter(d => categoryAccessor(d) == category).length)
-  //       runningY -= barHeight
-  //       return {
-  //         y: runningY,
-  //         height: barHeight,
-  //         color: categoryColors[category] || "#dbdbeb",
-  //         isCategory: true,
-  //       }
-  //     })
-  //   : [])
-  //   ]
+    yScale = scaleLinear()
+      .domain([0, max(bins.map(d => d.length))])
+      .range([height, 0])
+    }
 
-  //   return {
-  //     x: xScale(bin.x0),
-  //     bars,
-  //   }
-  // })
+  $: iteration, width, updateBins()
 
-  $: categoryBins = bins.map(bin => {
-    let runningY = 0
-    return categories.map(category => {
-      const numberInCategory = bin.filter(d => categoryAccessor(d) == category).length
-      runningY += numberInCategory
-      return {
-        start: runningY - numberInCategory,
-        end: runningY,
-        color: categoryColors[category],
-      }
-    })
+  $: parsedBins = bins.map(bin => {
+    let runningY = height
+    const bars = [{
+      y: yScale(bin.length),
+      height: height - yScale(bin.length),
+      color: "#dbdbeb",
+    },
+    ...(!isFiltered ?
+      categories.map(category => {
+        const barHeight = height - yScale(bin.filter(d => categoryAccessor(d) == category).length)
+        runningY -= barHeight
+        return {
+          y: runningY,
+          height: barHeight,
+          color: categoryColors[category] || "#dbdbeb",
+          isCategory: true,
+        }
+      })
+    : [])
+    ]
+
+    return {
+      x: xScale(bin.x0),
+      bars,
+    }
   })
+
+  // $: categoryBins = bins.map(bin => {
+  //   let runningY = 0
+  //   return categories.map(category => {
+  //     const numberInCategory = bin.filter(d => categoryAccessor(d) == category).length
+  //     runningY += numberInCategory
+  //     return {
+  //       start: runningY - numberInCategory,
+  //       end: runningY,
+  //       color: categoryColors[category],
+  //     }
+  //   })
+  // })
 
 
   const drawCanvas = () => {
@@ -117,24 +130,30 @@
       ctx.strokeStyle = color
       ctx.stroke()
     }
-    bins.forEach((bin, i) => {
-      const x = xScale(bin.x0)
-      const numberOfFilteredItems = (filteredBins[i] || []).length
-      bin.forEach((item, j) => {
-        // const category = categoryAccessor(item)
-        const itemColor = isFiltered
-          ? numberOfFilteredItems >= j ? (color || "#57a039") : "#dbdbeb"
-          : (categoryBins[i][
-            categoryBins[i].findIndex(({ start, end }) => start < j && end >= j)
-          ] || {}).color || "#dbdbeb"
-        // const y = height + -j * 2
-        const y = yScale(j)
-        drawItem({ x, y, color: itemColor })
-      })
-    })
 
+    parsedBins.forEach(({ x, bars }, i) => {
+      // const x = xScale(bin.x0)
+      // const numberOfFilteredItems = (filteredBins[i] || []).length
+      bars.forEach(({ y, height, color: barColor, isCategory }, j) => {
+
+        ctx.fillStyle = barColor
+        ctx.fillRect(x, y, itemWidth, height)
+
+        // const category = categoryAccessor(item)
+          // ? numberOfFilteredItems >= j ? (color || "#57a039") : "#dbdbeb"
+          // : (categoryBins[i][
+          //   categoryBins[i].findIndex(({ start, end }) => start < j && end >= j)
+          // ] || {}).color || "#dbdbeb"
+        // const y = height + -j * 2
+      })
+
+      ctx.fillStyle = color || "#656275"
+      const y = isFiltered ? yScale((filteredBins[i] || []).length) : height
+      ctx.fillRect(x, y, itemWidth, height - y)
+    })
   }
-  const debouncedDrawCanvas = debounce(drawCanvas, 500)
+
+  const debouncedDrawCanvas = debounce(drawCanvas, 300)
   // $: (() => {{
   //   const _ = width
   //   drawCanvas()
@@ -145,7 +164,7 @@
 
 </script>
 
-<div class="c" bind:clientWidth={width} bind:clientHeight={height}>
+<div class="c" bind:clientWidth={width} style={`height: ${containerHeight}px`}>
   <svg {height} {width}>
     <!-- {#each parsedBins as { x, bars }, i}
       {#each bars as { y, height, color, isCategory }}
@@ -188,7 +207,7 @@
     />
   </svg>
   <canvas
-   {height} {width}
+    style={`height: ${height}px; width: ${width}px`}
     bind:this={canvasElement}
   />
 </div>
@@ -196,9 +215,8 @@
 <style>
   .c {
     width: 100%;
-    height: 90px;
     margin-top: 2em;
-    margin-bottom: 20px;
+    overflow: hidden;
   }
   svg {
     position: absolute;

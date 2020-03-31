@@ -8,6 +8,7 @@
   import { smoothScrollTo } from "./utils"
 
   export let data
+  export let isLoading
   let focusedIndex = 0
   let isHovering = false
 
@@ -68,14 +69,14 @@
 
   <div class="text">
     <h1>
-      Covid 2019
+      COVID-19
       <b>Misinformation Explorer</b>
     </h1>
     <!-- <h2>
       Understand what false claims are spreading; what you may have unknowingly read.
     </h2> -->
     <p>
-      We compiled <InterpolatedNumber number={data.length || 1800} /> fact-checks from over <u>100 organizations</u> around the world to combat misinformation about Covid-19.
+      We compiled <InterpolatedNumber number={data.length || 1800} /> fact checks from over <u>100 organizations</u> around the world to combat misinformation about Covid-19.
     </p>
 
     <p>
@@ -107,6 +108,11 @@
   </div>
 
   <div class="focus" on:mouseover={() => isHovering = true} on:mouseleave={() => isHovering = false}>
+    {#if isLoading}
+      <div class="loading">
+        Loading fact checks...
+      </div>
+    {/if}
     <div class="focus-title">
       Newest fact checks
       <br />
@@ -297,6 +303,12 @@
     );
     z-index: 100;
     pointer-events: none;
+  }
+  .isLoading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
   .focus-title {
     position: absolute;

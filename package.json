@@ -51,8 +51,8 @@
     "svelte-select": "^3.4.0"
   },
   "scripts": {
-    "build": "rollup -c rollup.config-dev.js",
-    "build-static": "rollup -c rollup.config-dev.js && node copy.js && BASEPATH=/ sapper export && scp -r ./__sapper__/export ./",
+    "build": "NODE_ENV=production && rollup -c rollup.config.js",
+    "build-static": "node copy.js && BASEPATH=/ sapper export && scp -r ./__sapper__/export ./",
     "dev:rollup": "rollup -c rollup.config-dev.js -w",
     "dev": "npm run dev:rollup",
     "deploy": "node copy.js && BASEPATH=covid19-fact-check sapper export --basepath covid19-fact-check",

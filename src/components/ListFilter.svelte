@@ -54,7 +54,7 @@
     display: block;
     font-size: 1.2em;
     margin: 0 0;
-    padding: 0.6em 0.3em;
+    padding: 0.6em 0;
     background: none;
     border: none;
     text-align: right;
