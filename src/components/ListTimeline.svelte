@@ -5,7 +5,7 @@
   import { timeFormat, timeParse } from "d3-time-format"
   import { timeDay, timeMonth } from "d3-time"
   import { dateAccessor, parseDate, categories, categoryAccessor, categoryColors, countriesAccessor, ratings, ratingAccessor, sources, sourceAccessor, sourceColors, organizationAccessor, tags, tagsAccessor } from "./data-utils"
-  import { debounce, sortBy } from "./utils"
+  import { debounce, scaleCanvas } from "./utils"
 
   export let filter
   export let data
@@ -60,75 +60,94 @@
     .domain([0, max(bins.map(d => d.length))])
     .range([height, 0])
 
-  $: parsedBins = bins.map(bin => {
-    let runningY = height
-    const bars = [{
-      y: yScale(bin.length),
-      height: height - yScale(bin.length),
-    },
-    ...(!isFiltered ?
-      categories.map(category => {
-        const barHeight = height - yScale(bin.filter(d => categoryAccessor(d) == category).length)
-        runningY -= barHeight
-        return {
-          y: runningY,
-          height: barHeight,
-          color: categoryColors[category] || "#dbdbeb",
-          isCategory: true,
-        }
-      })
-    : [])
-    ]
+  // $: parsedBins = bins.map(bin => {
+  //   let runningY = height
+  //   const bars = [{
+  //     y: yScale(bin.length),
+  //     height: height - yScale(bin.length),
+  //   },
+  //   ...(!isFiltered ?
+  //     categories.map(category => {
+  //       const barHeight = height - yScale(bin.filter(d => categoryAccessor(d) == category).length)
+  //       runningY -= barHeight
+  //       return {
+  //         y: runningY,
+  //         height: barHeight,
+  //         color: categoryColors[category] || "#dbdbeb",
+  //         isCategory: true,
+  //       }
+  //     })
+  //   : [])
+  //   ]
 
-    return {
-      x: xScale(bin.x0),
-      bars,
-    }
+  //   return {
+  //     x: xScale(bin.x0),
+  //     bars,
+  //   }
+  // })
+
+  $: categoryBins = bins.map(bin => {
+    let runningY = 0
+    return categories.map(category => {
+      const numberInCategory = bin.filter(d => categoryAccessor(d) == category).length
+      runningY += numberInCategory
+      return {
+        start: runningY - numberInCategory,
+        end: runningY,
+        color: categoryColors[category],
+      }
+    })
   })
 
 
-  // const drawCanvas = () => {
-  //   console.log("drawCanvas")
-  //   if (!canvasElement) return
-  //   const ctx = canvasElement.getContext("2d")
-  //   canvasElement.width = width * pixelRatio
-  //   canvasElement.height = height * pixelRatio
+  const drawCanvas = () => {
+    if (!canvasElement) return
+    console.log("drawCanvas Timeline")
 
-  //   ctx.strokeWidth = 3
-  //   const drawItem = ({ x, y, color }) => {
-  //     ctx.beginPath()
-  //     ctx.moveTo(Math.round(x - itemWidth / 2), y)
-  //     ctx.lineTo(Math.round(x + itemWidth / 2), y)
-  //     ctx.strokeStyle = color
-  //     ctx.stroke()
-  //   }
-  //   bins.forEach((bin, i) => {
-  //     const x = xScale(bin.x0)
-  //     const numberOfFilteredItems = (filteredBins[i] || []).length
-  //     bin.forEach((item, j) => {
-  //       // const category = categoryAccessor(item)
-  //       const color = numberOfFilteredItems >= j ? "#45aeb1" : "#656275"
-  //       const y = height + -j * 2
-  //       drawItem({ x, y, color })
-  //     })
-  //   })
+    const ctx = canvasElement.getContext("2d")
+    scaleCanvas(canvasElement, ctx, width, height)
 
-  //   ctx.scale(pixelRatio, pixelRatio)
-  // }
-  // const debouncedDrawCanvas = debounce(drawCanvas, 500)
-  // // $: (() => {{
-  // //   const _ = width
-  // //   drawCanvas()
-  // // }})
-  // // onMount(drawCanvas)
-  // $: debouncedDrawCanvas()
-  // $: width, iteration, debouncedDrawCanvas()
+    // ctx.imageSmoothingEnabled = false
+    ctx.strokeWidth = 3
+    const drawItem = ({ x, y, color }) => {
+      ctx.beginPath()
+      ctx.moveTo(Math.round(x - itemWidth / 2), Math.round(y))
+      ctx.lineTo(Math.round(x + itemWidth / 2), Math.round(y))
+      ctx.strokeWidth = 1
+      ctx.strokeStyle = color
+      ctx.stroke()
+    }
+    bins.forEach((bin, i) => {
+      const x = xScale(bin.x0)
+      const numberOfFilteredItems = (filteredBins[i] || []).length
+      bin.forEach((item, j) => {
+        // const category = categoryAccessor(item)
+        const itemColor = isFiltered
+          ? numberOfFilteredItems >= j ? (color || "#57a039") : "#dbdbeb"
+          : (categoryBins[i][
+            categoryBins[i].findIndex(({ start, end }) => start < j && end >= j)
+          ] || {}).color || "#dbdbeb"
+        // const y = height + -j * 2
+        const y = yScale(j)
+        drawItem({ x, y, color: itemColor })
+      })
+    })
+
+  }
+  const debouncedDrawCanvas = debounce(drawCanvas, 500)
+  // $: (() => {{
+  //   const _ = width
+  //   drawCanvas()
+  // }})
+  // onMount(drawCanvas)
+  $: debouncedDrawCanvas()
+  $: width, iteration, debouncedDrawCanvas()
 
 </script>
 
 <div class="c" bind:clientWidth={width} bind:clientHeight={height}>
   <svg {height} {width}>
-    {#each parsedBins as { x, bars }, i}
+    <!-- {#each parsedBins as { x, bars }, i}
       {#each bars as { y, height, color, isCategory }}
         <rect
           class="full-area"
@@ -147,7 +166,7 @@
         width={itemWidth}
         style={`fill: ${color}`}
       />
-    {/each}
+    {/each} -->
     {#each xTicks as [label, offset]}
       <line
         class="tick-mark"
@@ -168,11 +187,10 @@
       y2={height}
     />
   </svg>
-  <!-- <canvas
-    {height}
-    {width}
+  <canvas
+    style={`width: ${width}px; height: ${height}px`}
     bind:this={canvasElement}
-  /> -->
+  />
 </div>
 
 <style>
@@ -183,6 +201,9 @@
     margin-bottom: 20px;
   }
   svg {
+    position: absolute;
+    top: 0;
+    left: 0;
     overflow: visible;
   }
   rect {

@@ -30,8 +30,9 @@ export const flatten = arr => (
 )
 
 const windowGlobal = typeof window !== "undefined" && window
+const documentGlobal = typeof document !== "undefined" && document
 // grabbed from https://stackoverflow.com/questions/17722497/scroll-smoothly-to-specific-element-on-page
-export const smoothScrollTo = (elementY, duration, element=windowGlobal) => {
+export const smoothScrollTo = (elementY, duration, element=documentGlobal && documentGlobal.scrollingElement, onEnd=() => {}) => {
   var startingY = element.scrollTop;
   var diff = elementY - startingY;
   var start;
@@ -49,6 +50,8 @@ export const smoothScrollTo = (elementY, duration, element=windowGlobal) => {
     // Proceed with animation as long as we wanted it to.
     if (time < duration) {
       requestAnimationFrame(step);
+    } else {
+      onEnd()
     }
   })
 }

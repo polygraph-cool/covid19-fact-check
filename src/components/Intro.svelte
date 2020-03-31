@@ -1,19 +1,23 @@
 <script>
   import { onMount } from "svelte"
   import { draw, fade } from "svelte/transition"
+
   import ListItem from "./ListItem.svelte"
+  import InterpolatedNumber from "./InterpolatedNumber.svelte"
   import { dateAccessor, titleAccessor, categories, categoryColors } from "./data-utils"
+  import { smoothScrollTo } from "./utils"
 
   export let data
   let focusedIndex = 0
   let isHovering = false
 
+  const windowGlobal = typeof window !== "undefined" && window
   onMount(() => {
     const interval = setInterval(() => {
       if (isHovering) return
       if (!data.length) return
       focusedIndex = Math.min(data.length - 1, focusedIndex + 1)
-    }, 4000)
+    }, 6000)
 
     return () => {
       clearInterval(interval)
@@ -31,6 +35,33 @@
       focusedIndex,
       focusedIndex + 5
     )
+
+	const scrollOptions = [
+    ["categories", "What categories of false claims are being spread?"],
+		["countries", "Where are the false claims coming from?"],
+		["all", "See all of the claims"],
+  ]
+
+  const scrollToSection = id => {
+    const sectionElement = document.getElementById(id)
+    if (!sectionElement) return
+
+    const onEnd = () => {
+      if (!windowGlobal) return
+      windowGlobal.location.href = `#${id}`
+    }
+
+    smoothScrollTo(
+      sectionElement.offsetTop - 100,
+      500,
+      undefined,
+      onEnd,
+    )
+    // sectionElement.scrollIntoView({
+    //   behavior: 'smooth',
+    // })
+  }
+
 </script>
 
 <div class="c">
@@ -44,16 +75,28 @@
       Understand what false claims are spreading; what you may have unknowingly read.
     </h2> -->
     <p>
-      We compiled fact-checks from over 100 organizations around the world to combat misinformation about Covid-19.
+      We compiled <InterpolatedNumber number={data.length || 1800} /> fact-checks from over <u>100 organizations</u> around the world to combat misinformation about Covid-19.
     </p>
 
     <p>
       Explore to find what false claims are being made about Covid-19 and where they're being spread.
     </p>
 
-    <p>
-      We've grouped each of these fact-checks into categories:
-    </p>
+    <div class="scroll-list">
+      {#each scrollOptions as [id, option], i}
+        <a href={`#${id}`} class="scroll-list-item" on:click|preventDefault={() => scrollToSection(id)}>
+          <div class="scroll-list-item-number">
+            { i + 1 }
+          </div>
+          <div class="scroll-list-item-name">
+            { id }
+          </div>
+          <div class="scroll-list-item-label">
+            { option }
+          </div>
+        </a>
+      {/each}
+    </div>
     <!-- <div class="orgs">
       {#each organizations as organization}
         <div class="org">
@@ -86,7 +129,7 @@
 
 </div>
 
-<div class="sticky">
+<!-- <div class="sticky">
   {#each categories as category, i}
     {
       !i                           ? ""       :
@@ -97,7 +140,7 @@
       { category }
     </span>
   {/each}
-</div>
+</div> -->
 
 <style>
   .c {
@@ -112,7 +155,7 @@
 		line-height: 1.6em; */
 		font-weight: 900;
 		/* max-width: 90%; */
-		margin-bottom: 0.3em;
+		margin-bottom: 0.6em;
 		/* font-weight: 900; */
 		font-size: 4em;
 		line-height: 1em;
@@ -155,10 +198,50 @@
     font-size: 1.2em;
     /* max-width: 100%; */
     /* width: 80em; */
-    margin: 0 auto;
+    margin: 0 3em;
     z-index: 100;
   }
-	.orgs {
+  .scroll-list {
+    padding: 0.3em 0 1em;
+  }
+  .scroll-list-item {
+    position: relative;
+    display: block;
+    margin: 0.2em 0 0.2em -1em;
+    padding: 0.6em 1em;
+    font-size: 1.2em;
+    line-height: 1.5em;
+    color: inherit;
+    text-decoration: none;
+    border-radius: 0.6em;
+  }
+  .scroll-list-item:hover {
+    background: white;
+  }
+  .scroll-list-item-number {
+    position: absolute;
+    /* top: 50%; */
+    /* margin-top: -0.2em; */
+    left: -0.3em;
+    color: #8b87c5;
+    font-size: 0.7em;
+    font-weight: 600;
+    /* opacity: 0; */
+    /* transform: translateY(-50%); */
+  }
+  .scroll-list-item-name {
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #8b87c5;
+    font-size: 0.7em;
+    font-weight: 600;
+  }
+  .scroll-list-item-label {
+    font-size: 1.1em;
+  }
+
+
+	/* .orgs {
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -171,12 +254,13 @@
 		font-size: 0.7em;
 		line-height: 1.1em;
 		opacity: 0.4;
-	}
+	} */
   .focus {
     position: relative;
     display: flex;
     flex: 1;
-    height: 30em;
+    height: 34em;
+    margin: 3em 0 0;
     overflow: hidden;
   }
   .focus:before {
@@ -245,50 +329,6 @@
   .list-item--4 {
     opacity: 0;
     transform: translate(0, 175%);
-  }
-  .grid {
-    position: relative;
-    flex: 1;
-    height: 16em;
-    /* position: absolute;
-    right: 0;
-    left: 0;
-    top: 0;
-    bottom: 0; */
-    /* overflow: hidden; */
-    /* display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-gap: 3em;
-    grid-column-gap: 1em; */
-  }
-  .grid-item {
-    font-size: 0.6em;
-    width: 27em;
-    position: absolute;
-  }
-  .grid-item:nth-child(1) {}
-  .grid-item:nth-child(2) {
-    transform: translate(18em, 6em);
-    z-index: 2;
-  }
-  .grid-item:nth-child(3) {
-    transform: translate(36em, 12em);
-    z-index: 3;
-  }
-  .grid-item:nth-child(4) {
-    top: 20em;
-    /* transform: translate(15em, 8em); */
-    z-index: 4;
-  }
-  .grid-item:nth-child(5) {
-    top: 20em;
-    transform: translate(18em, 6em);
-    z-index: 5;
-  }
-  .grid-item:nth-child(6) {
-    top: 20em;
-    transform: translate(36em, 12em);
-    z-index: 6;
   }
   .text {
     /* padding: 0 20em; */

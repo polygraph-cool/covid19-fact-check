@@ -29,34 +29,36 @@
 		countries = [...new Set(flatten(data.map(countriesAccessor)))]
 		iteration++
 	})
-
-	const types = [
-		"map", "clusters", "timeline"
-	]
-	// let selectedType = "clusters"
-	let selectedType = types[0]
-
 </script>
 
 <main>
-	<select class="select" bind:value={selectedType}>
+	<!-- <select class="select" bind:value={selectedType}>
 		{#each types as type}
 			<option>{ type }</option>
 		{/each}
-	</select>
+	</select> -->
 
 	<Intro {data} {organizations} />
 
-	{#if selectedType == "map"}
-		<MapClusters {data} {iteration} {isLoading} {organizations} {countries} />
-	{:else if selectedType == "clusters"}
-		<Clusters {data} {organizations} {countries} />
-	{:else if selectedType == "timeline"}
-		<Timeline {data} {organizations} {countries} />
-	{/if}
+	<div class="section" id="categories">
+    <p>
+      We've grouped each of these fact-checks into categories:
+    </p>
+		<Clusters {data} {iteration} />
+	</div>
 	<!-- <Quadrant /> -->
 	<!-- <Bubbles /> -->
-	<List {data} {organizations} />
+
+	<div class="section" id="countries">
+		<p style="max-width: 20em; margin-bottom: -1em">
+			We also looked at what country each fact check originated in.
+		</p>
+		<MapClusters {data} {iteration} {isLoading} {organizations} {countries} />
+	</div>
+
+	<div class="section" id="all">
+		<List {data} {countries} {organizations} />
+	</div>
 
 	{#if isLoading}
 		Loading fact checks...
@@ -80,6 +82,20 @@
 	}
 
 
+	.section {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+	p {
+		max-width: 60em;
+		/* text-align: left; */
+		text-align: center;
+		margin: 1em 0;
+		padding: 0 3rem;
+		font-size: 1.3em;
+		line-height: 1.6em;
+	}
 	/* .right:before {
 		content: "";
 		position: absolute;

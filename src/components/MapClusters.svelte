@@ -74,7 +74,7 @@
         const centroid = svgPathGenerator.centroid(shape)
         const scaledCentroid = [
           centroid[0] / width,
-          centroid[1] / height,
+          centroid[1] / width,
         ]
         countryCentroids[shape.properties["geounit"]] = scaledCentroid
 
@@ -136,7 +136,7 @@
         .stop()
 
       range(0, 300).forEach(i => simulation.tick())
-      console.log("simu", bubbles)
+      console.log("simu Map")
     }
     $: iteration, updateBubbles()
 
@@ -146,7 +146,7 @@
       delaunay = Delaunay.from(
         bubbles,
         d => d.x * width,
-        d => d.y * height,
+        d => d.y * width,
       )
     })()
 
@@ -160,12 +160,13 @@
     const mousePosition = [x, y]
     const pointIndex = delaunay.find(...mousePosition)
     if (pointIndex == -1) return null
+    const hoveredBubble = bubbles[pointIndex] || {}
     const distance = getDistanceBetweenPoints(
       mousePosition,
-      [bubbles[pointIndex].x * width, bubbles[pointIndex].y * height],
+      [hoveredBubble.x * width, hoveredBubble.y * width],
     )
     if (distance < 30) {
-      hoveredClaim = bubbles[pointIndex]
+      hoveredClaim = hoveredBubble
     } else {
       hoveredClaim = null
     }
@@ -220,6 +221,7 @@
   const drawBubbles = () => {
     if (!canvasElement) return
     if (!blankMap) return
+    console.log("drawCanvas Map")
     const ctx = canvasElement.getContext("2d")
     ctx.putImageData(blankMap, 0, 0)
 
@@ -233,7 +235,7 @@
       ))
 
       ctx.beginPath()
-      ctx.arc(x * width, y * height, transitionR, 0, 2 * Math.PI, false)
+      ctx.arc(x * width, y * width, transitionR, 0, 2 * Math.PI, false)
 
       ctx.fillStyle = color
       ctx.fill()
@@ -263,7 +265,7 @@
   bind:clientWidth={width}>
   <canvas style={`width: ${width}px; height: ${height}px`} bind:this={canvasElement} />
   {#if highlightedClaim}
-    <ItemTooltip item={highlightedClaim} {...highlightedClaim} x={highlightedClaim.x * width} y={highlightedClaim.y * height - bubbleSize} />
+    <ItemTooltip item={highlightedClaim} {...highlightedClaim} x={highlightedClaim.x * width} y={highlightedClaim.y * width - bubbleSize} />
     <!-- <ItemTooltip item={highlightedClaim} {...highlightedClaim} y={highlightedClaim.y - bubbleSize} /> -->
     <div
       class="hovered-claim-highlight"
@@ -271,7 +273,7 @@
         height: ${bubbleSize * 2.5}px;
         width: ${bubbleSize * 2.5}px;
         margin: ${-(bubbleSize * 1.75)}px;
-        transform: translate(${highlightedClaim.x * width}px, ${highlightedClaim.y * height}px);
+        transform: translate(${highlightedClaim.x * width}px, ${highlightedClaim.y * width}px);
       `}
     />
   {/if}

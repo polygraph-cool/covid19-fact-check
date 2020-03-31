@@ -4,23 +4,25 @@
   import { extent, max, range } from "d3-array"
   import { color } from "d3-color"
   import { forceSimulation, forceX, forceY, forceCollide, forceRadial } from "d3-force"
+  import { Delaunay } from "d3-delaunay"
   import { timeParse } from "d3-time-format"
   import { timeDay } from "d3-time"
-  import { getPositionFromAngle, debounce } from "./utils"
+  import { debounce, getDistanceBetweenPoints, getPositionFromAngle, scaleCanvas } from "./utils"
   import { dateAccessor, parseDate, categories, categoryAccessor, categoryColors, ratings, ratingAccessor, ratingPaths, titleAccessor } from "./data-utils"
 
   import ItemTooltip from "./ItemTooltip.svelte"
 
   export let data
+  export let iteration
   // console.log(data.length, data[0])
 
-  const windowGlobal = typeof window !== "undefined" && window
-  const width = (windowGlobal.innerWidth || 1200) * 0.9
-  const height = width * 0.5
+  let width = 1200
+  $: height = width * 0.5
 
   const types = categories
-  const bubbleR = Math.round(width / 300)
+  $: bubbleSize = Math.round(width / 300)
   let hoveredClaim = null
+  let canvasElement
 
   $: xScale = scaleLinear()
     .domain([-1, types.length])
@@ -41,17 +43,6 @@
     )))])
     .range([10, width * 0.4])
 
-  // $: topicsCountScale = scaleLinear()
-  //   .domain(extent(types.map(topic => (
-  //     data.filter(d => d.category == topic).length
-  //   ))))
-  //   .range([360 / types.length, 360 / types.length * 6])
-
-  // const darkerColors = colors.map(c => (
-  //   color(c)
-  //     .darker(0.6)
-  //     .formatHex()
-  // ))
   let typeColors = categoryColors
   let typeBorderColors = {}
 
@@ -66,126 +57,208 @@
     ratingOffsets[rating] = getPositionFromAngle(angle, 20)
   })
 
-  $: groups = types.map((type, i) => {
-    const angle = 360 / types.length * i
-    const [x, y] = getPositionFromAngle(angle, 100)
+  let delaunay
+  let groupBubbles = []
+  let bubbles = []
+  const updateGroups = () => {
+    const groups = types.map((type, i) => {
+      const angle = 360 / types.length * i
+      const [x, y] = getPositionFromAngle(angle, 100)
 
-    const bubbleCount = data.filter(d => categoryAccessor(d) == type).length
-    const r = Math.max(
-      Math.sqrt(bubbleCount * Math.PI * Math.pow(bubbleR * 1.09, 2) * (Math.sqrt(12) / Math.PI)) + 20,
-      20
-    )
-    const parsedColor = typeColors[type]
-    const darkerColor = color(parsedColor)
-      .darker(0.3)
-      .formatHex()
+      const bubbleCount = data.filter(d => categoryAccessor(d) == type).length
+      const r = Math.max(
+        Math.sqrt(bubbleCount * Math.PI * Math.pow(bubbleSize * 1.09, 2) * (Math.sqrt(12) / Math.PI)) + 20,
+        20
+      )
+      const parsedColor = typeColors[type]
+      const darkerColor = color(parsedColor)
+        .darker(0.3)
+        .formatHex()
 
-    return {
-      type,
-      r,
-      labelR: Math.max(r + 20, 30),
-      x: x + width / 2,
-      y: y + height / 2,
-      color: parsedColor,
-      darkerColor,
-    }
-  }).filter(d => d)
+      return {
+        type,
+        r: r / width,
+        labelR: Math.max(r + 20, 30) / width,
+        x: (x + width / 2) / width,
+        y: (y + height / 2) / width,
+        color: parsedColor,
+        darkerColor,
+      }
+    }).filter(d => d)
 
-  $: groupPositions = (() => {
-    let bubbles = [...groups]
-    let simulation = forceSimulation(bubbles)
+    groupBubbles = [...groups]
+    let simulation = forceSimulation(groupBubbles)
       // .force("x", forceX(d => d.x).strength(1))
       .force("x", forceX(d => d.x).strength(0.1))
-      .force("y", forceY(d => d.y).strength(1))
-      .force("collide", forceCollide(d => d.r + 16))
+      .force("y", forceY(d => d.y).strength(0.6))
+      .force("collide", forceCollide(d => d.r * 1.1).strength(0.6))
       // .force("r", forceRadial(d => d.distance).strength(5))
       .stop()
 
-    range(0, 350).forEach(i => simulation.tick())
+    range(0, 250).forEach(i => simulation.tick())
 
-    return bubbles
-  })()
+    const claims = data.map(d => {
+      const category = categoryAccessor(d)
+      if (!category) return
 
-  $: claims = data.map(d => {
-    const category = categoryAccessor(d)
-    if (!category) return
+      const groupPosition = groupBubbles.find(({ type }) => type == category) || {}
+      const {x, y, r} = groupPosition
+      // if (!d.category) return
+      const daysAgo = timeDay.range(dateAccessor(d), new Date()).length
+      const rating = ratingAccessor(d)
 
-    const groupPosition = groupPositions.find(({ type }) => type == category) || {}
-    const {x, y, r} = groupPosition
-    // if (!d.category) return
-    const daysAgo = timeDay.range(dateAccessor(d), new Date()).length
-    const rating = ratingAccessor(d)
+      const parsedColor = typeColors[category]
+      const darkerColor = color(parsedColor)
+        .darker(0.3)
+        .formatHex()
 
-    const parsedColor = typeColors[category]
-    const darkerColor = color(parsedColor)
-      .darker(0.3)
-      .formatHex()
+      return {
+        ...d,
+        r: bubbleSize / width,
+        x: x,
+        y: y,
+        // x: x + ((ratingOffsets[rating] || [])[0] || 0),
+        // y: y + ((ratingOffsets[rating] || [])[1] || 0),
+        category,
+        title: titleAccessor(d),
+        color: parsedColor,
+        opacity: ageScale(daysAgo),
+        // opacity: 1,
+        darkerColor,
+      }
+    }).filter(d => d)
 
-    return {
-      ...d,
-      r: bubbleR,
-      x: x + (rAgeScale(daysAgo) * r),
-      y: y - (rAgeScale(daysAgo) * r),
-      // x: x + ((ratingOffsets[rating] || [])[0] || 0),
-      // y: y + ((ratingOffsets[rating] || [])[1] || 0),
-      category,
-      title: titleAccessor(d),
-      color: parsedColor,
-      opacity: ageScale(daysAgo),
-      // opacity: 1,
-      darkerColor,
-    }
-  }).filter(d => d)
-
-  $: bubbles = (() => {
-    let bubbles = [...claims]
-    let simulation = forceSimulation(bubbles)
+    bubbles = [...claims]
+    let bubbleSimulation = forceSimulation(bubbles)
       // .force("x", forceX(d => d.x).strength(1))
       .force("x", forceX(d => d.x).strength(0.1))
       .force("y", forceY(d => d.y).strength(0.1))
-      .force("collide", forceCollide(d => d.r + bubbleR * 0.7))
+      .force("collide", forceCollide(d => d.r * 1.7))
       // .force("r", forceRadial(d => d.distance).strength(5))
       .stop()
 
-    range(0, 500).forEach(i => simulation.tick())
+    range(0, 500).forEach(i => bubbleSimulation.tick())
+    console.log("simu Clusters")
+  }
 
-    return bubbles
+  $: data, width, (() => {
+    delaunay = Delaunay.from(
+      bubbles,
+      d => d.x * width,
+      d => d.y * width,
+    )
   })()
 
-  const onMouseOver = point => {
-    hoveredClaim = point
+  $: iteration, updateGroups()
+
+  const getAngleFromArcLength = (radius=1, arcLength=10) => (
+    arcLength / radius
+  )
+  // grabbed from https://stackoverflow.com/questions/6061880/html5-canvas-circle-text
+  const fillTextCircle = (ctx, text, x, y, radius, startRotation=-0.6) => {
+  //  var numRadsPerLetter = 2*Math.PI / text.length;
+  //  var numRadsPerLetter = 2*Math.PI * 0.02
+   var numRadsPerLetter = getAngleFromArcLength(radius, 10)
+   ctx.save()
+   ctx.translate(x,y)
+   ctx.rotate(startRotation)
+
+   for(var i=0;i<text.length;i++){
+      ctx.save()
+      ctx.rotate(i*numRadsPerLetter)
+
+      ctx.fillText(text[i],0,-radius)
+      ctx.restore()
+   }
+   ctx.restore()
+}
+
+  const drawCanvas = () => {
+    if (!canvasElement) return
+    console.log("drawCanvas Clusters")
+    const ctx = canvasElement.getContext("2d")
+    scaleCanvas(canvasElement, ctx, width, height)
+
+    ctx.globalAlpha = 0.1
+
+    groupBubbles.forEach(({x, y, r, color, type}, i) => {
+      ctx.beginPath()
+      ctx.arc(x * width, y * width, r * width, 0, 2 * Math.PI, false)
+
+      ctx.fillStyle = color
+      ctx.fill()
+    })
+
+    // ctx.globalAlpha = 1
+    // groupBubbles.forEach(({x, y, r, darkerColor, type}, i) => {
+    //   ctx.fillStyle = darkerColor
+    //   fillTextCircle(ctx, type.toUpperCase(), x * width, y * width, r * width * 1.1)
+    // })
+
+    ctx.globalAlpha = 1
+
+    bubbles.forEach(({x, y, color}, i) => {
+      ctx.beginPath()
+      ctx.arc(x * width, y * width, bubbleSize, 0, 2 * Math.PI, false)
+
+      ctx.fillStyle = color
+      ctx.fill()
+    })
   }
-  const debouncedOnMouseOver = debounce(onMouseOver, 50)
+
+  const debouncedDrawCanvas = debounce(drawCanvas, 500)
+  // $: (() => {{
+  //   const _ = width
+  //   drawCanvas()
+  // }})
+  // onMount(drawCanvas)
+  $: debouncedDrawCanvas()
+  $: width, bubbles, debouncedDrawCanvas()
+
+  // const onMouseOver = point => {
+  //   hoveredClaim = point
+  // }
+
+  $: onMouseMove = e => {
+    const x = e.clientX
+      - canvasElement.getBoundingClientRect().left
+    const y = e.clientY
+      - canvasElement.getBoundingClientRect().top
+
+    const mousePosition = [x, y]
+    const pointIndex = delaunay.find(...mousePosition)
+    if (pointIndex == -1) return null
+    const hoveredBubble = bubbles[pointIndex] || {}
+    const distance = getDistanceBetweenPoints(
+      mousePosition,
+      [hoveredBubble.x * width, hoveredBubble.y * width],
+    )
+    if (distance < 100) {
+      hoveredClaim = hoveredBubble
+    } else {
+      hoveredClaim = null
+    }
+  }
+  // const debouncedOnMouseOver = debounce(onMouseOver, 50)
 </script>
 
-<div class="c">
+<div class="c" bind:clientWidth={width} on:mousemove={onMouseMove}>
+  <canvas style={`width: ${width}px; height: ${height}px`} bind:this={canvasElement} />
+
   <svg {width} {height}>
-    <defs>
-      <path
-        id="bubble"
-        d="M0.834766 0.0570311C0.653906 0.114843 0.487891 0.215234 0.351563 0.351561C0.126563 0.576561 0 0.881638 0 1.2V7.59998C0 7.7617 0.0972656 7.90779 0.246875 7.96951C0.353125 8.01365 0.471094 8.00896 0.571094 7.96131C0.611719 7.94216 0.649609 7.91599 0.682813 7.88279L2.16563 6.39998H6.8C7.11836 6.39998 7.42344 6.27342 7.64844 6.04842C7.87344 5.82342 8 5.51834 8 5.19998V1.2C8 0.881638 7.87344 0.576561 7.64844 0.351561C7.42344 0.126562 7.11836 0 6.8 0H1.2C1.075 0 0.951953 0.0195312 0.834766 0.0570311Z"
-        transform={`translate(-4, -4) scale(${bubbleR * (1/4)})`}
-      />
-      {#each ratings as rating}
-        <g id={`rating-${rating}`}>
-          {@html ratingPaths[rating]}
-        </g>
-      {/each}
-    </defs>
-    {#each groups as { type, x, y, r, labelR, color, darkerColor }, i}
-      <g fill={color} transform={`translate(${x}, ${y})`}
-          on:mouseleave={() => onMouseOver(null)}>
-        <circle
+    {#each groupBubbles as { type, x, y, r, labelR, color, darkerColor }, i}
+      <g fill={color} transform={`translate(${x * width}, ${y * width})`}>
+        <!-- <circle
           r={r}
           fill-opacity="0.1"
-        />
+        /> -->
 
         <path
           class="hidden"
           d={[
-            ["M", 0, -(labelR - 16)].join(" "),
-            ["A", (labelR - 16), (labelR - 16), 0, 0, 1, 0, (labelR - 16)].join(" "),
-            ["A", (labelR - 16), (labelR - 16), 0, 0, 1, 0, -(labelR - 16)].join(" "),
+            ["M", 0, -((labelR * width) - 16)].join(" "),
+            ["A", ((labelR * width) - 16), ((labelR * width) - 16), 0, 0, 1, 0, ((labelR * width) - 16)].join(" "),
+            ["A", ((labelR * width) - 16), ((labelR * width) - 16), 0, 0, 1, 0, -((labelR * width) - 16)].join(" "),
           ].join(" ")}
           fill="none"
           id={`path-${type}`}
@@ -203,72 +276,42 @@
         </text>
       </g>
     {/each}
-
-    {#each claims as claim}
-      <g
-        class="claim"
-        transform={`translate(${claim.x}, ${claim.y})`}
-        fill={claim.color}
-        on:mouseenter={() => onMouseOver(claim)}>
-        <circle
-          r={bubbleR + 5}
-          class="hidden"
-          class:active={hoveredClaim == claim}
-        />
-
-        <use
-          href="#bubble"
-          transform={`rotate(${Math.random() * 30 - 35}) scale(0.86)`}
-          opacity={claim.opacity}
-        />
-        <!-- <use
-          href={`#rating-${ratingAccessor(claim)}`}
-          transform={`translate(${-bubbleR}, ${-bubbleR}) rotate(${Math.random() * 30 - 35}) scale(0.86)`}
-        /> -->
-
-      <!-- <circle
-        cx={x}
-        cy={y}
-        r={r}
-        fill={color}
-        stroke={darkerColor}
-        {opacity}
-      >
-        <title>
-          { mainSource }: { title }
-        </title>
-      </circle> -->
-      </g>
-    {/each}
-
-    <!-- <text transform={`translate(${ width / 2 }, 20)`} style={"font-weight: 600"}>
-      Medical Consensus
-    </text>
-      <text transform={`translate(${xPositions[c]}, ${60})`}>
-        { c }
-      </text>
-    {/each} -->
-
-    <!-- <text transform={`translate(${ 0 }, ${height / 2}) rotate(-90)`} style={"font-weight: 600"}>
-      Medical Consensus
-    </text>
-      <text transform={`translate(${60}, ${yPositions[c]})`}>
-        { c }
-      </text>
-    {/each} -->
   </svg>
 
   {#if hoveredClaim}
-    <ItemTooltip item={hoveredClaim} {...hoveredClaim} />
+    <ItemTooltip item={hoveredClaim} {...hoveredClaim}} x={hoveredClaim.x * width} y={hoveredClaim.y * width - bubbleSize} />
+    <div
+      class="hovered-claim-highlight"
+      style={`
+        height: ${bubbleSize * 2.5}px;
+        width: ${bubbleSize * 2.5}px;
+        margin: ${-(bubbleSize * 1.75)}px;
+        transform: translate(${hoveredClaim.x * width}px, ${hoveredClaim.y * width}px);
+      `}
+    />
   {/if}
 </div>
 
 <style>
   .c {
     position: relative;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .hovered-claim-highlight {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 100%;
+    border: 1.5px solid;
   }
   svg {
-    margin: 1em 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* margin: 1em 0; */
     overflow: visible;
     /* shape-rendering: crispEdges; */
   }

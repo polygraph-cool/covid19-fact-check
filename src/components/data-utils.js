@@ -5,7 +5,7 @@ import { flatten } from "./utils"
 // export const data = rawData
 
 export const parseDate = timeParse("%-m/%-d/%Y")
-export const dateAccessor = d => parseDate(d[""])
+export const dateAccessor = d => parseDate(d["When did you see the claim?"])
 
 export const titleAccessor = (d={}, doStripFormatting=true) => (
   doStripFormatting
@@ -67,7 +67,9 @@ export const sourceColors = {
 export const sources = Object.keys(sourceKeywords)
 
 export const categories = ["Authorities", "Causes", "Conspiracy theory", "Cures", "Spread", "Symptoms", "Other"]
-const colors = ["#58B19F", "#778beb", "#e77f67", "#FDA7DF", "#cf6a87", "#A3CB38", "#786fa6", "#4b7bec", "#778ca3", "#0fb9b1"]
+// const colors = ["#58B19F", "#778beb", "#e77f67", "#FDA7DF", "#cf6a87", "#A3CB38", "#786fa6", "#4b7bec", "#778ca3", "#0fb9b1"]
+// const colors = ["#1AC29A", "#778beb", "#E58F29", "#FDA7DF", "#cf6a87", "#AED027", "#786fa6", "#778ca3"]
+const colors = ["#20C29B", "#358DDE", "#E58F29", "#E1538F", "#CD424A", "#91BF0D", "#6F57B0", "#778ca3"]
 let categoryColors = {}
 categories.forEach((category, i) => {
   categoryColors[category] = colors[i % (colors.length - 1)]

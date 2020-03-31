@@ -217,7 +217,7 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
     </div>
   </div>
   <div class="list">
-    {#each ids as id}
+    {#each ids.slice(0, 500) as id}
       {#if metadata[id]}
         <div
           class={`card card--column-${metadata[id].columnId} card-${
