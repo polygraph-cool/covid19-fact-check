@@ -1,0 +1,9 @@
+html,
+body {
+  background: #f4f5fa;
+}
+body,
+button {
+  font-family: 'Product Sans', sans-serif;
+  /* font-family: 'Inter', sans-serif; */
+}

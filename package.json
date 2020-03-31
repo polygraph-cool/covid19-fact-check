@@ -52,10 +52,9 @@
   },
   "scripts": {
     "build": "rollup -c rollup.config-dev.js",
-    "build-static": "BASEPATH=/ && rollup -c rollup.config-dev.js",
+    "build-static": "rollup -c rollup.config-dev.js && node copy.js && BASEPATH=/ sapper export && scp -r ./__sapper__/export ./",
     "dev:rollup": "rollup -c rollup.config-dev.js -w",
     "dev": "npm run dev:rollup",
-    "deploy-static": "node copy.js && BASEPATH=/ sapper export --basepath export",
     "deploy": "node copy.js && BASEPATH=covid19-fact-check sapper export --basepath covid19-fact-check",
     "pudding": "BASEPATH=2020/01/name sapper export --basepath 2020/01/name",
     "start": "sirv public"
