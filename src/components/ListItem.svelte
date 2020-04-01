@@ -174,6 +174,8 @@
     -webkit-box-orient: vertical;
     text-overflow: ellipsis;
 
+    --lh: 1.4em;
+    max-height: calc(var(--lh) * var(--max-lines));
   }
   @supports not (-webkit-line-clamp: 4) {
     .title {
