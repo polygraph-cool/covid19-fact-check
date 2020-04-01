@@ -114,7 +114,6 @@
 			</div>
 		</div>
 
-		{#if !isLoading}
 			<div class="section" id="categories">
 				<p style="margin-bottom: 3em; margin-top: 3em;">
 					We've grouped each of these fact-checks into categories:
@@ -134,7 +133,6 @@
 			<div class="section" id="list">
 				<List {data} {isLoading} {isFiltered} {filterIteration} {filterFunction} {filterColor} />
 			</div>
-		{/if}
 	</div>
 
 </main>
@@ -161,6 +159,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		min-height: 6em;
 		margin: 3em 0 2em;
 	}
 	p {

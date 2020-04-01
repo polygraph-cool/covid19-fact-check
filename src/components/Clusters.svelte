@@ -139,18 +139,24 @@
       // .force("x", forceX(d => d.x).strength(1))
       .force("x", forceX(d => d.x).strength(0.1))
       .force("y", forceY(d => d.y).strength(0.1))
-      .force("collide", forceCollide(d => d.r * 1.9))
+      .force("collide", forceCollide(d => d.r * 1.8))
       // .force("r", forceRadial(d => d.distance).strength(5))
       .stop()
 
     range(0, 500).forEach(i => bubbleSimulation.tick())
   }
 
-  $: delaunay = Delaunay.from(
-    bubbles,
-    d => d.x * width,
-    d => d.y * width,
-  )
+  let delaunay = null
+  const updateDelaunay = () => {
+    setTimeout(() => {
+    delaunay = Delaunay.from(
+      bubbles,
+      d => d.x * width,
+      d => d.y * width,
+    )
+    })
+  }
+  $: iteration, bubbles, width, updateDelaunay()
 
   $: iteration, isVertical, updateGroups()
 
@@ -188,18 +194,24 @@
       const { x, y, color, darkerColor, opacity } = d
       const isBubbleFilteredOut = isFiltered && !filterFunction(d)
       const isBubbleFilteredIn = isFiltered && !isBubbleFilteredOut
-      // ctx.globalAlpha = opacity
+      if (!isFiltered) ctx.globalAlpha = opacity
       ctx.beginPath()
-      ctx.arc(x * width, y * width, bubbleSize + 1.3, 0, 2 * Math.PI, false)
-      ctx.fillStyle = darkerColor
-      ctx.fill()
-
-      ctx.beginPath()
+      // if (Path2D) {
+      //   ctx.moveTo(x * width, y * width)
+      //   const path = new Path2D("M0.834766 0.0570311C0.653906 0.114843 0.487891 0.215234 0.351563 0.351561C0.126563 0.576561 0 0.881638 0 1.2V7.59998C0 7.7617 0.0972656 7.90779 0.246875 7.96951C0.353125 8.01365 0.471094 8.00896 0.571094 7.96131C0.611719 7.94216 0.649609 7.91599 0.682813 7.88279L2.16563 6.39998H6.8C7.11836 6.39998 7.42344 6.27342 7.64844 6.04842C7.87344 5.82342 8 5.51834 8 5.19998V1.2C8 0.881638 7.87344 0.576561 7.64844 0.351561C7.42344 0.126562 7.11836 0 6.8 0H1.2C1.075 0 0.951953 0.0195312 0.834766 0.0570311Z")
+      // } else {
+      //   // ctx.arc(x * width, y * width, r * width, 0, 2 * Math.PI, false)
+      // }
       ctx.arc(x * width, y * width, bubbleSize, 0, 2 * Math.PI, false)
       ctx.fillStyle = isBubbleFilteredOut ? "#fff" :
         isBubbleFilteredIn && filterColor ? filterColor || color :
                                             color
       ctx.fill()
+
+      ctx.beginPath()
+      ctx.arc(x * width, y * width, bubbleSize, 0, 2 * Math.PI, false)
+      ctx.strokeStyle = darkerColor
+      ctx.stroke()
     })
   }
 
@@ -211,6 +223,8 @@
   // onMount(drawCanvas)
   $: debouncedDrawCanvas()
   $: width, bubbles, filterIteration, debouncedDrawCanvas()
+
+  $: topLeftBubble = delaunay && bubbles[delaunay.find(width * 0.05, 0)]
 
   // const onMouseOver = point => {
   //   hoveredClaim = point
@@ -231,14 +245,18 @@
       mousePosition,
       [hoveredBubble.x * width, hoveredBubble.y * width],
     )
-    if (distance < 100) {
+    if (distance < 1000) {
       hoveredClaim = hoveredBubble
     } else {
       hoveredClaim = null
     }
   }
+
+  const clearTooltip = () => hoveredClaim = null
   // const debouncedOnMouseOver = debounce(onMouseOver, 50)
 </script>
+
+<svelte:window on:scroll={clearTooltip} />
 
 <div class="c" bind:clientWidth={width} on:mousemove={onMouseMove}>
   <canvas style={`width: ${width}px; height: ${height}px`} bind:this={canvasElement} />
@@ -274,6 +292,17 @@
         </text>
       </g>
     {/each}
+
+    {#if topLeftBubble}
+      <path
+        class="annotation-line"
+        d={[
+          "M", topLeftBubble.x * width - bubbleSize, topLeftBubble.y * width,
+          "Q", topLeftBubble.x * width - 50, topLeftBubble.y * width,
+          topLeftBubble.x * width - 50, topLeftBubble.y * width - 50
+        ].join(" ")}
+      />
+    {/if}
   </svg>
 
   {#if hoveredClaim}
@@ -290,6 +319,14 @@
         transform: translate(${hoveredClaim.x * width - bubbleSize - 2}px, ${hoveredClaim.y * width - bubbleSize - 2}px);
       `}
     />
+  {/if}
+
+  {#if topLeftBubble}
+    <div class="annotation" style={`transform: translate(${Math.max(100, topLeftBubble.x * width - 50)}px, ${topLeftBubble.y * width - 50}px)`}>
+      <div class="annotation-contents">
+        Each fact check is represented as a circle, which fades with age
+      </div>
+    </div>
   {/if}
 
   <DataSource />
@@ -318,12 +355,6 @@
     overflow: visible;
     /* shape-rendering: crispEdges; */
   }
-  .boundary {
-    fill: none;
-    stroke: rgb(173, 178, 190);
-    stroke-width: 0.5;
-    stroke-dasharray: 9 5;
-  }
   .boundary-label {
     text-anchor: middle;
     text-transform: uppercase;
@@ -340,26 +371,25 @@
     font-weight: 600;
     user-select: none;
   }
-  .topic-label {
-    text-anchor: middle;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-size: 0.8em;
-    font-weight: 700;
-  }
   .hidden {
     fill-opacity: 0;
   }
 
-  .active {
-    fill-opacity: 0.6;
-    fill-opacity: 1;
-    fill: white;
-    stroke: black;
-    stroke-width: 1;
+  .annotation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 5;
   }
-
-  use {
-    mix-blend-mode: multiply;
+  .annotation-contents {
+    max-width: 11em;
+    text-align: right;
+    font-size: 0.8em;
+    transform: translate(-100%, -100%);
+  }
+  .annotation-line {
+    fill: none;
+    stroke: grey;
+    stroke-width: 1;
   }
 </style>

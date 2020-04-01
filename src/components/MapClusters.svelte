@@ -299,8 +299,13 @@
     debouncedDrawBubbles()
   })()
 
+  const clearTooltip = () => hoveredClaim = null
+
   $: highlightedClaim = hoveredClaim || (!hasHovered && bubbles[highlightIndex])
 </script>
+
+
+<svelte:window on:scroll={clearTooltip} />
 
 <!-- <svelte:window bind:innerWidth={windowWidth} /> -->
 

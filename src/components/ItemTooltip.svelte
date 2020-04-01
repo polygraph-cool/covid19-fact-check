@@ -41,6 +41,7 @@
     width: 0;
     transition: all 0.1s ease-out;
     pointer-events: none;
+    z-index: 50;
   }
   .contents {
     /* background: #fff; */
