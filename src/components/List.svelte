@@ -18,6 +18,8 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
   export let filterColor
   export let iteration
 
+  const documentGlobal = typeof document !== "undefined" && document
+
   let windowWidth = 1200
   let selectedCategory = null
   let selectedType = null
@@ -106,11 +108,16 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
 
   const scrollToTop = () => {
     if (!containerElement) return
+    const elementY = containerElement.offsetTop - 100
+
+    const currentScrollY = documentGlobal && documentGlobal.scrollingElement && documentGlobal.scrollingElement.scrollTop || 0
+    // don't scroll down page from vizes above
+    if (currentScrollY <= elementY) return
+
     containerElement.scrollIntoView({
       behavior: 'smooth',
       block: 'start' ,
     })
-    // const elementY = containerElement.offsetTop - 100
     // smoothScrollTo(elementY, 300)
   }
 
@@ -133,8 +140,8 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
 
 <svelte:window bind:innerWidth={windowWidth} />
 
-<div class="c" style={`width: ${listWidth}px`}>
-  <div class="top" bind:this={containerElement}>
+<div class="c" style={`width: ${listWidth}px`} bind:this={containerElement}>
+  <div class="top">
     <ListTimeline
       {filterFunction}
       iteration={filterIteration}

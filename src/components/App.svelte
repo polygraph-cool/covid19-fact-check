@@ -127,7 +127,7 @@
 			<!-- <Bubbles /> -->
 
 			<div class="section" id="countries">
-				<p style="max-width: 20em; margin-bottom: -3em">
+				<p style="max-width: 20em; margin-bottom: -5vw">
 					We also looked at what country each fact check originated in.
 				</p>
 				<MapClusters {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} {isLoading} {organizations} {countries} />
@@ -163,6 +163,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		margin: 3em 0 2em;
 	}
 	p {
 		max-width: 60em;

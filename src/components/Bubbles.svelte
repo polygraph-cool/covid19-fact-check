@@ -8,7 +8,6 @@
   import { dateAccessor, parseDate, sources, sourceAccessor, sourceColors } from "./data-utils"
 
   export let data = []
-  console.log(data.length, data[0])
 
   const width = 700
   const height = 700
@@ -44,7 +43,6 @@
     angleCounter += (360 / sources.length)
     typeAngles[type] = angleCounter
   })
-  $:console.log(typeAngles)
 
   const colors = ["#0fb9b1", "#778beb", "#e77f67", "#FDA7DF", "#cf6a87", "#58B19F", "#A3CB38", "#786fa6", "#4b7bec", "#778ca3"]
   const darkerColors = colors.map(c => (
@@ -91,7 +89,6 @@
       .stop()
 
     range(0, 200).forEach(i => simulation.tick())
-console.log(bubbles)
     return bubbles
   })()
 

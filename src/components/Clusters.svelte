@@ -11,6 +11,7 @@
   import { dateAccessor, parseDate, categories, categoryAccessor, categoryColors, ratings, ratingAccessor, ratingPaths, titleAccessor } from "./data-utils"
 
   import ItemTooltip from "./ItemTooltip.svelte"
+  import DataSource from "./DataSource.svelte"
 
   export let data
   export let isFiltered
@@ -18,10 +19,9 @@
   export let filterFunction
   export let filterColor
   export let iteration
-  // console.log(data.length, data[0])
 
   let width = 1200
-  $: height = width * 0.45
+  $: height = width * 0.43
 
   const types = categories
   $: bubbleSize = Math.round(width / 300)
@@ -141,7 +141,6 @@
       .stop()
 
     range(0, 500).forEach(i => bubbleSimulation.tick())
-    console.log("simu Clusters")
   }
 
   $: delaunay = Delaunay.from(
@@ -154,7 +153,6 @@
 
   const drawCanvas = () => {
     if (!canvasElement) return
-    console.log("drawCanvas Clusters")
     const ctx = canvasElement.getContext("2d")
     scaleCanvas(canvasElement, ctx, width, height)
 
@@ -291,6 +289,8 @@
       `}
     />
   {/if}
+
+  <DataSource />
 </div>
 
 <style>

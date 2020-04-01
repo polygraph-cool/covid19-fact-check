@@ -12,11 +12,13 @@
   import { timeDay } from "d3-time"
   import { easeCubicOut } from "d3-ease"
   import { geoEqualEarth, geoOrthographic, geoPath, geoCentroid, geoGraticule10 } from "d3-geo"
+
   // import countryShapes from "./countries.json"
   import { debounce, getDistanceBetweenPoints, getPositionFromAngle, scaleCanvas } from "./utils"
   import { dateAccessor, parseDate, countryAccessor, categories, categoryColors, categoryAccessor } from "./data-utils"
-  import ItemTooltip from "./ItemTooltip.svelte"
   import { countryShapes, countryCentroids } from "./countryData"
+  import ItemTooltip from "./ItemTooltip.svelte"
+  import DataSource from "./DataSource.svelte"
 
   export let data = []
   export let isFiltered
@@ -86,8 +88,8 @@
     let claims = []
     Object.keys(claimsByCountry).forEach(country => {
       const countryCentroid = countryCentroids[country]
-      if (!countryCentroid) console.log(country, countryCentroid)
-      if (!Number.isFinite((countryCentroid || [])[0])) console.log(country, countryCentroid)
+      // if (!countryCentroid) console.log(country, countryCentroid)
+      // if (!Number.isFinite((countryCentroid || [])[0])) console.log(country, countryCentroid)
       if (!countryCentroid) return
 
       const points = claimsByCountry[country].sort((a,b) => (
@@ -127,7 +129,7 @@
       .on("tick", drawBubbles)
 
     // range(0, 220).forEach(i => simulation.tick())
-    console.log("simu Map")
+    // console.log("simu Map")
   }
   $: iteration, updateBubbles()
 
@@ -171,7 +173,7 @@
   let blankMap
 
   const drawCanvas = () => {
-    console.log("drawCanvas Map")
+    // console.log("drawCanvas Map")
     if (!canvasElement) return
     const ctx = canvasElement.getContext("2d")
     scaleCanvas(canvasElement, ctx, width, height)
@@ -212,11 +214,10 @@
   const drawBubbles = () => {
     if (!canvasElement) return
     if (!blankMap) return
-    console.log("drawBubbles Map")
+    // console.log("drawBubbles Map")
     const ctx = canvasElement.getContext("2d")
     ctx.putImageData(blankMap, 0, 0)
 
-// console.log("bubbles", bubbles)
     bubbles.forEach((d, i) => {
       const { x, y, color } = d
       const isBubbleFilteredOut = isFiltered && !filterFunction(d)
@@ -274,6 +275,8 @@
       `}
     />
   {/if}
+
+  <DataSource />
 </div>
 
 <style>
