@@ -23,7 +23,7 @@
   let width = 1200
   $: isVertical = width < 800
   $: height = width * (
-    isVertical ? 1.25 : 0.45
+    isVertical ? 1.25 : 0.5
   )
 
   const types = categories
