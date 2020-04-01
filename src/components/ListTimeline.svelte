@@ -81,7 +81,6 @@
         d,
         yScale(d),
       ])
-
   }
 
   $: iteration, width, updateBins()

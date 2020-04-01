@@ -136,7 +136,7 @@
 			</div>
 
 			<div class="section" id="list">
-				<List {data} {isLoading} {isFiltered} {filterIteration} {filterFunction} {filterColor} />
+				<List {data} {isLoading} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
 			</div>
 	</div>
 

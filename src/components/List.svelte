@@ -12,6 +12,7 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
 
   export let isLoading
   export let data = []
+  export let iteration
   export let isFiltered
   export let filterIteration
   export let filterFunction
@@ -133,10 +134,10 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
 <div class="c" style={`width: ${listWidth}px`} bind:this={containerElement}>
   <div class="top">
     <ListTimeline
-      {filterFunction}
-      iteration={filterIteration}
-      color={filterColor}
       {data}
+      {filterFunction}
+      iteration={filterIteration + iteration}
+      color={filterColor}
       {isFiltered}
       overrideWidth={listWidth}
     />
