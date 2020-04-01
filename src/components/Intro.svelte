@@ -9,7 +9,9 @@
 
   export let data
   export let isLoading
-  let focusedIndex = 0
+  export let footerElement
+
+  let focusedIndex = 1
   let isHovering = false
 
   const windowGlobal = typeof window !== "undefined" && window
@@ -63,6 +65,16 @@
     // })
   }
 
+  const onScrollToFooter = () => {
+    if (!footerElement) return
+    smoothScrollTo(
+      footerElement.offsetTop,
+      500,
+      undefined,
+      onEnd,
+    )
+  }
+
 </script>
 
 <div class="c">
@@ -76,7 +88,7 @@
       Understand what false claims are spreading; what you may have unknowingly read.
     </h2> -->
     <p>
-      We compiled <InterpolatedNumber number={data.length || 1800} /> fact checks from over <u>100 organizations</u> around the world to combat misinformation about Covid-19.
+      We compiled <InterpolatedNumber number={data.length || 1800} /> fact checks from over <a href="#footer" class="inline-link" on:click={() => scrollToSection("footer")}>100 organizations</a> around the world to combat misinformation about Covid-19.
     </p>
 
     <p>
@@ -197,7 +209,11 @@
 		margin: 1em 0;
 		font-size: 1.3em;
 		line-height: 1.6em;
-	}
+  }
+
+  .inline-link {
+    color: inherit;
+  }
 
   .sticky {
     position: sticky;

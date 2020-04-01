@@ -264,6 +264,9 @@ export const countryNameMap = {
   Kaxakhstan: "Kazakhstan",
   Korea: "South Korea",
   // "Hong Kong":
+  México: "Mexico",
+  "North Macedonia": "Macedonia",
+  "DR Congo": "Democratic Republic of the Congo",
 }
 export const countryAccessor = d => countryNameMap[d["Country 1"]] || d["Country 1"]
 export const countriesAccessor = d => [

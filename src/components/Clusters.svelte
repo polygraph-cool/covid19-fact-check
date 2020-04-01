@@ -13,6 +13,10 @@
   import ItemTooltip from "./ItemTooltip.svelte"
 
   export let data
+  export let isFiltered
+  export let filterIteration
+  export let filterFunction
+  export let filterColor
   export let iteration
   // console.log(data.length, data[0])
 
@@ -57,7 +61,6 @@
     ratingOffsets[rating] = getPositionFromAngle(angle, 20)
   })
 
-  let delaunay
   let groupBubbles = []
   let bubbles = []
   const updateGroups = () => {
@@ -141,13 +144,11 @@
     console.log("simu Clusters")
   }
 
-  $: bubbles, width, (() => {
-    delaunay = Delaunay.from(
-      bubbles,
-      d => d.x * width,
-      d => d.y * width,
-    )
-  })()
+  $: delaunay = Delaunay.from(
+    bubbles,
+    d => d.x * width,
+    d => d.y * width,
+  )
 
   $: iteration, updateGroups()
 
@@ -182,7 +183,10 @@
 
     ctx.globalAlpha = 1
 
-    bubbles.forEach(({x, y, color, darkerColor, opacity}, i) => {
+    bubbles.forEach((d, i) => {
+      const { x, y, color, darkerColor, opacity } = d
+      const isBubbleFilteredOut = isFiltered && !filterFunction(d)
+      const isBubbleFilteredIn = isFiltered && !isBubbleFilteredOut
       // ctx.globalAlpha = opacity
       ctx.beginPath()
       ctx.arc(x * width, y * width, bubbleSize + 1.3, 0, 2 * Math.PI, false)
@@ -191,7 +195,9 @@
 
       ctx.beginPath()
       ctx.arc(x * width, y * width, bubbleSize, 0, 2 * Math.PI, false)
-      ctx.fillStyle = color
+      ctx.fillStyle = isBubbleFilteredOut ? "#fff" :
+        isBubbleFilteredIn && filterColor ? filterColor || color :
+                                            color
       ctx.fill()
     })
   }
@@ -203,7 +209,7 @@
   // }})
   // onMount(drawCanvas)
   $: debouncedDrawCanvas()
-  $: width, bubbles, debouncedDrawCanvas()
+  $: width, bubbles, filterIteration, debouncedDrawCanvas()
 
   // const onMouseOver = point => {
   //   hoveredClaim = point
@@ -270,14 +276,18 @@
   </svg>
 
   {#if hoveredClaim}
-    <ItemTooltip item={hoveredClaim} {...hoveredClaim}} x={hoveredClaim.x * width} y={hoveredClaim.y * width - bubbleSize} />
+    <ItemTooltip
+      item={hoveredClaim}
+      {...hoveredClaim}}
+      x={Math.min(width - 200, Math.max(200, hoveredClaim.x * width))}
+      y={hoveredClaim.y * width - bubbleSize}
+    />
     <div
       class="hovered-claim-highlight"
       style={`
-        height: ${bubbleSize * 2.5}px;
-        width: ${bubbleSize * 2.5}px;
-        margin: ${-(bubbleSize * 1.75)}px;
-        transform: translate(${hoveredClaim.x * width}px, ${hoveredClaim.y * width}px);
+        height: ${bubbleSize * 2 + 1.5}px;
+        width: ${bubbleSize * 2 + 1.5}px;
+        transform: translate(${hoveredClaim.x * width - bubbleSize - 2}px, ${hoveredClaim.y * width - bubbleSize - 2}px);
       `}
     />
   {/if}

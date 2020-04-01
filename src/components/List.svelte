@@ -12,8 +12,11 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
 
   export let isLoading
   export let data = []
-  export let countries = []
-  export let organizations = []
+  export let isFiltered
+  export let filterIteration
+  export let filterFunction
+  export let filterColor
+  export let iteration
 
   let windowWidth = 1200
   let selectedCategory = null
@@ -27,12 +30,11 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
   let containerElement
   let inputElement
   let listWidth = 1200
-  let filterIteration = 0
 
   let typeColors = sourceColors
   let totalHeight = 300
 
-  const pageHeight = 2000
+  const pageHeight = 1600
   let pageIndex = 1
 
   $: dataWithIds = [...data].sort((a,b) => (
@@ -44,31 +46,6 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
 
   $: ids = dataWithIds.map(({ id }) => id)
   const metadata = {}
-  $: isShowingAccessor = d => (
-    !selectedCategory
-    || (categoryAccessor(d).includes(selectedCategory))
-  ) && (
-    !selectedType
-    || (sourceAccessor(d).includes(selectedType))
-  ) && (
-    !selectedRating
-    || (ratingAccessor(d) == selectedRating)
-  ) && (
-    !selectedOrg
-    || (organizationAccessor(d) == selectedOrg)
-  ) && (
-    !selectedTag
-    || (tagsAccessor(d).includes(selectedTag))
-  ) && (
-    !selectedCountry
-    || (countriesAccessor(d).includes(selectedCountry))
-  // ) && (
-  //   !selectedLang
-  //   || (selectedLang == d["language_code"])
-  ) && (
-    !searchString
-    || (titleAccessor(d).toLowerCase().includes(searchString.toLowerCase()))
-  )
   $: selectedCategory, selectedType, selectedRating, selectedOrg, selectedTag, selectedCountry, searchString,
     filterIteration++,
     pageIndex = 1
@@ -81,7 +58,7 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
     const itemWidth = 378
 
     dataWithIds.forEach(d => {
-      const isShowing = isShowingAccessor(d)
+      const isShowing = filterFunction(d)
 
       if (!isShowing) {
         metadata[d.id] = {
@@ -128,6 +105,7 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
   $: showingItemsCount = Object.values(metadata).filter(d => d.isShowing).length
 
   const scrollToTop = () => {
+    if (!containerElement) return
     containerElement.scrollIntoView({
       behavior: 'smooth',
       block: 'start' ,
@@ -136,42 +114,38 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
     // smoothScrollTo(elementY, 300)
   }
 
-  const filterTo = (type, newValue) => {
-    if (type == "type") {
-      selectedType = newValue
-    }
-    scrollToTop()
-  }
-  const onUpdateSearchString = e => {
-    const newValue = e.target.value
-    searchString = newValue
-    scrollToTop()
-  }
-  const debouncedOnUpdateSearchString = debounce(onUpdateSearchString, 300)
-
-  const getTextWidth = (str="") => (
-    typeof str == "string"
-      ? Math.max(str.length * 1.3 + 0.9, 6)
-      : 6
-  )
+  // const filterTo = (type, newValue) => {
+  //   if (type == "type") {
+  //     selectedType = newValue
+  //   }
+  //   scrollToTop()
+  // }
+  // const onUpdateSearchString = e => {
+  //   const newValue = e.target.value
+  //   searchString = newValue
+  //   scrollToTop()
+  // }
+  // const debouncedOnUpdateSearchString = debounce(onUpdateSearchString, 300)
+  $: filterIteration && filterIteration > 0 && scrollToTop()
 
   $: listHeight = pageHeight * pageIndex
 </script>
 
 <svelte:window bind:innerWidth={windowWidth} />
 
-<div class="c"style={`width: ${listWidth + 220}px`}>
-  <div class="top" style={`width: ${listWidth}px`} bind:this={containerElement}>
+<div class="c" style={`width: ${listWidth}px`}>
+  <div class="top" bind:this={containerElement}>
     <ListTimeline
-      filter={isShowingAccessor}
+      {filterFunction}
       iteration={filterIteration}
-      color={selectedCategory && categoryColors[selectedCategory]}
+      color={filterColor}
       {data}
       {isFiltered}
       {categories}
       {categoryColors}
+      overrideWidth={listWidth}
     />
-    <div class="input">
+    <!-- <div class="input">
       <input placeholder="Search for a fact check..." on:keydown={debouncedOnUpdateSearchString} />
       {#if !isLoading}
         <div class="count">
@@ -184,10 +158,10 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
           fact checks about Covid-19
         </div>
       {/if}
-    </div>
+    </div> -->
   </div>
   <div class="main-list">
-    <div class="filters">
+    <!-- <div class="filters">
       <ListFilter
         label="Category"
         options={categories}
@@ -220,14 +194,14 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
         bind:value={selectedOrg}
         {scrollToTop}
       />
-      <!-- <ListFilter
+      <ListFilter
         label="Tags"
         options={tags}
         bind:value={selectedTag}
         {scrollToTop}
-      /> -->
-    </div>
-    <div class="list" style={`height: ${listHeight + 210}px; width: ${listWidth}px; flex: 0 0 ${listWidth}px;`}>
+      />
+    </div> -->
+    <div class="list" style={`height: ${listHeight + 210}px;`}>
       {#each ids as id}
         {#if metadata[id] && metadata[id].y <= (listHeight)}
           <div
@@ -243,7 +217,6 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
               `transform: translate(${metadata[id].x}px, ${metadata[id].y}px)`,
               `height: ${metadata[id].height}px`,
             ].join(";")}
-            in:fly={{y: 20, duration: 1200}}
             >
             <ListItem
               item={metadata[id]}
@@ -276,9 +249,9 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
     position: relative;
     /* max-width: calc(100% - 12em); */
     /* max-width: 69em; */
-    width: 100%;
-    padding: 1em 0;
-    margin-bottom: 9em;
+    /* width: 100%; */
+    padding: 1em 0 10em;
+    margin: 0 auto 9em;
     /* overflow: hidden; */
   }
   .loading {
@@ -287,28 +260,24 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
     font-style: italic;
   }
   .top {
-    position: sticky;
-    top: -155px;
-    display: flex;
+    /* position: sticky;
+    top: -155px; */
+    /* display: flex;
     flex-direction: column;
     align-items: flex-end;
-    justify-content: flex-end;
-    margin-left: 210px;
-    background: #f4f5fa;
+    justify-content: flex-end; */
+    /* margin-left: 210px; */
+    /* background: #f4f5fa;
     box-shadow: 0px 8px 10px -8px rgba(52, 73, 94, .2), 0 1px 1px rgba(52, 73, 94, 0.1);
-    z-index: 100;
+    z-index: 100; */
+    padding-bottom: 2em;
   }
-  .input {
+  /* .input {
     position: sticky;
     top: 0;
     width: 100%;
-    /* margin-top: -6.6em; */
-    /* margin-bottom: 3.6em; */
     padding-top: 1em;
     padding-bottom: 1.2em;
-    /* background: #f4f5fa;
-    box-shadow: 0px 8px 10px -8px rgba(52, 73, 94, .2), 0 1px 1px rgba(52, 73, 94, 0.1); */
-    /* z-index: 100; */
   }
   .input input {
     width: calc(100% - 2.9em);
@@ -316,7 +285,7 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
     font-size: 1.1em;
     line-height: 1em;
     border: none;
-  }
+  } */
   .count {
     color: #9093a1;
     text-align: left;
@@ -327,37 +296,30 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
   }
 
   .main-list {
-    display: flex;
+    /* display: flex; */
   }
   .list {
     position: relative;
-    flex: 1;
-    display: flex;
+    margin-top: 5em;
+    /* flex: 1; */
+    /* display: flex;
     flex-direction: column;
     flex-wrap: wrap;
-    display: grid;
+    display: grid; */
     /* grid-template-columns: repeat(3, 1fr);
     grid-auto-rows: 70px;
     grid-gap: 2em;
     grid-column-gap: 4em; */
-    margin-top: 3em;
   }
-  .filters {
+  /* .filters {
     position: sticky;
     top: 6em;
     flex: 0 0 180px;
-    /* flex: 0 0 0; */
     width: 180px;
-    /* height: 0; */
     height: 37.6em;
-    /* height: 17em; */
-    /* margin-left: -17em; */
-    /* margin-top: 2em; */
     padding-right: 30px;
-    /* margin-bottom: -15em; */
-    /* padding-top: 6em; */
     text-align: right;
-  }
+  } */
   .card {
     /* max-width: 25em; */
     /* margin: 1em; */

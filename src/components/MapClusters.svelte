@@ -19,7 +19,12 @@
   import { countryShapes, countryCentroids } from "./countryData"
 
   export let data = []
+  export let isFiltered
+  export let filterIteration
+  export let filterFunction
+  export let filterColor
   export let iteration
+
   // const parseDate = timeParse("%Y-%m-%d")
   const formatDate = timeFormat("%A %B %-d, %Y")
   let hoveredClaim = null
@@ -34,155 +39,107 @@
   let hasHovered = false
   let hasInited = false
 
-  // $: width = windowWidth * 0.9
-  // $: height = width * 0.65
-
-  // const debouncedOnMouseOver = debounce(onMouseOver, 50)
-  // const duration = 12000
-  // let runningTimer
-  // const initTimer = () => {
-  //   if (!data.length) return
-  //   if (hasInited) return
-  //   hasInited = true
-  //   setTimeout(() => {
-  //     runningTimer = timer(elapsed => {
-  //       initTransitionProgress = Math.min(1, easeCubicOut(elapsed / duration))
-
-  //       if (initTransitionProgress >= 1) {
-  //         runningTimer.stop()
-  //       }
-  //     })
-  //   })
-  // }
-  // $: iteration, initTimer()
-
   const windowGlobal = typeof window !== "undefined" && window
   const pixelRatio = windowGlobal.devicePixelRatio || 1
 
-
-const getSpiralPositions = (n=3000) => {
-  let angle = 0
-  return new Array(n).fill(0).map((_, i) => {
-    const radius = Math.sqrt(i + 0.3) * 3.3
-    angle += Math.asin(1 / radius) * 4
-    return [
-      Math.cos(angle) * radius,
-      Math.sin(angle) * radius,
-      angle,
-    ]
-  })
-}
-const spiralPositions = getSpiralPositions()
-
-    const sphere = ({type: "Sphere"})
-    $: projection = geoArmadillo()
-      .fitSize([width, height], sphere)
-      .rotate([-9, 0])
-
-    $: svgPathGenerator = geoPath(projection)
-    // const countryCentroids = {}
-    // let countries = []
-    // $: data, (() => {
-    //   countries = countryShapes.features.map(shape => {
-    //     const countryData = data.find(d => (
-    //       countryAccessor(data) == shape.properties["geounit"]
-    //     )) || {}
-    //     const centroid = svgPathGenerator.centroid(shape)
-    //     const scaledCentroid = [
-    //       centroid[0] / width,
-    //       centroid[1] / width,
-    //     ]
-    //     countryCentroids[shape.properties["geounit"]] = scaledCentroid
-
-    //     return centroid[0] ? shape : null
-    //       // name: shape.properties["geounit"],
-    //       // shape,
-    //       // centroid: scaledCentroid,
-    //       // ...countryData,
-
-    //   }).filter(d => d)
-
-    // })()
-    // $:console.log("countries", countries, countryCentroids)
-
-    $: ageScale = scaleTime()
-      .domain(extent(data.map(dateAccessor)))
-      .range(["#fff", "#778beb"])
-
-    let categoryOffsets = {}
-    categories.forEach((category, i) => {
-      const angle = 360 / categories.length * i
-      categoryOffsets[category] = getPositionFromAngle(angle, 1)
+  const getSpiralPositions = (n=3000) => {
+    let angle = 0
+    return new Array(n).fill(0).map((_, i) => {
+      const radius = Math.sqrt(i + 0.3) * 2.3
+      angle += Math.asin(1 / radius) * 4
+      angle = angle % (Math.PI * 2)
+      return [
+        Math.cos(angle) * radius,
+        Math.sin(angle) * radius,
+        angle,
+      ]
     })
+  }
+  const spiralPositions = getSpiralPositions()
 
-    let bubbles = []
-    const updateBubbles = () => {
-      let countryCounts = {}
-      const claims = data.map((d, i) => {
-        const country = countryAccessor(d)
-        if (!country) return
+  const sphere = ({type: "Sphere"})
+  $: projection = geoArmadillo()
+    .fitSize([width, height], sphere)
+    .rotate([-9, 0])
 
-        const [x, y] = countryCentroids[country] || []
-        const [offsetX, offsetY] = [
-          (spiralPositions[countryCounts[country] || 0] || [])[0] / width + (countryCentroids[country] || [])[0],
-          (spiralPositions[countryCounts[country] || 0] || [])[1] / width + (countryCentroids[country] || [])[1],
-        ]
-        if (!x && !y) return
-        countryCounts[country] = (countryCounts[country] || 0) + 1
+  $: svgPathGenerator = geoPath(projection)
 
+  $: ageScale = scaleTime()
+    .domain(extent(data.map(dateAccessor)))
+    .range(["#fff", "#778beb"])
+
+  let categoryOffsets = {}
+  categories.forEach((category, i) => {
+    const angle = 360 / categories.length * i
+    categoryOffsets[category] = getPositionFromAngle(angle, 1)
+  })
+
+  let bubbles = []
+  const updateBubbles = () => {
+    const claimsByCountry = {}
+    data.forEach(d => {
+      const country = countryAccessor(d)
+      if (!country) return
+      if (!claimsByCountry[country]) claimsByCountry[country] = []
+      claimsByCountry[country].push(d)
+    })
+    let claims = []
+    Object.keys(claimsByCountry).forEach(country => {
+      const countryCentroid = countryCentroids[country]
+      if (!countryCentroid) console.log(country, countryCentroid)
+      if (!Number.isFinite((countryCentroid || [])[0])) console.log(country, countryCentroid)
+      if (!countryCentroid) return
+
+      const points = claimsByCountry[country].sort((a,b) => (
+        categories.indexOf(categoryAccessor(a))
+        - categories.indexOf(categoryAccessor(b))
+      ))
+      const positions = spiralPositions
+        .slice(0, points.length)
+        .sort((a,b) => (
+          a[2] > b[2] ? -1 : 1
+        ))
+      let runningIndex = 0
+      points.forEach(d => {
         const category = categoryAccessor(d)
-        const categoryPosition = [
-          x + (categoryOffsets[category] ? categoryOffsets[category][0] * 15 / width : 0),
-          y + (categoryOffsets[category] ? categoryOffsets[category][1] * 15 / width : 0),
-          // 0, 0,
-        ]
-
         const parsedColor = categoryColors[category] || "#adb2be"
-
-        return {
+        claims.push({
           ...d,
-          // r: bubbleSize,
-          // x: x + categoryOffset[0],
-          // y: y + categoryOffset[1],
-          // x: categoryPosition[0], y: categoryPosition[1],
-          // x, y,
-          x: offsetX, y: offsetY,
-          countryX: x, countryY: y,
-          categoryPosition,
+          x: (positions[runningIndex] || [])[0] / width + countryCentroid[0],
+          y: (positions[runningIndex] || [])[1] / width + countryCentroid[1],
           color: parsedColor,
-          // opacity: ageScale(daysAgo),
-          opacity: 1,
-          // darkerColor: topicBorderColors[d.category],
-        }
-      }).filter(d => d)
+        })
+        runningIndex++
+      })
+    })
+    claims = claims.filter(d => d)
 
-      // bubbles = claims
-      bubbles = [...claims]
-      let simulation = forceSimulation()
-        // .force("x", forceX(d => d.x).strength(1))
-        .force("x", forceX(d => d.x).strength(0.05))
-        .force("y", forceY(d => d.y).strength(0.05))
-        .force("collide", forceCollide(d => (bubbleSize / width) * 1.3).strength(1))
-        // .force("r", forceRadial(d => d.distance).strength(5))
-        .nodes(bubbles)
-        .alphaMin(0.006)
-        .on("tick", drawBubbles)
+    // bubbles = claims
+    bubbles = [...claims]
+    let simulation = forceSimulation()
+      // .force("x", forceX(d => d.x).strength(1))
+      .force("x", forceX(d => d.x).strength(0.05))
+      .force("y", forceY(d => d.y).strength(0.05))
+      .force("collide", forceCollide(d => (bubbleSize / width) * 1.3).strength(1))
+      // .force("r", forceRadial(d => d.distance).strength(5))
+      .nodes(bubbles)
+      .alphaMin(0.006)
+      .on("tick", drawBubbles)
 
-      // range(0, 220).forEach(i => simulation.tick())
-      console.log("simu Map")
-    }
-    $: iteration, updateBubbles()
+    // range(0, 220).forEach(i => simulation.tick())
+    console.log("simu Map")
+  }
+  $: iteration, updateBubbles()
 
-    let delaunay = []
+  let delaunay = []
 
-    $: data, width, (() => {
-      delaunay = Delaunay.from(
-        bubbles,
-        d => d.x * width,
-        d => d.y * width,
-      )
-    })()
-
+  $: data, width, (() => {
+    delaunay = Delaunay.from(
+      bubbles,
+      d => d.x * width,
+      d => d.y * width,
+    )
+  })()
 
   $: onMouseMove = e => {
     const x = e.clientX
@@ -260,18 +217,19 @@ const spiralPositions = getSpiralPositions()
     ctx.putImageData(blankMap, 0, 0)
 
 // console.log("bubbles", bubbles)
-    bubbles.forEach(({x, y, color}, i) => {
-      const transitionR = bubbleSize * Math.min(1, Math.max(
-        0,
-        // initTransitionProgress
-        initTransitionProgress * 2 - (i / bubbles.length)
-        // 1,
-      ))
+    bubbles.forEach((d, i) => {
+      const { x, y, color } = d
+      const isBubbleFilteredOut = isFiltered && !filterFunction(d)
+      const isBubbleFilteredIn = isFiltered && !isBubbleFilteredOut
 
       ctx.beginPath()
-      ctx.arc(x * width, y * width, transitionR, 0, 2 * Math.PI, false)
+      ctx.arc(x * width, y * width, bubbleSize, 0, 2 * Math.PI, false)
 
-      ctx.fillStyle = color
+      ctx.fillStyle = (
+        isBubbleFilteredOut ? "#c9cde2" :
+        isBubbleFilteredIn  ? filterColor || "#57a039" :
+                              color
+      )
       ctx.fill()
     })
   }
@@ -284,7 +242,7 @@ const spiralPositions = getSpiralPositions()
   // onMount(drawCanvas)
   $: debouncedDrawCanvas()
   $: initTransitionProgress, drawBubbles()
-  $: width, bubbles, (() => {
+  $: width, bubbles, filterIteration, (() => {
     debouncedDrawCanvas()
     debouncedDrawBubbles()
   })()
@@ -299,7 +257,12 @@ const spiralPositions = getSpiralPositions()
   bind:clientWidth={width}>
   <canvas style={`width: ${width}px; height: ${height}px`} bind:this={canvasElement} />
   {#if highlightedClaim}
-    <ItemTooltip item={highlightedClaim} {...highlightedClaim} x={highlightedClaim.x * width} y={highlightedClaim.y * width - bubbleSize} />
+    <ItemTooltip
+      item={highlightedClaim}
+      {...highlightedClaim}
+      x={Math.min(width - 160, Math.max(160, highlightedClaim.x * width))}
+      y={highlightedClaim.y * width - bubbleSize}
+    />
     <!-- <ItemTooltip item={highlightedClaim} {...highlightedClaim} y={highlightedClaim.y - bubbleSize} /> -->
     <div
       class="hovered-claim-highlight"

@@ -7,16 +7,19 @@
   import { dateAccessor, parseDate, categories, categoryAccessor, categoryColors, countriesAccessor, ratings, ratingAccessor, sources, sourceAccessor, sourceColors, organizationAccessor, tags, tagsAccessor } from "./data-utils"
   import { debounce, scaleCanvas } from "./utils"
 
-  export let filter
+  export let filterFunction
   export let data
   export let isFiltered
   export let color
+  export let overrideWidth
   export let iteration
 
   let containerHeight = 120
   let height = containerHeight - 20
-  let width = 1200
+  let containerWidth = 1200
   let canvasElement
+
+  $: width = overrideWidth || containerWidth
 
   const formatDay = timeFormat("%d/%m/%Y")
   const prettyMonth = timeFormat("%B")
@@ -25,6 +28,7 @@
   let bins = []
   let filteredBins = []
   let xTicks = []
+  let yTicks = []
   let xScale
   let yScale
   let itemWidth = 10
@@ -44,7 +48,7 @@
       )
       (data)
 
-    const filteredData = data.filter(filter)
+    const filteredData = data.filter(filterFunction)
     filteredBins = bin()
       .value(d => dateAccessor(d))
       .thresholds(days)
@@ -65,10 +69,20 @@
       xScale(d),
     ])
 
+    const maxCount = max(bins.map(d => d.length))
     yScale = scaleLinear()
-      .domain([0, max(bins.map(d => d.length))])
+      .domain([0, maxCount])
       .range([height, 0])
-    }
+
+    yTicks = [
+      Math.round(maxCount),
+      Math.round(maxCount / 2),
+    ].map(d => [
+        d,
+        yScale(d),
+      ])
+
+  }
 
   $: iteration, width, updateBins()
 
@@ -94,7 +108,7 @@
     ]
 
     return {
-      x: xScale(bin.x0),
+      x: xScale(bin.x0) - itemWidth,
       bars,
     }
   })
@@ -115,7 +129,6 @@
 
   const drawCanvas = () => {
     if (!canvasElement) return
-    console.log("drawCanvas Timeline")
 
     const ctx = canvasElement.getContext("2d")
     scaleCanvas(canvasElement, ctx, width, height)
@@ -164,7 +177,7 @@
 
 </script>
 
-<div class="c" bind:clientWidth={width} style={`height: ${containerHeight}px`}>
+<div class="c" bind:clientWidth={containerWidth} style={`height: ${containerHeight}px`}>
   <svg {height} {width}>
     <!-- {#each parsedBins as { x, bars }, i}
       {#each bars as { y, height, color, isCategory }}
@@ -194,16 +207,28 @@
         y1={height}
         y2={height + 5}
       />
-      <text x={offset} y={height + 19}>
+      <text class="x-tick" x={offset} y={height + 19}>
         { label }
+      </text>
+    {/each}
+    {#each yTicks as [label, offset], i}
+      <line
+        class="grid-mark"
+        x1={0}
+        x2={width}
+        y1={offset}
+        y2={offset}
+      />
+      <text class="y-tick" x={0} y={offset - 5}>
+        { label }{ !i ? " new fact checks per day" : "" }
       </text>
     {/each}
     <line
       class="tick-mark"
       x1={0}
       x2={width}
-      y1={height}
-      y2={height}
+      y1={height + 1}
+      y2={height + 1}
     />
   </svg>
   <canvas
@@ -216,12 +241,14 @@
   .c {
     width: 100%;
     margin-top: 2em;
-    overflow: hidden;
+    /* overflow: hidden; */
   }
-  svg {
+  canvas {
     position: absolute;
     top: 0;
     left: 0;
+  }
+  svg {
     overflow: visible;
   }
   rect {
@@ -237,12 +264,22 @@
   }
   text {
     fill: #8b8ba0;
-    text-anchor: middle;
     font-size: 0.65em;
     text-transform: uppercase;
     letter-spacing: 0.1em;
   }
+  .x-tick {
+    text-anchor: middle;
+  }
   .tick-mark {
     stroke: #cacadb;
+  }
+  .grid-mark {
+    stroke: #e5e5ee;
+  }
+  .y-tick {
+    /* text-anchor: end; */
+    text-anchor: start;
+    /* dominant-baseline: middle; */
   }
 </style>

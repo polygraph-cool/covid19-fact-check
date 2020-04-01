@@ -34813,7 +34813,7 @@ export const countryCentroids = {
     0.6295992383540132,
     0.28411157424839517
   ],
-  "Hong Kong S.A.R.": [
+  "Hong Kong": [
     null,
     null
   ],
@@ -35266,7 +35266,7 @@ export const countryCentroids = {
     null
   ],
   "France": [
-    0.45230696478790405,
+    0.49230696478790405,
     0.2896365927085607
   ],
   "Greece": [
@@ -35488,5 +35488,13 @@ export const countryCentroids = {
   "Samoa": [
     null,
     null
+  ],
+  "West Africa": [
+    0.4467984823644568,
+    0.3957744798017804
+  ],
+  "Hong Kong": [
+    0.8761085018125334,
+    0.31834771076534094
   ]
 }

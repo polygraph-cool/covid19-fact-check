@@ -6,12 +6,6 @@
   export let type = "dropdown"
   export let colors = {}
 
-  const getTextWidth = (str="") => (
-    typeof str == "string"
-      ? Math.max(str.length * 1.3 + 0.9, 6)
-      : 6
-  )
-
   const onSelect = option => {
     value = option == value ? null : option
     scrollToTop()
@@ -19,11 +13,11 @@
 </script>
 
 <div class="filter">
-  <div class="filter-label">
+  <div class="label">
     { label }
   </div>
   {#if type == "dropdown"}
-    <select bind:value={value} on:change={scrollToTop} style={`width: ${getTextWidth(value)}em`}>
+    <select bind:value={value} on:change={scrollToTop}>
       <option value="">Any</option>
       {#each options as option}
         <option
@@ -52,21 +46,23 @@
 <style>
   .filter {
     display: block;
-    font-size: 1.2em;
-    margin: 0 0;
-    padding: 0.6em 0;
+    margin-left: 0.6em;
+    /* padding: 0.6em 0; */
     background: none;
     border: none;
-    text-align: right;
-    width: 100%;
+    /* text-align: right; */
+    width: 15em;
     /* appearance: none; */
     /* cursor: pointer; */
   }
+  .label {
+    padding-left: 0.7em;
+    font-size: 0.9em;
+    margin-bottom: 0.5em;
+  }
   select {
     max-width: 10em;
-    margin-top: 0.5em;
     padding: 0.6em 0.1em 0.6em 0.6em;
-    text-align: right;
     background: white;
     border: none;
   }
