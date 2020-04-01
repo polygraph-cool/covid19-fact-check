@@ -193,9 +193,6 @@
 		/* padding-right: 0.6em; */
 		/* margin-bottom: 0.1em; */
 	}
-	.sticky :global(.filter) {
-		width: auto;
-	}
 	/* .right:before {
 		content: "";
 		position: absolute;
@@ -212,5 +209,14 @@
 		right: 0;
 		font-size: 0.8em;
 		z-index: 1000;
+	}
+
+	@media (max-width: 900px) {
+		.sticky {
+			position: relative;
+		}
+		.sticky-contents {
+			flex-wrap: wrap;
+		}
 	}
 </style>

@@ -124,4 +124,17 @@
   .clear:hover {
     background: #d2d2db;
   }
+	@media (max-width: 900px) {
+    .filter {
+      margin: 1em;
+      width: 100%;
+    }
+    select {
+      max-width: none;
+      width: 100%;
+    }
+    input {
+      width: 100%;
+    }
+  }
 </style>

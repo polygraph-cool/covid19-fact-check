@@ -172,10 +172,12 @@
 		line-height: 1em;
 	}
   h1 b {
+    display: block;
     font-size: 0.7em;
     line-height: 1em;
+    margin-top: 0.1em;
     /* font-weight: 300; */
-    white-space: nowrap;
+    /* white-space: nowrap; */
   }
 	h2 {
 		font-weight: 300;
@@ -382,5 +384,73 @@
     text-align: left;
     padding: 1em 3em;
     flex: 1;
+  }
+  @media (max-width: 1155px) {
+    .c {
+      flex-direction: column;
+    }
+    .focus {
+      height: 30em;
+      width: 100%;
+      flex: none;
+    }
+    .focus:before {
+      left: 0;
+      bottom: 0;
+      right: auto;
+      height: auto;
+      width: 5vw;
+      background: linear-gradient(
+        to right,
+        #f4f5fa -10%,
+        transparent 100%
+      );
+    }
+    .focus:after {
+      left: auto;
+      top: 0;
+      right: 0;
+      height: auto;
+      width: 5vw;
+      background: linear-gradient(
+        to left,
+        #f4f5fa -10%,
+        transparent 100%
+      );
+    }
+
+    .list-item {
+      height: auto;
+      top: 6em;
+      width: 88vw;
+    }
+    .list-item--0 {
+      transform: translate(-270%, 0);
+    }
+    .list-item--1 {
+      opacity: 1;
+      transform: translate(-152%, 0);
+    }
+    .list-item--2 {
+      transform: translate(-50%, 0);
+    }
+    .list-item--3 {
+      opacity: 1;
+      transform: translate(52%, 0);
+    }
+    .list-item--4 {
+      transform: translate(170%, 0);
+    }
+  }
+  @media (max-width: 700px) {
+    h1 {
+      font-size: 2.3em;
+    }
+    p {
+      font-size: 1em;
+    }
+    .scroll-list-item {
+      font-size: 1em;
+    }
   }
 </style>

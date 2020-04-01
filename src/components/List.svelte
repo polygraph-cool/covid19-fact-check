@@ -328,13 +328,13 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
     left: 0;
     text-align: left;
     width: 345px;
+    max-width: 90vw;
     /* padding-bottom: 6px;
     padding-left: 6px;
     padding-right: 2px;
     padding-top: 2px; */
     /* overflow: hidden; */
     transition: transform 0.6s ease-out;
-    background: black;
 
     /* transform: translateY(30px); */
     /* opacity: 0; */
@@ -393,5 +393,11 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
     background: none;
     border: none;
     transform: translateX(-50%);
+  }
+
+  @media (max-width: 600px) {
+    .list {
+      margin-left: 2vw;
+    }
   }
 </style>

@@ -67,11 +67,6 @@
     height: auto;
     margin-left: 10px;
   }
-  @media screen and (min-width: 768px) {
-    .logo {
-        margin-left: 36px;
-    }
-  }
   .links {
     display: flex;
     align-items: center;
@@ -88,5 +83,24 @@
   a {
     color: #57a039;
     text-decoration: none;
+  }
+
+  @media (max-width: 1000px) {
+    .links {
+      display: none;
+    }
+  }
+  @media screen and (min-width: 768px) {
+    .logo {
+        margin-left: 36px;
+    }
+  }
+  @media (max-width: 600px) {
+    .contents {
+      padding: 0.6em 1em 0.3em;
+    }
+    .logo {
+      width: 120px;
+    }
   }
 </style>

@@ -129,6 +129,7 @@
   .card-wrapper {
     height: 100%;
     width: 100%;
+    max-width: 90vw;
   }
   .card-contents {
     height: 100%;
@@ -270,5 +271,11 @@
   }
   .category {
     font-weight: 700;
+  }
+
+  @media (max-width: 700px) {
+    .card-wrapper {
+      font-size: 0.8em;
+    }
   }
 </style>
