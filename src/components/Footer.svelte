@@ -11,10 +11,10 @@
   </div>
 
   <div class="orgs-label">
-    Led by the <b>International Fact-Checking Network (IFCN)</b> at <b>the Poynter Institute</b>, the <b>#CoronaVirusFacts / #DatosCoronaVirus Alliance</b> unites more than 100 fact-checkers around the world in publishing, sharing and translating facts surrounding the novel coronavirus.
+    Led by the <a class="inline-link" href="https://www.poynter.org/ifcn/" target="_blank">International Fact-Checking Network (IFCN)</a> at <a class="inline-link" href="https://www.poynter.org/" target="_blank">the Poynter Institute</a>, the <a class="inline-link" href="https://www.poynter.org/coronavirusfactsalliance/" target="_blank">#CoronaVirusFacts / #DatosCoronaVirus Alliance</a> unites more than 100 fact-checkers around the world in publishing, sharing and translating facts surrounding the novel coronavirus.
     <br />
     <br />
-    Members of the <b>#CoronaVirusFacts / #DatosCoronaVirus Alliance</b> include
+    Members of the <a class="inline-link" href="https://www.poynter.org/coronavirusfactsalliance/" target="_blank">#CoronaVirusFacts / #DatosCoronaVirus Alliance</a> include
   </div>
   <div class="orgs">
     {#each organizations as org}
@@ -68,5 +68,9 @@
     padding: 0.6em 1em;
     font-weight: 600;
     opacity: 0.6;
+  }
+  .inline-link {
+    color: inherit;
+    font-weight: 600;
   }
 </style>
