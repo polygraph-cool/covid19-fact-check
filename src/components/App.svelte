@@ -68,7 +68,7 @@
 	$: selectedCategory, selectedCountry, selectedRating, selectedOrg, selectedSource, filterIteration++
 </script>
 
-<!-- <Header /> -->
+<Header />
 
 <main>
 	<Intro {data} {isLoading} />
