@@ -268,12 +268,5 @@ export const countryNameMap = {
   "North Macedonia": "Macedonia",
   "DR Congo": "Democratic Republic of the Congo",
 }
-export const countryAccessor = d => countryNameMap[d["Country 1"]] || d["Country 1"]
-export const countriesAccessor = d => [
-  d["Country 1"],
-  d["Country 2"],
-  d["Country 3"],
-  d["Country 4"],
-]
-  .filter(d => d)
-  .map(d => countryNameMap[d] || d)
+export const countryAccessor = d => countryNameMap[d["Countries"][0]] || d["Countries"][0]
+export const countriesAccessor = d => d["Countries"].map(d => countryNameMap[d] || d)

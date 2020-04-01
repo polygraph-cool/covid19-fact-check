@@ -1,5 +1,7 @@
 <script>
 	import { onMount } from 'svelte'
+	import { csv } from "d3-request"
+
 	import Intro from "./Intro.svelte"
 	import Timeline from "./Timeline.svelte"
 	import Header from "./Header.svelte"
@@ -13,7 +15,8 @@
   import { debounce, flatten } from "./utils"
   import { categoryAccessor, categoryColors, categories, dateAccessor, ratings, sources, titleAccessor, countriesAccessor, organizationAccessor, ratingAccessor, sourceAccessor } from "./data-utils"
 
-	const dataUrl = "https://pudding.cool/misc/covid-fact-checker/data.json"
+	// const dataUrl = "https://pudding.cool/misc/covid-fact-checker/data.json"
+	const dataUrl = "https://pudding.cool/misc/covid-fact-checker/data.csv"
 	let iteration = 0
 	let filterIteration = 0
 	let allData = []
@@ -23,18 +26,25 @@
 	let isLoading = true
 
 	onMount(async () => {
-		const res = await fetch(dataUrl)
-		const resJson = await res.json()
-		allData = data = resJson.data.sort((a,b) => (
-				dateAccessor(a) > dateAccessor(b) ? -1 : 1
-			)).map((d,i) =>({
-				...d,
-				id: i,
-			}))
-		isLoading = false
-		countries = [...new Set(flatten(data.map(countriesAccessor)))].sort()
-		organizations = [...new Set(data.map(organizationAccessor))]
-		iteration++
+		// const res = await fetch(dataUrl)
+		csv(dataUrl)
+		.row(d => ({
+			...d,
+			Countries: (d["Countries"] || "").split(",")
+		}))
+		.get(resJson => {
+		console.log(resJson[0])
+			allData = data = resJson.sort((a,b) => (
+					dateAccessor(a) > dateAccessor(b) ? -1 : 1
+				)).map((d,i) =>({
+					...d,
+					id: i,
+				}))
+			isLoading = false
+			countries = [...new Set(flatten(data.map(countriesAccessor)))].sort()
+			organizations = [...new Set(data.map(organizationAccessor))]
+			iteration++
+		})
 	})
 
 	let searchString = ""
