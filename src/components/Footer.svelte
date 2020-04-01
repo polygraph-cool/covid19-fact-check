@@ -3,13 +3,6 @@
 </script>
 
 <footer id="footer">
-  <div class="item">
-    <div class="label">
-      With support from
-    </div>
-    <img class="logo" src="assets/newsinit_logo.png" alt="Google News Initiative logo" />
-  </div>
-
   <div class="orgs-label">
     Led by the <a class="inline-link" href="https://www.poynter.org/ifcn/" target="_blank">International Fact-Checking Network (IFCN)</a> at <a class="inline-link" href="https://www.poynter.org/" target="_blank">the Poynter Institute</a>, the <a class="inline-link" href="https://www.poynter.org/coronavirusfactsalliance/" target="_blank">CoronaVirusFacts / DatosCoronaVirus Alliance</a> unites more than 100 fact-checkers around the world in publishing, sharing and translating facts surrounding the novel coronavirus.
     <br />
@@ -23,6 +16,14 @@
       </div>
     {/each}
   </div>
+
+  <div class="item gni">
+    <div class="label">
+      With support from
+    </div>
+    <img class="logo" src="assets/newsinit_logo.png" alt="Google News Initiative logo" />
+  </div>
+
 </footer>
 
 <style>
@@ -35,7 +36,7 @@
     background: #fff;
   }
   .logo {
-    width: 16em;
+    width: 11em;
   }
   .item {
     display: flex;
@@ -44,7 +45,7 @@
     position: relative;
   }
   .label {
-    font-size: 0.8em;
+    font-size: 1em;
     line-height: 1.6em;
     /* text-transform: uppercase;
     letter-spacing: 0.1em; */
@@ -54,7 +55,7 @@
     margin-top: 4em;
     line-height: 1.6em;
     text-align: center;
-    font-size: 0.8em;
+    font-size: 1em;
   }
   .orgs {
     display: flex;
@@ -72,5 +73,16 @@
   .inline-link {
     color: inherit;
     font-weight: 600;
+  }
+  .gni {
+    margin-top: 2em;
+    width: 100%;
+    display: flex;
+    text-align: right;
+    justify-content: flex-end;
+    align-items: flex-end;
+  }
+  .gni .label {
+    margin-right: 0.8em;
   }
 </style>
