@@ -35,13 +35,15 @@
 	})
 
 	let searchString = ""
+	let searchStringRaw = ""
   const onUpdateSearchString = e => {
-    const newValue = e.target.value
+    const newValue = searchStringRaw
     searchString = newValue
 		// scrollToTop()
 		onUpdateFilters()
 	}
 	const debouncedOnUpdateSearchString = debounce(onUpdateSearchString, 300)
+	$: searchStringRaw, debouncedOnUpdateSearchString()
 
 	let selectedCategory = null
 	let selectedCountry = null
@@ -79,13 +81,13 @@
 	<div class="input-container">
 		<div class="sticky">
 			<div class="sticky-contents">
-				<div class="search">
-					<div class="search-label">
-						Filter the fact checks
-					</div>
-					<input placeholder="Search for a fact check..." on:keydown={debouncedOnUpdateSearchString} />
-				</div>
-
+				<ListFilter
+					label="Filter the fact checks"
+					options={categories}
+					placeholder="Search for a fact check..."
+					bind:value={searchStringRaw}
+					type="input"
+				/>
 				<ListFilter
 					label="Category"
 					options={categories}
@@ -191,18 +193,6 @@
 		flex: 1;
 		/* padding-right: 0.6em; */
 		/* margin-bottom: 0.1em; */
-	}
-	.search-label {
-    margin-bottom: 0.5em;
-    padding-left: 0.7em;
-    font-size: 0.9em;
-	}
-	.search input {
-		width: calc(100% - 1.2em);
-    padding: 0.56em 0.6em;
-		font-size: 0.9em;
-		line-height: 1em;
-		border: none;
 	}
 	.sticky :global(.filter) {
 		width: auto;
