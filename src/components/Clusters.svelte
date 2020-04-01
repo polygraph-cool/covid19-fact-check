@@ -21,7 +21,10 @@
   export let iteration
 
   let width = 1200
-  $: height = width * 0.45
+  $: isVertical = width < 800
+  $: height = width * (
+    isVertical ? 1.25 : 0.45
+  )
 
   const types = categories
   $: bubbleSize = Math.round(width / 300)
@@ -92,8 +95,8 @@
     groupBubbles = [...groups]
     let simulation = forceSimulation(groupBubbles)
       // .force("x", forceX(d => d.x).strength(1))
-      .force("x", forceX(d => d.x).strength(0.1))
-      .force("y", forceY(d => d.y).strength(0.5))
+      .force("x", forceX(d => d.x).strength(isVertical ? 0.5 : 0.1))
+      .force("y", forceY(d => d.y).strength(isVertical ? 0.1 : 0.5))
       .force("collide", forceCollide(d => d.r * 1.2).strength(0.4))
       // .force("r", forceRadial(d => d.distance).strength(5))
       .stop()

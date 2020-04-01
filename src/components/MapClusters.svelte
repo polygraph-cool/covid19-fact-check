@@ -16,7 +16,7 @@
   // import countryShapes from "./countries.json"
   import { debounce, getDistanceBetweenPoints, getPositionFromAngle, scaleCanvas } from "./utils"
   import { dateAccessor, parseDate, countryAccessor, categories, categoryColors, categoryAccessor } from "./data-utils"
-  import { countryShapes, countryCentroids } from "./countryData"
+  import { countryShapes, countryCentroids, countryCentroidsVertical } from "./countryData"
   import ItemTooltip from "./ItemTooltip.svelte"
   import DataSource from "./DataSource.svelte"
 
@@ -33,8 +33,11 @@
   let canvasElement = null
   // let windowWidth = 1200
   let width = 1200
-  $: height = width * 0.7
-  $: bubbleSize = width * 0.0015
+  $: isVertical = width < 800
+  $: height = width * (
+    isVertical ? 2 : 0.7
+  )
+  $: bubbleSize = width * (isVertical ? 0.0027 : 0.0015)
   let highlightIndex = null
   let timeElapsed = 0
   let initTransitionProgress = 1
@@ -60,11 +63,54 @@
   const spiralPositions = getSpiralPositions()
 
   const sphere = ({type: "Sphere"})
-  $: projection = geoArmadillo()
+  $: projection = isVertical ? (
+    geoOrthographic()
+    .fitSize([width, width], sphere)
+    .rotate([-60, -20])
+  ) : (
+    geoArmadillo()
     .fitSize([width, height], sphere)
     .rotate([-9, 0])
+  )
+  $: projection2 = isVertical && (
+    geoOrthographic()
+      .fitSize([width, width], sphere)
+      .translate([width / 2, height * 0.7])
+      .rotate([90, -20])
+  )
+// const countryCentroids = {}
+//     let countries = []
+//     $: data, (() => {
+//       countries = countryShapes.map(shape => {
+//         const countryData = data.find(d => (
+//           countryAccessor(data) == shape.properties["geounit"]
+//         )) || {}
+//         let centroid = svgPathGenerator.centroid(shape)
+//         const secondProjectionCountries = [
+//           "United States of America",
+//           "Canada",
+//         ]
+//         if (!Number.isFinite(centroid[0]) || secondProjectionCountries.includes(shape.properties["geounit"])) {
+//           centroid = svgPathGenerator2.centroid(shape)
+//         }
+//         const scaledCentroid = [
+//           centroid[0] / width,
+//           centroid[1] / width,
+//         ]
+//         countryCentroids[shape.properties["geounit"]] = scaledCentroid
 
+//         return centroid[0] ? shape : null
+//           // name: shape.properties["geounit"],
+//           // shape,
+//           // centroid: scaledCentroid,
+//           // ...countryData,
+
+//       }).filter(d => d)
+
+//     })()
+//     $:console.log("countries", countries, countryCentroids)
   $: svgPathGenerator = geoPath(projection)
+  // $: svgPathGenerator2 = geoPath(projection2)
 
   $: ageScale = scaleTime()
     .domain(extent(data.map(dateAccessor)))
@@ -87,7 +133,7 @@
     })
     let claims = []
     Object.keys(claimsByCountry).forEach(country => {
-      const countryCentroid = countryCentroids[country]
+      const countryCentroid = isVertical ? countryCentroidsVertical[country] : countryCentroids[country]
       // if (!countryCentroid) console.log(country, countryCentroid)
       // if (!Number.isFinite((countryCentroid || [])[0])) console.log(country, countryCentroid)
       if (!countryCentroid) return
@@ -131,7 +177,7 @@
     // range(0, 220).forEach(i => simulation.tick())
     // console.log("simu Map")
   }
-  $: iteration, updateBubbles()
+  $: iteration, isVertical, updateBubbles()
 
   let delaunay = []
 
@@ -177,36 +223,41 @@
     if (!canvasElement) return
     const ctx = canvasElement.getContext("2d")
     scaleCanvas(canvasElement, ctx, width, height)
-    const path = geoPath(projection, ctx)
-    const drawPath = shape => {
-      ctx.beginPath()
-      path(shape)
-    }
-    drawPath(sphere)
-    ctx.clip()
 
-    const fill = color => {
-      ctx.fillStyle = color
-      ctx.fill()
-    }
-    const stroke = color => {
-      ctx.strokeStyle = color
-      ctx.stroke()
-    }
-    drawPath(sphere)
-    fill("#fff")
-    stroke("#b4b7c9")
-    drawPath(geoGraticule10())
-    stroke("#eaedff")
-    countryShapes.forEach((shape) => {
-      drawPath(shape)
-      fill("#f8f8fb")
+    const drawMap = projection => {
+      const path = geoPath(projection, ctx)
+      const drawPath = shape => {
+        ctx.beginPath()
+        path(shape)
+      }
+      drawPath(sphere)
+      if (!isVertical) ctx.clip()
+
+      const fill = color => {
+        ctx.fillStyle = color
+        ctx.fill()
+      }
+      const stroke = color => {
+        ctx.strokeStyle = color
+        ctx.stroke()
+      }
+      drawPath(sphere)
+      fill("#fff")
+      stroke("#b4b7c9")
+      drawPath(geoGraticule10())
+      stroke("#eaedff")
+      countryShapes.forEach((shape) => {
+        drawPath(shape)
+        fill("#f8f8fb")
+        stroke("#c9cde2")
+      })
+      ctx.restore() // stop clipping
+
+      drawPath(sphere)
       stroke("#c9cde2")
-    })
-    ctx.restore() // stop clipping
-
-    drawPath(sphere)
-    stroke("#c9cde2")
+    }
+    drawMap(projection)
+    if (projection2) drawMap(projection2)
 
     blankMap = ctx.getImageData(0, 0, width * 2, height * 2)
   }

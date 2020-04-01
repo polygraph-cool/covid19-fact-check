@@ -20,4 +20,9 @@
   .c a {
     color: inherit;
   }
+  @media (max-width: 800px) {
+    .c {
+      bottom: 0;
+    }
+  }
 </style>
