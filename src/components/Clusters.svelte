@@ -21,7 +21,7 @@
   export let iteration
 
   let width = 1200
-  $: height = width * 0.43
+  $: height = width * 0.45
 
   const types = categories
   $: bubbleSize = Math.round(width / 300)

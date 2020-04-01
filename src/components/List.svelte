@@ -50,9 +50,9 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
   $: filterIteration, pageIndex = 1
 
   $: (() => {
-    let runningYs = [0, 0, 0]
     let runningColumnId = 0
     const itemsPerRow = Math.round(windowWidth / 500)
+    let runningYs = new Array(itemsPerRow).fill(0)
     const itemWidth = 378
 
     dataWithIds.forEach(d => {
