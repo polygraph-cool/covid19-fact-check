@@ -31,6 +31,24 @@
   let hoveredClaim = null
   let canvasElement
 
+
+  const updateSpiralPositions = (n=2000) => {
+    let angle = 0
+    spiralPositions = new Array(n).fill(0).map((_, i) => {
+      const radius = Math.sqrt(i + 0.3) * bubbleSize * 1.8
+      angle += Math.asin(1 / radius) * bubbleSize * 3.3
+      angle = angle % (Math.PI * 2)
+      return [
+        Math.cos(angle) * radius,
+        Math.sin(angle) * radius,
+        angle,
+      ]
+    })
+  }
+  let spiralPositions = []
+  const debounceUpdateSpiralPositions = debounce(updateSpiralPositions, 100)
+  $: iteration, bubbleSize, debounceUpdateSpiralPositions()
+
   $: xScale = scaleLinear()
     .domain([-1, types.length])
     .range([0, width])
@@ -74,7 +92,7 @@
       const bubbleCount = data.filter(d => categoryAccessor(d) == type).length
       const r = Math.max(
         Math.sqrt(bubbleCount * Math.PI * Math.pow(bubbleSize * 1.2, 2) * (Math.sqrt(12) / Math.PI)) + 20,
-        20
+        36
       )
       const parsedColor = typeColors[type]
       const darkerColor = color(parsedColor)
@@ -96,19 +114,32 @@
     let simulation = forceSimulation(groupBubbles)
       // .force("x", forceX(d => d.x).strength(1))
       .force("x", forceX(d => d.x).strength(isVertical ? 0.5 : 0.1))
-      .force("y", forceY(d => d.y).strength(isVertical ? 0.1 : 0.5))
+      .force("y", forceY(d => d.y).strength(isVertical ? 0.1 : 0.4))
       .force("collide", forceCollide(d => d.r * 1.2).strength(0.4))
       // .force("r", forceRadial(d => d.distance).strength(5))
       .stop()
 
-    range(0, 250).forEach(i => simulation.tick())
+    let groupBubblesByCategory = {}
+    groupBubbles.forEach(d => {
+      groupBubblesByCategory[d.type] = d
+    })
 
-    const claims = data.map(d => {
+    range(0, 60).forEach(i => simulation.tick())
+
+    const runningCategoryIndices = {}
+    const claims = [...data].reverse().map(d => {
       const category = categoryAccessor(d)
       if (!category) return
+      if (!runningCategoryIndices[category]) runningCategoryIndices[category] = 0
 
-      const groupPosition = groupBubbles.find(({ type }) => type == category) || {}
-      const {x, y} = groupPosition
+      const groupPosition = groupBubblesByCategory[category]
+      if (!groupPosition) return
+
+      const [x, y] = [
+        groupPosition.x + spiralPositions[runningCategoryIndices[category]][0] / width,
+        groupPosition.y + spiralPositions[runningCategoryIndices[category]][1] / width,
+      ]
+      runningCategoryIndices[category]++
       // if (!d.category) return
       const daysAgo = timeDay.range(dateAccessor(d), new Date()).length
       const rating = ratingAccessor(d)
@@ -135,15 +166,17 @@
     }).filter(d => d)
 
     bubbles = [...claims]
-    let bubbleSimulation = forceSimulation(bubbles)
-      // .force("x", forceX(d => d.x).strength(1))
-      .force("x", forceX(d => d.x).strength(0.1))
-      .force("y", forceY(d => d.y).strength(0.1))
-      .force("collide", forceCollide(d => d.r * 1.8))
-      // .force("r", forceRadial(d => d.distance).strength(5))
-      .stop()
+    // let bubbleSimulation = forceSimulation(bubbles)
+    //   // .force("x", forceX(d => d.x).strength(1))
+    //   .force("x", forceX(d => d.x).strength(0.1))
+    //   .force("y", forceY(d => d.y).strength(0.1))
+    //   .force("collide", forceCollide(d => d.r * 1.8))
+    //   // .force("r", forceRadial(d => d.distance).strength(5))
+    //   .on("tick", drawCanvas)
+    //   .alphaMin(0.06)
+    //   // .stop()
 
-    range(0, 500).forEach(i => bubbleSimulation.tick())
+    // range(0, 500).forEach(i => bubbleSimulation.tick())
   }
 
   let delaunay = null
@@ -156,7 +189,8 @@
     )
     })
   }
-  $: iteration, bubbles, width, updateDelaunay()
+  const debounceUpdateDelaunay = debounce(updateDelaunay, 100)
+  $: iteration, bubbles, width, debounceUpdateDelaunay()
 
   $: iteration, isVertical, updateGroups()
 
@@ -245,7 +279,7 @@
       mousePosition,
       [hoveredBubble.x * width, hoveredBubble.y * width],
     )
-    if (distance < 1000) {
+    if (distance < 30) {
       hoveredClaim = hoveredBubble
     } else {
       hoveredClaim = null
@@ -299,7 +333,7 @@
         d={[
           "M", topLeftBubble.x * width - bubbleSize, topLeftBubble.y * width,
           "Q", topLeftBubble.x * width - 50, topLeftBubble.y * width,
-          topLeftBubble.x * width - 50, topLeftBubble.y * width - 50
+          topLeftBubble.x * width - 50, topLeftBubble.y * width - 45
         ].join(" ")}
       />
     {/if}
@@ -322,7 +356,7 @@
   {/if}
 
   {#if topLeftBubble}
-    <div class="annotation" style={`transform: translate(${Math.max(100, topLeftBubble.x * width - 50)}px, ${topLeftBubble.y * width - 50}px)`}>
+    <div class="annotation" style={`transform: translate(${Math.max(100, topLeftBubble.x * width - (isVertical ? 0 : 50))}px, ${topLeftBubble.y * width - 50}px)`}>
       <div class="annotation-contents">
         Each fact check is represented as a circle, which fades with age
       </div>
@@ -354,6 +388,9 @@
     /* margin: 1em 0; */
     overflow: visible;
     /* shape-rendering: crispEdges; */
+  }
+  g {
+    transition: all 0.2s ease-out;
   }
   .boundary-label {
     text-anchor: middle;
@@ -389,7 +426,7 @@
   }
   .annotation-line {
     fill: none;
-    stroke: grey;
+    stroke: #b9b6ca;
     stroke-width: 1;
   }
 </style>

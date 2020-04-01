@@ -38,14 +38,7 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
   const pageHeight = 1600
   let pageIndex = 1
 
-  $: dataWithIds = [...data].sort((a,b) => (
-    dateAccessor(a) > dateAccessor(b) ? -1 : 1
-  )).map((d,i) =>({
-      ...d,
-      id: i,
-    }))
-
-  $: ids = dataWithIds.map(({ id }) => id)
+  $: ids = data.map(({ id }) => id)
   const metadata = {}
   $: filterIteration, pageIndex = 1
 
@@ -55,7 +48,7 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
     let runningYs = new Array(itemsPerRow).fill(0)
     const itemWidth = 378
 
-    dataWithIds.forEach(d => {
+    data.forEach(d => {
       const isShowing = filterFunction(d)
 
       if (!isShowing) {
@@ -96,6 +89,7 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
     })
 
     listWidth = itemWidth * (itemsPerRow * 0.98)
+    if (itemsPerRow == 1) listWidth = null
     totalHeight = Math.max(...runningYs)
   })()
 
@@ -211,12 +205,13 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
               titleAccessor(metadata[id]).length <  90 ?   "m" :
               titleAccessor(metadata[id]).length < 160 ?   "l" :
               titleAccessor(metadata[id]).length < 200 ?  "xl" :
-                                                "xxl"
+                                                          "xxl"
             }`}
             class:hidden={!metadata[id].isShowing}
             style={[
               `transform: translate(${metadata[id].x}px, ${metadata[id].y}px)`,
               `height: ${metadata[id].height}px`,
+              `width: ${listWidth ? "345px" : null}`,
             ].join(";")}
             >
             <ListItem
@@ -252,6 +247,7 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
     /* width: 100%; */
     padding: 1em 0 10em;
     margin: 0 auto 9em;
+    width: 90%;
     /* overflow: hidden; */
   }
   .loading {
@@ -327,8 +323,8 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
     top: 0;
     left: 0;
     text-align: left;
-    width: 345px;
-    max-width: 90vw;
+    width: 100%;
+    /* max-width: 90vw; */
     /* padding-bottom: 6px;
     padding-left: 6px;
     padding-right: 2px;

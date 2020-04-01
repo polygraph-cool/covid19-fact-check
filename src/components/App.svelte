@@ -11,7 +11,7 @@
 	import ListFilter from "./ListFilter.svelte"
 	import Footer from "./Footer.svelte"
   import { debounce, flatten } from "./utils"
-  import { categoryAccessor, categoryColors, categories, ratings, sources, titleAccessor, countriesAccessor, organizationAccessor, ratingAccessor, sourceAccessor } from "./data-utils"
+  import { categoryAccessor, categoryColors, categories, dateAccessor, ratings, sources, titleAccessor, countriesAccessor, organizationAccessor, ratingAccessor, sourceAccessor } from "./data-utils"
 
 	// import rawData from "./../data/data.json"
 
@@ -27,7 +27,12 @@
 	onMount(async () => {
 		const res = await fetch(dataUrl)
 		const resJson = await res.json()
-		allData = data = resJson.data
+		allData = data = resJson.data.sort((a,b) => (
+				dateAccessor(a) > dateAccessor(b) ? -1 : 1
+			)).map((d,i) =>({
+				...d,
+				id: i,
+			}))
 		isLoading = false
 		countries = [...new Set(flatten(data.map(countriesAccessor)))].sort()
 		organizations = [...new Set(data.map(organizationAccessor))]
