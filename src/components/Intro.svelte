@@ -9,7 +9,6 @@
 
   export let data
   export let isLoading
-  export let footerElement
 
   let focusedIndex = 1
   let isHovering = false
@@ -64,17 +63,6 @@
     //   behavior: 'smooth',
     // })
   }
-
-  const onScrollToFooter = () => {
-    if (!footerElement) return
-    smoothScrollTo(
-      footerElement.offsetTop,
-      500,
-      undefined,
-      onEnd,
-    )
-  }
-
 </script>
 
 <div class="c">

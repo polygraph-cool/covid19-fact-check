@@ -260,7 +260,6 @@
   {#if highlightedClaim}
     <ItemTooltip
       item={highlightedClaim}
-      {...highlightedClaim}
       x={Math.min(width - 160, Math.max(160, highlightedClaim.x * width))}
       y={highlightedClaim.y * width - bubbleSize}
     />

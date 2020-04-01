@@ -1,7 +1,7 @@
 <script>
   import { getOrdinal } from "./utils.js"
   import { format } from "d3-format"
-  export let isOrdinal
+  export let isOrdinal = false
   export let number = false
   export let numberFormat = ",.0f"
 

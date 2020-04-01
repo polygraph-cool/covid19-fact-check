@@ -16,7 +16,6 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
   export let filterIteration
   export let filterFunction
   export let filterColor
-  export let iteration
 
   const documentGlobal = typeof document !== "undefined" && document
 
@@ -48,10 +47,7 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
 
   $: ids = dataWithIds.map(({ id }) => id)
   const metadata = {}
-  $: selectedCategory, selectedType, selectedRating, selectedOrg, selectedTag, selectedCountry, searchString,
-    filterIteration++,
-    pageIndex = 1
-  $: isFiltered = selectedCategory || selectedType || selectedRating || selectedOrg || selectedTag || selectedCountry || searchString
+  $: filterIteration, pageIndex = 1
 
   $: (() => {
     let runningYs = [0, 0, 0]
@@ -114,11 +110,11 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
     // don't scroll down page from vizes above
     if (currentScrollY <= elementY) return
 
-    containerElement.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start' ,
-    })
-    // smoothScrollTo(elementY, 300)
+    // containerElement.scrollIntoView({
+    //   behavior: 'smooth',
+    //   block: 'start' ,
+    // })
+    smoothScrollTo(elementY, 300)
   }
 
   // const filterTo = (type, newValue) => {
@@ -133,7 +129,7 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
   //   scrollToTop()
   // }
   // const debouncedOnUpdateSearchString = debounce(onUpdateSearchString, 300)
-  $: filterIteration && filterIteration > 0 && scrollToTop()
+  $: filterIteration && scrollToTop()
 
   $: listHeight = pageHeight * pageIndex
 </script>
@@ -148,8 +144,6 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
       color={filterColor}
       {data}
       {isFiltered}
-      {categories}
-      {categoryColors}
       overrideWidth={listWidth}
     />
     <!-- <div class="input">
@@ -227,7 +221,6 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
             >
             <ListItem
               item={metadata[id]}
-              {searchString}
             />
           </div>
         {/if}

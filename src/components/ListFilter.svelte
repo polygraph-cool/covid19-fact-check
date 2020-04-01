@@ -2,14 +2,12 @@
   export let label
   export let value
   export let options
-  export let scrollToTop
   export let type = "dropdown"
   export let placeholder = ""
   export let colors = {}
 
   const onSelect = option => {
     value = option == value ? null : option
-    scrollToTop()
   }
 </script>
 
@@ -27,7 +25,7 @@
     </div>
   {/if}
   {#if type == "dropdown"}
-    <select bind:value={value} on:change={scrollToTop}>
+    <select bind:value={value}>
       <option value="">Any</option>
       {#each options as option}
         <option

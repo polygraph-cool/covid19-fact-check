@@ -40,7 +40,7 @@
     const newValue = searchStringRaw
     searchString = newValue
 		// scrollToTop()
-		onUpdateFilters()
+		filterIteration++
 	}
 	const debouncedOnUpdateSearchString = debounce(onUpdateSearchString, 300)
 	$: searchStringRaw, debouncedOnUpdateSearchString()
@@ -59,13 +59,11 @@
 		&& (!searchString || ((titleAccessor(d).toLowerCase().includes(searchString.toLowerCase()))))
 	)
 
-	const onUpdateFilters = () => filterIteration++
-	// const onUpdateFilters = () => iteration++
 	$: isFiltered = searchString || selectedCategory || selectedCountry || selectedRating || selectedOrg || selectedSource
 	$: filterColor = isFiltered && (
 		selectedCategory && !(searchString || selectedCountry) ? categoryColors[selectedCategory] : null
 	)
-	$: selectedCategory, selectedCountry, selectedRating, selectedOrg, selectedSource, onUpdateFilters()
+	$: selectedCategory, selectedCountry, selectedRating, selectedOrg, selectedSource, filterIteration++
 </script>
 
 <Header />
@@ -77,7 +75,7 @@
 		{/each}
 	</select> -->
 
-	<Intro {data} {organizations} {isLoading} />
+	<Intro {data} {isLoading} />
 	<div class="input-container">
 		<div class="sticky">
 			<div class="sticky-contents">
@@ -130,11 +128,11 @@
 				<p style="max-width: 20em; margin-bottom: -5vw">
 					We also looked at what country each fact check originated in.
 				</p>
-				<MapClusters {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} {isLoading} {organizations} {countries} />
+				<MapClusters {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
 			</div>
 
 			<div class="section" id="list">
-				<List {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} />
+				<List {data} {isLoading} {isFiltered} {filterIteration} {filterFunction} {filterColor} />
 			</div>
 		{/if}
 	</div>

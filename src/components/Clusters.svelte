@@ -276,7 +276,6 @@
   {#if hoveredClaim}
     <ItemTooltip
       item={hoveredClaim}
-      {...hoveredClaim}}
       x={Math.min(width - 200, Math.max(200, hoveredClaim.x * width))}
       y={hoveredClaim.y * width - bubbleSize}
     />
