@@ -154,6 +154,7 @@
     text-decoration: none;
   }
   .title {
+    position: relative;
     display: block;
     margin-top: 2em;
     font-size: 1.4em;
@@ -163,8 +164,56 @@
     color: inherit;
     text-decoration: none;
     margin-bottom: 0.5em;
+    /* padding-bottom: 0.3em; */
     overflow: hidden;
     text-overflow: ellipsis;
+    padding-right: 0.5em;
+
+    -webkit-line-clamp: 4;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+
+  }
+  @supports not (-webkit-line-clamp: 4) {
+    .title {
+      --lh: 1.4em;
+      max-height: calc(var(--lh) * var(--max-lines));
+    }
+    .title:before {
+      /* content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 0.6em;
+      background: linear-gradient(
+        to top,
+        white 0%,
+        transparent 100%
+      );
+      z-index: 5; */
+
+      position: absolute;
+      content: "...";
+      bottom: 0;
+      right: 0.5em;
+      z-index: 5;
+    }
+    .title:after {
+      content: "";
+      position: absolute;
+      /*
+      inset-inline-end: 0;
+      */
+      right: 0.5em;
+      /* bottom: -0.5em; */
+      /* missing bottom on purpose*/
+      width: 1em;
+      height: 1.5em;
+      background: white;
+      z-index: 10;
+    }
   }
   .title b {
     background: #dfddfd;

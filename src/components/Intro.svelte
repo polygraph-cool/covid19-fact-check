@@ -345,7 +345,7 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    height: 15em;
+    height: 16.4em;
     text-align: left;
     width: 33em;
     transform: translate(-50%, -50%);
@@ -354,6 +354,7 @@
     font-size: 0.9em;
     pointer-events: all;
     cursor: pointer;
+    --max-lines: 4;
   }
   .list-item :global(.card-wrapper) {
     width: 100%;

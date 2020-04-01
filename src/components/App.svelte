@@ -158,6 +158,8 @@
 		/* align-items: center; */
 		/* text-align: center; */
 		/* background: #f3f8fb; */
+
+		--max-lines: 20;
 	}
 
 	.section {
