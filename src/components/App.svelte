@@ -30,10 +30,18 @@
 		csv(dataUrl)
 		.row(d => ({
 			...d,
-			Countries: (d["Countries"] || "").split(",")
+			date: d["When did you see the claim?"],
+			countries: (d["Countries"] || "").split(","),
+			organization: d["Organization"],
+			category: d["Category"],
+			rating: d["Final rating"],
+			lang: d["Language of your fact-check"],
+			url: d["URL to fact-checked article (in your language)"],
+			source: d["Who said/posted it?"],
+			title: d["What did you fact-check?"],
 		}))
 		.get(resJson => {
-		console.log(resJson[0])
+			console.log(resJson[0])
 			allData = data = resJson.sort((a,b) => (
 					dateAccessor(a) > dateAccessor(b) ? -1 : 1
 				)).map((d,i) =>({

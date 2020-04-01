@@ -5,12 +5,12 @@ import { flatten } from "./utils"
 // export const data = rawData
 
 export const parseDate = timeParse("%-m/%-d/%Y")
-export const dateAccessor = d => parseDate(d["When did you see the claim?"])
+export const dateAccessor = d => parseDate(d["date"])
 
 export const titleAccessor = (d={}, doStripFormatting=true) => (
   doStripFormatting
-  ? (d["What did you fact-check?"] || "").replace(/\*/g, "")
-  : d["What did you fact-check?"] || ""
+  ? (d["title"] || "").replace(/\*/g, "")
+  : d["title"] || ""
 )
 
 const sourceKeywords = {
@@ -77,7 +77,7 @@ categories.forEach((category, i) => {
 categoryColors[""] = "#656275"
 export {categoryColors}
 
-export const categoryAccessor = d => d["Category"].trim()
+export const categoryAccessor = d => d["category"].trim()
 
 export const parseSource = (str="") => {
   const words = (str.toLowerCase().match(/\S+\s*/g) || []).map(d => d.trim())
@@ -89,8 +89,8 @@ export const parseSource = (str="") => {
   return matchingSources
 }
 export const sourceAccessor = d => {
-  if (!d["Who said/posted it?"]) return []
-  return parseSource(d["Who said/posted it?"])
+  if (!d["source"]) return []
+  return parseSource(d["source"])
 }
 
 function getDomainFromUrl(url) {
@@ -112,9 +112,9 @@ function getDomainFromUrl(url) {
 
   return hostname;
 }
-export const languageAccessor = d => d["Language of your fact-check"]
+export const languageAccessor = d => d["lang"]
 
-export const urlAccessor = d => d["URL to fact-checked article (in your language)"]
+export const urlAccessor = d => d["url"]
 // export const domainAccessor = d => {
 //   const url = urlAccessor(d)
 //   if (
@@ -197,14 +197,14 @@ export const ratingPaths = {
 
 export const ratings = Object.keys(validRatings)
 export const ratingAccessor = d => {
-  const rating = d["Final rating"].toLowerCase()
+  const rating = d["rating"].toLowerCase()
   const matchingRating = ratings.find(validRating => (
     validRatings[validRating].includes(rating)
   ))
   return matchingRating || rating
 }
 
-export const organizationAccessor = d => d["Organization"]
+export const organizationAccessor = d => d["organization"]
 
 export const organizationLogos = {
   "FactCrescendo": "https://i2.wp.com/www.factcrescendo.com/wp-content/uploads/2019/07/Fact-Crescendo-Logo-01-e1569236593436.png?fit=200%2C74&ssl=1",
@@ -268,5 +268,5 @@ export const countryNameMap = {
   "North Macedonia": "Macedonia",
   "DR Congo": "Democratic Republic of the Congo",
 }
-export const countryAccessor = d => countryNameMap[d["Countries"][0]] || d["Countries"][0]
-export const countriesAccessor = d => d["Countries"].map(d => countryNameMap[d] || d)
+export const countryAccessor = d => countryNameMap[d["countries"][0]] || d["countries"][0]
+export const countriesAccessor = d => d["countries"].map(d => countryNameMap[d] || d)
