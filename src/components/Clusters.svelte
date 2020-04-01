@@ -329,7 +329,7 @@
       </g>
     {/each}
 
-    {#if topLeftBubble}
+    {#if topLeftBubble && Number.isFinite(topLeftBubble.x)}
       <path
         class="annotation-line"
         d={[

@@ -290,7 +290,7 @@
     background: linear-gradient(
       to bottom,
       #f4f5fa 30%,
-      transparent 100%
+      rgba(244, 245, 250, 0.01) 100%
     );
     z-index: 100;
     pointer-events: none;
@@ -305,7 +305,7 @@
     background: linear-gradient(
       to top,
       #f4f5fa 0%,
-      transparent 100%
+      rgba(244, 245, 250, 0.01) 100%
     );
     z-index: 100;
     pointer-events: none;
@@ -404,7 +404,7 @@
       background: linear-gradient(
         to right,
         #f4f5fa -10%,
-        transparent 100%
+        rgba(244, 245, 250, 0.01) 100%
       );
     }
     .focus:after {
@@ -416,7 +416,7 @@
       background: linear-gradient(
         to left,
         #f4f5fa -10%,
-        transparent 100%
+        rgba(244, 245, 250, 0.01) 100%
       );
     }
 

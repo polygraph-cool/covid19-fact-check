@@ -13,8 +13,6 @@
   import { debounce, flatten } from "./utils"
   import { categoryAccessor, categoryColors, categories, dateAccessor, ratings, sources, titleAccessor, countriesAccessor, organizationAccessor, ratingAccessor, sourceAccessor } from "./data-utils"
 
-	// import rawData from "./../data/data.json"
-
 	const dataUrl = "https://pudding.cool/misc/covid-fact-checker/data.json"
 	let iteration = 0
 	let filterIteration = 0
@@ -44,7 +42,6 @@
   const onUpdateSearchString = e => {
     const newValue = searchStringRaw
     searchString = newValue
-		// scrollToTop()
 		filterIteration++
 	}
 	const debouncedOnUpdateSearchString = debounce(onUpdateSearchString, 300)
@@ -71,16 +68,11 @@
 	$: selectedCategory, selectedCountry, selectedRating, selectedOrg, selectedSource, filterIteration++
 </script>
 
-<Header />
+<!-- <Header /> -->
 
 <main>
-	<!-- <select class="select" bind:value={selectedType}>
-		{#each types as type}
-			<option>{ type }</option>
-		{/each}
-	</select> -->
-
 	<Intro {data} {isLoading} />
+
 	<div class="input-container">
 		<div class="sticky">
 			<div class="sticky-contents">
@@ -97,7 +89,7 @@
 					bind:value={selectedCategory}
 				/>
 				<ListFilter
-					label="Country"
+					label="Primary Country"
 					options={countries}
 					bind:value={selectedCountry}
 				/>
@@ -119,25 +111,23 @@
 			</div>
 		</div>
 
-			<div class="section" id="categories">
-				<p style="margin-bottom: 3em; margin-top: 3em;">
-					We've grouped each of these fact-checks into categories:
-				</p>
-				<Clusters {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
-			</div>
-			<!-- <Quadrant /> -->
-			<!-- <Bubbles /> -->
+		<div class="section" id="categories">
+			<p style="margin-bottom: 3em; margin-top: 3em;">
+				We've grouped each of these fact-checks into categories:
+			</p>
+			<Clusters {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
+		</div>
 
-			<div class="section" id="countries">
-				<p class="map-title">
-					We also looked at what country each fact check originated in.
-				</p>
-				<MapClusters {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
-			</div>
+		<div class="section" id="countries">
+			<p class="map-title">
+				We also looked at what country each fact check primarily originated in.
+			</p>
+			<MapClusters {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
+		</div>
 
-			<div class="section" id="list">
-				<List {data} {isLoading} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
-			</div>
+		<div class="section" id="list">
+			<List {data} {isLoading} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
+		</div>
 	</div>
 
 </main>

@@ -8,6 +8,8 @@
   export let item
   // export let searchString
 
+  let isModal = false
+
   const formatDate = date => [
     timeFormat("%B %-d")(date),
     getOrdinal(+timeFormat("%-d")(date)),
@@ -42,9 +44,9 @@
 </script>
 
 
-<div class="card-wrapper" style={`background: ${color}`}>
+<div class="card-wrapper" class:modal={isModal} style={`background: ${color}`} on:click={() => isModal = !isModal}>
   <div class="card-contents">
-    <a class="card-contents-inner" href={url} target="_blank">
+    <div class="card-contents-inner">
       <div class="title">
         {#each titleParts as part, i}
           {#if i % 2}
@@ -120,7 +122,13 @@
         </div>
       </div>
 
-    </a>
+      {#if isModal}
+        <p>
+          { item.Explanation }
+        </p>
+      {/if}
+
+    </div>
   </div>
 </div>
 
@@ -130,6 +138,19 @@
     height: 100%;
     width: 100%;
     max-width: 90vw;
+    transition: all 0.3s ease-out;
+  }
+  .card-wrapper.modal {
+    position: fixed;
+    width: 750px;
+    height: auto;
+
+    z-index: 100;
+    /* position: fixed;
+    top: 10em;
+    bottom: 10em;
+    left: 50%;
+    transform: translate(-50%, 0); */
   }
   .card-contents {
     height: 100%;
