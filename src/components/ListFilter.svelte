@@ -11,7 +11,7 @@
   }
 </script>
 
-<div class="filter">
+<div class={`filter filter--type-${type}`}>
   <div class="label">
     { label }
   </div>
@@ -56,14 +56,19 @@
 <style>
   .filter {
     position: relative;
+    flex: 1;
+    min-width: 7em;
     margin-left: 0.6em;
     /* padding: 0.6em 0; */
     background: none;
     border: none;
     /* text-align: right; */
-    width: 15em;
     /* appearance: none; */
     /* cursor: pointer; */
+  }
+  .filter--type-input {
+    flex: 2;
+    min-width: 10em;
   }
   .label {
     padding-left: 0.7em;
@@ -71,7 +76,7 @@
     margin-bottom: 0.5em;
   }
   select {
-    max-width: 10em;
+    width: 100%;
     padding: 0.6em 0.1em 0.6em 0.6em;
     background: white;
     border: none;

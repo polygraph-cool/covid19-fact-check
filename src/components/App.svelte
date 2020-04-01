@@ -125,7 +125,7 @@
 			<!-- <Bubbles /> -->
 
 			<div class="section" id="countries">
-				<p style="max-width: 20em; margin-bottom: -5vw">
+				<p class="map-title">
 					We also looked at what country each fact check originated in.
 				</p>
 				<MapClusters {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
@@ -203,6 +203,10 @@
 		background: #f3f8fb;
 		z-index: -1;
 	} */
+	.map-title {
+		max-width: 20em;
+		margin-bottom: -5vw;
+	}
 	select {
 		position: fixed;
 		top: 0;
@@ -217,6 +221,9 @@
 		}
 		.sticky-contents {
 			flex-wrap: wrap;
+		}
+		.map-title {
+			margin-bottom: 2em;
 		}
 	}
 </style>

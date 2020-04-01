@@ -20,6 +20,11 @@
   .c a {
     color: inherit;
   }
+  @media (max-width: 1200px) {
+    .c {
+      bottom: 2em;
+    }
+  }
   @media (max-width: 800px) {
     .c {
       bottom: 0;

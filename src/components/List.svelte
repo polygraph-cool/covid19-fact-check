@@ -270,7 +270,7 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
     /* background: #f4f5fa;
     box-shadow: 0px 8px 10px -8px rgba(52, 73, 94, .2), 0 1px 1px rgba(52, 73, 94, 0.1);
     z-index: 100; */
-    padding-bottom: 2em;
+    padding-bottom: 1em;
   }
   /* .input {
     position: sticky;

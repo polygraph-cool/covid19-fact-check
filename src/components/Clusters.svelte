@@ -152,7 +152,7 @@
     d => d.y * width,
   )
 
-  $: iteration, updateGroups()
+  $: iteration, isVertical, updateGroups()
 
   const drawCanvas = () => {
     if (!canvasElement) return
