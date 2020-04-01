@@ -135,9 +135,11 @@
       const groupPosition = groupBubblesByCategory[category]
       if (!groupPosition) return
 
+      const spiralPosition = spiralPositions[runningCategoryIndices[category]] || []
+
       const [x, y] = [
-        groupPosition.x + spiralPositions[runningCategoryIndices[category]][0] / width,
-        groupPosition.y + spiralPositions[runningCategoryIndices[category]][1] / width,
+        groupPosition.x + spiralPosition[0] / width,
+        groupPosition.y + spiralPosition[1] / width,
       ]
       runningCategoryIndices[category]++
       // if (!d.category) return

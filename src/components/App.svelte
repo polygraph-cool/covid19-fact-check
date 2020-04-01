@@ -179,7 +179,7 @@
 	.sticky {
 		position: sticky;
 		top: 0;
-		margin-top: 3em;
+		margin-top: 6em;
 		padding: 0.6em 1em;
     background: #f4f5fa;
     box-shadow: 0px 8px 10px -8px rgba(52, 73, 94, .2), 0 1px 1px rgba(52, 73, 94, 0.1);
