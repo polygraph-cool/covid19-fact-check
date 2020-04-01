@@ -44,10 +44,10 @@
 </script>
 
 
-<div class="card-wrapper" class:modal={isModal} style={`background: ${color}`} on:click={() => isModal = !isModal}>
+<div class="card-wrapper" class:modal={isModal} style={`background: ${color}`}>
   <div class="card-contents">
     <div class="card-contents-inner">
-      <div class="title">
+      <a href={url} target="_blank" class="title">
         {#each titleParts as part, i}
           {#if i % 2}
             <b>
@@ -57,7 +57,7 @@
             { part }
           {/if}
         {/each}
-      </div>
+      </a>
       <div class="date">
         { formatDate(date) }
       </div>
@@ -190,7 +190,7 @@
     text-overflow: ellipsis;
     padding-right: 0.5em;
 
-    -webkit-line-clamp: 4;
+    -webkit-line-clamp: var(--max-lines);
     display: -webkit-box;
     -webkit-box-orient: vertical;
     text-overflow: ellipsis;

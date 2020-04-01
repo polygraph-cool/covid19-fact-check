@@ -19,7 +19,7 @@
       if (isHovering) return
       if (!data.length) return
       focusedIndex = Math.min(data.length - 1, focusedIndex + 1)
-    }, 6000)
+    }, 3000)
 
     return () => {
       clearInterval(interval)
