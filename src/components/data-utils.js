@@ -5,7 +5,7 @@ import { flatten } from "./utils"
 // export const data = rawData
 
 export const parseDate = timeParse("%-m/%-d/%Y")
-export const dateAccessor = d => parseDate(d["date"])
+export const dateAccessor = d => parseDate(d[""] || d["date"])
 
 export const titleAccessor = (d={}, doStripFormatting=true) => (
   doStripFormatting

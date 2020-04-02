@@ -1,7 +1,7 @@
 <script>
   import { draw, fade } from "svelte/transition"
   import { scaleOrdinal, scaleLinear, scaleSqrt } from "d3-scale"
-  import { extent, max, range } from "d3-array"
+  import { extent, max, min, range } from "d3-array"
   import { color } from "d3-color"
   import { forceSimulation, forceX, forceY, forceCollide, forceRadial } from "d3-force"
   import { Delaunay } from "d3-delaunay"
@@ -53,7 +53,10 @@
     .domain([-1, types.length])
     .range([0, width])
   $: ageScale = scaleLinear()
-    .domain(extent(data.map(dateAccessor)))
+    .domain([
+      min([new Date(), max(data.map(dateAccessor))]),
+      min(data.map(dateAccessor)),
+    ])
     .range([0.2, 1])
   $: rAgeScale = scaleLinear()
     .domain([1, 60])
@@ -124,7 +127,7 @@
       groupBubblesByCategory[d.type] = d
     })
 
-    range(0, 60).forEach(i => simulation.tick())
+    range(0, 30).forEach(i => simulation.tick())
 
     const runningCategoryIndices = {}
     const claims = [...data].reverse().map(d => {

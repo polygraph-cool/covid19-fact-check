@@ -12,6 +12,7 @@
   import { debounce, flatten } from "./utils"
   import { categoryAccessor, categoryColors, categories, dateAccessor, ratings, sources, titleAccessor, countriesAccessor, organizationAccessor, ratingAccessor, sourceAccessor } from "./data-utils"
 
+  const windowGlobal = typeof window !== "undefined" && window
 	// const dataUrl = "https://pudding.cool/misc/covid-fact-checker/data.json"
 	const dataUrl = "https://pudding.cool/misc/covid-fact-checker/data.csv"
 	let iteration = 0
@@ -20,8 +21,9 @@
 	let countries = []
 	let organizations = []
 	let isLoading = true
+	let embed = null
 
-	onMount(async () => {
+	onMount(() => {
 		// const res = await fetch(dataUrl)
 		csv(dataUrl)
 		.row(d => ({
@@ -37,8 +39,8 @@
 			title: d["What did you fact-check?"],
 		}))
 		.get(resJson => {
-			console.log(resJson[0])
-			data = resJson.sort((a,b) => (
+			data = resJson
+				.sort((a,b) => (
 					dateAccessor(a) > dateAccessor(b) ? -1 : 1
 				)).map((d,i) =>({
 					...d,
@@ -48,8 +50,9 @@
 			countries = [...new Set(flatten(data.map(countriesAccessor)))].sort()
 			organizations = [...new Set(data.map(organizationAccessor))]
 			iteration++
-			console.log(data)
 		})
+
+		// embed = windowGlobal && windowGlobal.location.
 	})
 
 	let searchString = ""
