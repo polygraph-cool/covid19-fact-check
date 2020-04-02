@@ -53,7 +53,7 @@
     .domain([-1, types.length])
     .range([0, width])
   $: ageScale = scaleLinear()
-    .domain([1, 60])
+    .domain(extent(data.map(dateAccessor)))
     .range([0.2, 1])
   $: rAgeScale = scaleLinear()
     .domain([1, 60])
@@ -143,7 +143,6 @@
       ]
       runningCategoryIndices[category]++
       // if (!d.category) return
-      const daysAgo = timeDay.range(dateAccessor(d), new Date()).length
       const rating = ratingAccessor(d)
 
       const parsedColor = typeColors[category]
@@ -161,7 +160,7 @@
         category,
         title: titleAccessor(d),
         color: parsedColor,
-        opacity: ageScale(daysAgo),
+        opacity: ageScale(dateAccessor(d)),
         // opacity: 1,
         darkerColor,
       }

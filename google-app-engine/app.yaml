@@ -1,0 +1,9 @@
+runtime: nodejs12
+env: standard
+
+handlers:
+  - url: /assets
+    static_dir: public
+
+  - url: /export/*
+    script: auto

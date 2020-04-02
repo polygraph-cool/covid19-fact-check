@@ -2,13 +2,10 @@
 	import { onMount } from 'svelte'
 	import { csv } from "d3-request"
 
+	// // import Header from "./Header.svelte"
 	import Intro from "./Intro.svelte"
-	import Timeline from "./Timeline.svelte"
-	import Header from "./Header.svelte"
 	import Clusters from "./Clusters.svelte"
 	import MapClusters from "./MapClusters.svelte"
-	import Quadrant from "./Quadrant.svelte"
-	import Bubbles from "./Bubbles.svelte"
 	import List from "./List.svelte"
 	import ListFilter from "./ListFilter.svelte"
 	import Footer from "./Footer.svelte"
@@ -19,7 +16,6 @@
 	const dataUrl = "https://pudding.cool/misc/covid-fact-checker/data.csv"
 	let iteration = 0
 	let filterIteration = 0
-	let allData = []
 	let data = []
 	let countries = []
 	let organizations = []
@@ -42,7 +38,7 @@
 		}))
 		.get(resJson => {
 			console.log(resJson[0])
-			allData = data = resJson.sort((a,b) => (
+			data = resJson.sort((a,b) => (
 					dateAccessor(a) > dateAccessor(b) ? -1 : 1
 				)).map((d,i) =>({
 					...d,
@@ -52,6 +48,7 @@
 			countries = [...new Set(flatten(data.map(countriesAccessor)))].sort()
 			organizations = [...new Set(data.map(organizationAccessor))]
 			iteration++
+			console.log(data)
 		})
 	})
 
@@ -86,7 +83,7 @@
 	$: selectedCategory, selectedCountry, selectedRating, selectedOrg, selectedSource, filterIteration++
 </script>
 
-<Header />
+<!-- <Header /> -->
 
 <main>
 	<Intro {data} {isLoading} />
