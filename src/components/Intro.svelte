@@ -54,7 +54,7 @@
     }
 
     smoothScrollTo(
-      sectionElement.offsetTop - 100,
+      sectionElement.offsetTop - 200,
       500,
       undefined,
       onEnd,
@@ -160,6 +160,8 @@
     position: relative;
     max-width: 80em;
     margin: 0 auto;
+    padding-top: 3em;
+    padding-bottom: 5em;
   }
   h1 {
 		/* font-size: 3em;
@@ -349,8 +351,7 @@
     text-align: left;
     width: 33em;
     transform: translate(-50%, -50%);
-    transition: opacity 0.5s ease-out,
-      transform 0.5s ease-out;
+    transition: all 0.5s ease-out;
     font-size: 0.9em;
     pointer-events: all;
     cursor: pointer;

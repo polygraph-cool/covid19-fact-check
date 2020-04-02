@@ -9,10 +9,9 @@
 	import List from "./List.svelte"
 	import ListFilter from "./ListFilter.svelte"
 	import Footer from "./Footer.svelte"
-  import { debounce, flatten } from "./utils"
+  import { debounce, flatten, getUrlParams } from "./utils"
   import { categoryAccessor, categoryColors, categories, dateAccessor, ratings, sources, titleAccessor, countriesAccessor, organizationAccessor, ratingAccessor, sourceAccessor } from "./data-utils"
 
-  const windowGlobal = typeof window !== "undefined" && window
 	// const dataUrl = "https://pudding.cool/misc/covid-fact-checker/data.json"
 	const dataUrl = "https://pudding.cool/misc/covid-fact-checker/data.csv"
 	let iteration = 0
@@ -22,9 +21,21 @@
 	let organizations = []
 	let isLoading = true
 	let embed = null
+	const allSections = [
+		"intro",
+		"filters",
+		"clusters",
+		"map",
+		"list",
+		"footer",
+	]
+	let sections = ["intro"]
 
 	onMount(() => {
 		// const res = await fetch(dataUrl)
+		const urlParams = getUrlParams()
+		sections = urlParams["embed"] ? urlParams["embed"].split(",") : allSections
+
 		csv(dataUrl)
 		.row(d => ({
 			...d,
@@ -51,8 +62,6 @@
 			organizations = [...new Set(data.map(organizationAccessor))]
 			iteration++
 		})
-
-		// embed = windowGlobal && windowGlobal.location.
 	})
 
 	let searchString = ""
@@ -89,68 +98,78 @@
 <!-- <Header /> -->
 
 <main>
-	<Intro {data} {isLoading} />
+	{#if sections.includes("intro")}
+		<Intro {data} {isLoading} />
+	{/if}
 
-	<div class="input-container">
-		<div class="sticky">
-			<div class="sticky-contents">
-				<ListFilter
-					label="Filter the fact checks"
-					options={categories}
-					placeholder="Search for a fact check..."
-					bind:value={searchStringRaw}
-					type="input"
-				/>
-				<ListFilter
-					label="Category"
-					options={categories}
-					bind:value={selectedCategory}
-				/>
-				<ListFilter
-					label="Primary Country"
-					options={countries}
-					bind:value={selectedCountry}
-				/>
-				<ListFilter
-					label="Rating"
-					options={ratings}
-					bind:value={selectedRating}
-				/>
-				<ListFilter
-					label="Source"
-					options={sources}
-					bind:value={selectedSource}
-				/>
-				<ListFilter
-					label="Fact-checker"
-					options={organizations}
-					bind:value={selectedOrg}
-				/>
+	{#if sections.includes("filters")}
+			<div class="sticky">
+				<div class="sticky-contents">
+					<ListFilter
+						label="Filter the fact checks"
+						options={categories}
+						placeholder="Search for a fact check..."
+						bind:value={searchStringRaw}
+						type="input"
+					/>
+					<ListFilter
+						label="Category"
+						options={categories}
+						bind:value={selectedCategory}
+					/>
+					<ListFilter
+						label="Primary Country"
+						options={countries}
+						bind:value={selectedCountry}
+					/>
+					<ListFilter
+						label="Rating"
+						options={ratings}
+						bind:value={selectedRating}
+					/>
+					<ListFilter
+						label="Source"
+						options={sources}
+						bind:value={selectedSource}
+					/>
+					<ListFilter
+						label="Fact-checker"
+						options={organizations}
+						bind:value={selectedOrg}
+					/>
+				</div>
 			</div>
-		</div>
+		{/if}
 
-		<div class="section" id="categories">
-			<p style="margin-bottom: 3em; margin-top: 3em;">
-				We've grouped each of these fact-checks into categories:
-			</p>
-			<Clusters {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
-		</div>
+		{#if sections.includes("clusters")}
+			<div class="section" id="categories">
+				<p style="margin-bottom: 3em; margin-top: 3em;">
+					We've grouped each of these fact-checks into categories:
+				</p>
+				<Clusters {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
+			</div>
+		{/if}
 
-		<div class="section" id="countries">
-			<p class="map-title">
-				We also looked at what country each fact check primarily originated in.
-			</p>
-			<MapClusters {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
-		</div>
+		{#if sections.includes("map")}
+			<div class="section" id="countries">
+				<p class="map-title">
+					We also looked at what country each fact check primarily originated in.
+				</p>
+				<MapClusters {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
+			</div>
+		{/if}
 
-		<div class="section" id="list">
-			<List {data} {isLoading} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
-		</div>
-	</div>
+		{#if sections.includes("list")}
+			<div class="section" id="list">
+				<List {data} {isLoading} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
+			</div>
+		{/if}
 
 </main>
 
-<Footer {organizations} />
+{#if sections.includes("footer")}
+	<Footer {organizations} />
+{/if}
 
 <style>
 	/* @import url('https://rsms.me/inter/inter.css'); */
@@ -158,7 +177,7 @@
 	main {
 		/* max-width: 70em; */
 		width: 100%;
-		margin: 3em auto;
+		margin: 0 auto;
 		/* padding: 6em 4em; */
 		color: #1f2025;
 		display: flex;
@@ -189,8 +208,8 @@
 	.sticky {
 		position: sticky;
 		top: 0;
-		margin-top: 6em;
-		padding: 0.6em 1em;
+		margin-top: 0.5em;
+		padding: 0.8em 1em 0.7em;
     background: #f4f5fa;
     box-shadow: 0px 8px 10px -8px rgba(52, 73, 94, .2), 0 1px 1px rgba(52, 73, 94, 0.1);
 		z-index: 500;

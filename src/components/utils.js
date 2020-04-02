@@ -1,6 +1,9 @@
 import { max, median } from "d3-array"
 import { timeDay } from "d3-time"
 
+const windowGlobal = typeof window !== "undefined" && window
+const documentGlobal = typeof document !== "undefined" && document
+
 export const getOrdinal = d => {
   const t = d % 10;
   return Math.floor((d % 100 / 10)) === 1 ? "th" :
@@ -29,8 +32,6 @@ export const flatten = arr => (
   arr.reduce((a,b) => [...a, ...b])
 )
 
-const windowGlobal = typeof window !== "undefined" && window
-const documentGlobal = typeof document !== "undefined" && document
 // grabbed from https://stackoverflow.com/questions/17722497/scroll-smoothly-to-specific-element-on-page
 export const smoothScrollTo = (elementY, duration, element=documentGlobal && documentGlobal.scrollingElement, onEnd=() => {}) => {
   var startingY = element.scrollTop;
@@ -216,3 +217,17 @@ export const scaleCanvas = (canvas, context, width, height) => {
   context.scale(ratio, ratio);
 }
 
+
+
+export const getUrlParams = () => {
+  if (!windowGlobal) return
+  const parts = windowGlobal.location.search.slice(1).split("&")
+  if (!parts) return
+  let params = {}
+  parts.forEach(part => {
+    const [key, value] = part.split("=")
+    if (!key) return
+    params[key] = value
+  })
+  return params
+}
