@@ -90,7 +90,6 @@
   let groupBubbles = []
   let bubbles = []
   const updateGroups = () => {
-    console.log("updateGroups")
     const groups = types.map((type, i) => {
       const angle = 360 / types.length * i
       const [x, y] = getPositionFromAngle(angle, 100)
@@ -115,7 +114,6 @@
         darkerColor,
       }
     }).filter(d => d)
-    console.log("groups", groups[0])
 
     groupBubbles = [...groups]
     let simulation = forceSimulation(groupBubbles)
@@ -191,7 +189,6 @@
 
   let delaunay = null
   const updateDelaunay = () => {
-    console.log("updateDelaunay")
     setTimeout(() => {
     delaunay = Delaunay.from(
       bubbles,
@@ -241,6 +238,9 @@
       const isBubbleFilteredOut = isFiltered && !filterFunction(d)
       const isBubbleFilteredIn = isFiltered && !isBubbleFilteredOut
       if (!isFiltered) ctx.globalAlpha = opacity
+      console.log({
+        isBubbleFilteredOut, isBubbleFilteredIn, isFiltered
+      })
       ctx.beginPath()
       // if (Path2D) {
       //   ctx.moveTo(x * width, y * width)
@@ -254,6 +254,10 @@
                                             color
       ctx.fill()
       console.log("bubbleSize", bubbleSize)
+      console.log("width", width)
+      console.log("color", isBubbleFilteredOut ? "#fff" :
+        isBubbleFilteredIn && filterColor ? filterColor || color :
+                                            color)
 
       ctx.beginPath()
       ctx.arc(x * width, y * width, bubbleSize, 0, 2 * Math.PI, false)
@@ -272,6 +276,8 @@
   $: width, bubbles, filterIteration, debouncedDrawCanvas()
 
   $: topLeftBubble = delaunay && bubbles[delaunay.find(width * 0.05, 0)]
+  $: console.table(topLeftBubble)
+  $: console.log({isVertical})
 
   // const onMouseOver = point => {
   //   hoveredClaim = point
