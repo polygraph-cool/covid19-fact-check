@@ -21,6 +21,7 @@
   export let iteration
 
   let width = 1200
+  $: constant = width / 1000
   $: isVertical = width < 800
   $: height = width * (
     isVertical ? 1.25 :
@@ -106,10 +107,10 @@
 
       return {
         type,
-        r: r / width,
-        labelR: Math.max(r + 13, 30) / width,
-        x: (x + width / 2) / width,
-        y: (y + height / 2) / width,
+        r: r / constant,
+        labelR: Math.max(r + 13, 30) / constant,
+        x: (x + width / 2) / constant,
+        y: (y + height / 2) / constant,
         color: parsedColor,
         darkerColor,
       }
@@ -144,8 +145,8 @@
       const spiralPosition = spiralPositions[runningCategoryIndices[category]] || []
 
       const [x, y] = [
-        groupPosition.x + spiralPosition[0] / width,
-        groupPosition.y + spiralPosition[1] / width,
+        groupPosition.x + spiralPosition[0] / constant,
+        groupPosition.y + spiralPosition[1] / constant,
       ]
       runningCategoryIndices[category]++
       // if (!d.category) return
@@ -157,12 +158,12 @@
         .formatHex()
 
       if (i < 3) {
-        console.table({x, y, width, r: bubbleSize / width})
+        console.table({x, y, width, r: bubbleSize / constant})
         console.log(spiralPosition)
       }
       return {
         ...d,
-        r: bubbleSize / width,
+        r: bubbleSize / constant,
         x: x,
         y: y,
         // x: x + ((ratingOffsets[rating] || [])[0] || 0),
@@ -195,8 +196,8 @@
     setTimeout(() => {
     delaunay = Delaunay.from(
       bubbles,
-      d => d.x * width,
-      d => d.y * width,
+      d => d.x * constant,
+      d => d.y * constant,
     )
     })
   }
@@ -213,7 +214,7 @@
     ctx.globalAlpha = 0.2
     groupBubbles.forEach(({x, y, r, color, type}, i) => {
       let gradient = ctx.createRadialGradient(
-        x * width, y * width, 0, x * width, y * width, r * width,
+        x * constant, y * constant, 0, x * constant, y * constant, r * constant,
       )
 
       gradient.addColorStop(0, color)
@@ -222,7 +223,7 @@
       ctx.fillStyle = gradient
 
       ctx.beginPath()
-      ctx.arc(x * width, y * width, r * width, 0, 2 * Math.PI, false)
+      ctx.arc(x * constant, y * constant, r * constant, 0, 2 * Math.PI, false)
       // ctx.fillStyle = color
       ctx.fill()
     })
@@ -230,7 +231,7 @@
     // ctx.globalAlpha = 1
     // groupBubbles.forEach(({x, y, r, darkerColor, type}, i) => {
     //   ctx.fillStyle = darkerColor
-    //   fillTextCircle(ctx, type.toUpperCase(), x * width, y * width, r * width * 1.1)
+    //   fillTextCircle(ctx, type.toUpperCase(), x * constant, y * constant, r * constant * 1.1)
     // })
 
     ctx.globalAlpha = 1
@@ -242,19 +243,19 @@
       if (!isFiltered) ctx.globalAlpha = opacity
       ctx.beginPath()
       // if (Path2D) {
-      //   ctx.moveTo(x * width, y * width)
+      //   ctx.moveTo(x * constant, y * constant)
       //   const path = new Path2D("M0.834766 0.0570311C0.653906 0.114843 0.487891 0.215234 0.351563 0.351561C0.126563 0.576561 0 0.881638 0 1.2V7.59998C0 7.7617 0.0972656 7.90779 0.246875 7.96951C0.353125 8.01365 0.471094 8.00896 0.571094 7.96131C0.611719 7.94216 0.649609 7.91599 0.682813 7.88279L2.16563 6.39998H6.8C7.11836 6.39998 7.42344 6.27342 7.64844 6.04842C7.87344 5.82342 8 5.51834 8 5.19998V1.2C8 0.881638 7.87344 0.576561 7.64844 0.351561C7.42344 0.126562 7.11836 0 6.8 0H1.2C1.075 0 0.951953 0.0195312 0.834766 0.0570311Z")
       // } else {
-      //   // ctx.arc(x * width, y * width, r * width, 0, 2 * Math.PI, false)
+      //   // ctx.arc(x * constant, y * constant, r * constant, 0, 2 * Math.PI, false)
       // }
-      ctx.arc(x * width, y * width, bubbleSize, 0, 2 * Math.PI, false)
+      ctx.arc(x * constant, y * constant, bubbleSize, 0, 2 * Math.PI, false)
       ctx.fillStyle = isBubbleFilteredOut ? "#fff" :
         isBubbleFilteredIn && filterColor ? filterColor || color :
                                             color
       ctx.fill()
 
       ctx.beginPath()
-      ctx.arc(x * width, y * width, bubbleSize, 0, 2 * Math.PI, false)
+      ctx.arc(x * constant, y * constant, bubbleSize, 0, 2 * Math.PI, false)
       ctx.strokeStyle = darkerColor
       ctx.stroke()
     })
@@ -288,7 +289,7 @@
     const hoveredBubble = bubbles[pointIndex] || {}
     const distance = getDistanceBetweenPoints(
       mousePosition,
-      [hoveredBubble.x * width, hoveredBubble.y * width],
+      [hoveredBubble.x * constant, hoveredBubble.y * constant],
     )
     if (distance < 30) {
       hoveredClaim = hoveredBubble
@@ -308,7 +309,7 @@
 
   <svg {width} {height}>
     {#each groupBubbles as { type, x, y, r, labelR, color, darkerColor }, i}
-      <g fill={color} transform={`translate(${x * width}, ${y * width})`}>
+      <g fill={color} transform={`translate(${x * constant}, ${y * constant})`}>
         <!-- <circle
           r={r}
           fill-opacity="0.1"
@@ -317,9 +318,9 @@
         <path
           class="hidden"
           d={[
-            ["M", 0, -((labelR * width) - 16)].join(" "),
-            ["A", ((labelR * width) - 16), ((labelR * width) - 16), 0, 0, 1, 0, ((labelR * width) - 16)].join(" "),
-            ["A", ((labelR * width) - 16), ((labelR * width) - 16), 0, 0, 1, 0, -((labelR * width) - 16)].join(" "),
+            ["M", 0, -((labelR * constant) - 16)].join(" "),
+            ["A", ((labelR * constant) - 16), ((labelR * constant) - 16), 0, 0, 1, 0, ((labelR * constant) - 16)].join(" "),
+            ["A", ((labelR * constant) - 16), ((labelR * constant) - 16), 0, 0, 1, 0, -((labelR * constant) - 16)].join(" "),
           ].join(" ")}
           fill="none"
           id={`path-${type}`}
@@ -342,9 +343,9 @@
       <path
         class="annotation-line"
         d={[
-          "M", topLeftBubble.x * width - bubbleSize, topLeftBubble.y * width,
-          "Q", topLeftBubble.x * width - 50, topLeftBubble.y * width,
-          topLeftBubble.x * width - 50, topLeftBubble.y * width - 45
+          "M", topLeftBubble.x * constant - bubbleSize, topLeftBubble.y * constant,
+          "Q", topLeftBubble.x * constant - 50, topLeftBubble.y * constant,
+          topLeftBubble.x * constant - 50, topLeftBubble.y * constant - 45
         ].join(" ")}
       />
     {/if}
@@ -353,21 +354,21 @@
   {#if hoveredClaim}
     <ItemTooltip
       item={hoveredClaim}
-      x={Math.min(width - 200, Math.max(200, hoveredClaim.x * width))}
-      y={hoveredClaim.y * width - bubbleSize}
+      x={Math.min(constant - 200, Math.max(200, hoveredClaim.x * constant))}
+      y={hoveredClaim.y * constant - bubbleSize}
     />
     <div
       class="hovered-claim-highlight"
       style={`
         height: ${bubbleSize * 2 + 1.5}px;
         width: ${bubbleSize * 2 + 1.5}px;
-        transform: translate(${hoveredClaim.x * width - bubbleSize - 2}px, ${hoveredClaim.y * width - bubbleSize - 2}px);
+        transform: translate(${hoveredClaim.x * constant - bubbleSize - 2}px, ${hoveredClaim.y * constant - bubbleSize - 2}px);
       `}
     />
   {/if}
 
   {#if topLeftBubble}
-    <div class="annotation" style={`transform: translate(${Math.max(100, topLeftBubble.x * width - (isVertical ? 0 : 50))}px, ${topLeftBubble.y * width - 50}px)`}>
+    <div class="annotation" style={`transform: translate(${Math.max(100, topLeftBubble.x * constant - (isVertical ? 0 : 50))}px, ${topLeftBubble.y * constant - 50}px)`}>
       <div class="annotation-contents">
         Each fact check is represented as a circle, which fades with age
       </div>
