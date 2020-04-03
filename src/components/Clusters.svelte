@@ -270,7 +270,7 @@
   $: debouncedDrawCanvas()
   $: width, bubbles, filterIteration, debouncedDrawCanvas()
 
-  $: topLeftBubble = delaunay && bubbles[delaunay.find(width * 0.05, 0)]
+  $: topLeftBubble = delaunay && bubbles[delaunay.find(constant * 0.05, 0)]
 
   // const onMouseOver = point => {
   //   hoveredClaim = point
@@ -354,7 +354,7 @@
   {#if hoveredClaim}
     <ItemTooltip
       item={hoveredClaim}
-      x={Math.min(constant - 200, Math.max(200, hoveredClaim.x * constant))}
+      x={Math.min(width - 200, Math.max(200, hoveredClaim.x * constant))}
       y={hoveredClaim.y * constant - bubbleSize}
     />
     <div
