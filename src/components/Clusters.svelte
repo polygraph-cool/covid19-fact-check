@@ -158,8 +158,9 @@
         .formatHex()
 
       if (i < 3) {
-        console.table({x, y, width, r: bubbleSize / constant})
+        console.table({x, y})
         console.log(spiralPosition)
+        console.log(category, groupPosition, runningCategoryIndices[category], constant)
       }
       return {
         ...d,
