@@ -253,11 +253,13 @@
         isBubbleFilteredIn && filterColor ? filterColor || color :
                                             color
       ctx.fill()
+      if (i < 3) {
       console.log("bubbleSize", bubbleSize)
       console.log("width", width)
       console.log("color", isBubbleFilteredOut ? "#fff" :
         isBubbleFilteredIn && filterColor ? filterColor || color :
                                             color)
+      }
 
       ctx.beginPath()
       ctx.arc(x * width, y * width, bubbleSize, 0, 2 * Math.PI, false)
