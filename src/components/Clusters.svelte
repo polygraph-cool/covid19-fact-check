@@ -132,7 +132,6 @@
     })
 
     range(0, 50).forEach(i => simulation.tick())
-    console.log("groupBubbles", groupBubbles[0])
 
     const runningCategoryIndices = {}
     const claims = [...data].reverse().map((d, i) => {
@@ -158,11 +157,6 @@
         .darker(0.3)
         .formatHex()
 
-      if (i < 3) {
-        console.table({x, y})
-        console.log(spiralPosition)
-        console.log(category, groupPosition, runningCategoryIndices[category], constant)
-      }
       return {
         ...d,
         r: bubbleSize / constant,
