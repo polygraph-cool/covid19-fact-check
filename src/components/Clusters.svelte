@@ -91,6 +91,7 @@
   let groupBubbles = []
   let bubbles = []
   const updateGroups = () => {
+    updateSpiralPositions()
     const groups = types.map((type, i) => {
       const angle = 360 / types.length * i
       const [x, y] = getPositionFromAngle(angle, 100)
