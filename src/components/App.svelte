@@ -6,6 +6,7 @@
 	import Intro from "./Intro.svelte"
 	import Clusters from "./Clusters.svelte"
 	import MapClusters from "./MapClusters.svelte"
+	import Map from "./Map.svelte"
 	import List from "./List.svelte"
 	import ListFilter from "./ListFilter.svelte"
 	import Footer from "./Footer.svelte"
@@ -155,7 +156,7 @@
 				<p class="map-title">
 					We also looked at what country each fact check primarily originated in.
 				</p>
-				<MapClusters {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
+				<Map {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
 			</div>
 		{/if}
 

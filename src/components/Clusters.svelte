@@ -23,7 +23,9 @@
   let width = 1200
   $: isVertical = width < 800
   $: height = width * (
-    isVertical ? 1.25 : 0.5
+    isVertical ? 1.25 :
+    width < 1200 ? 0.66 :
+      0.5
   )
 
   const types = categories
@@ -88,6 +90,7 @@
   let groupBubbles = []
   let bubbles = []
   const updateGroups = () => {
+    console.log("updateGroups")
     const groups = types.map((type, i) => {
       const angle = 360 / types.length * i
       const [x, y] = getPositionFromAngle(angle, 100)
@@ -112,6 +115,7 @@
         darkerColor,
       }
     }).filter(d => d)
+    console.log("groups", groups[0])
 
     groupBubbles = [...groups]
     let simulation = forceSimulation(groupBubbles)
@@ -127,7 +131,8 @@
       groupBubblesByCategory[d.type] = d
     })
 
-    range(0, 30).forEach(i => simulation.tick())
+    range(0, 50).forEach(i => simulation.tick())
+    console.log("groupBubbles", groupBubbles[0])
 
     const runningCategoryIndices = {}
     const claims = [...data].reverse().map(d => {
@@ -168,6 +173,7 @@
         darkerColor,
       }
     }).filter(d => d)
+    console.log("claims", claims[0])
 
     bubbles = [...claims]
     // let bubbleSimulation = forceSimulation(bubbles)
@@ -185,6 +191,7 @@
 
   let delaunay = null
   const updateDelaunay = () => {
+    console.log("updateDelaunay")
     setTimeout(() => {
     delaunay = Delaunay.from(
       bubbles,
@@ -200,6 +207,7 @@
 
   const drawCanvas = () => {
     if (!canvasElement) return
+    console.log("drawCanvas")
     const ctx = canvasElement.getContext("2d")
     scaleCanvas(canvasElement, ctx, width, height)
 
@@ -210,7 +218,7 @@
       )
 
       gradient.addColorStop(0, color)
-      gradient.addColorStop(0.7, color)
+      gradient.addColorStop(0.5, color)
       gradient.addColorStop(1, `${color}00`)
       ctx.fillStyle = gradient
 
@@ -245,6 +253,7 @@
         isBubbleFilteredIn && filterColor ? filterColor || color :
                                             color
       ctx.fill()
+      console.log("bubbleSize", bubbleSize)
 
       ctx.beginPath()
       ctx.arc(x * width, y * width, bubbleSize, 0, 2 * Math.PI, false)
