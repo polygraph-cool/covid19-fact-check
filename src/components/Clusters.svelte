@@ -277,6 +277,8 @@
   // }
 
   $: onMouseMove = e => {
+    if (!delaunay) return
+
     const x = e.clientX
       - canvasElement.getBoundingClientRect().left
     const y = e.clientY
