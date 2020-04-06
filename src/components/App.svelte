@@ -173,7 +173,14 @@
 {/if}
 
 <style>
-	/* @import url('https://rsms.me/inter/inter.css'); */
+	@font-face {
+		font-family: "Product Sans";
+		/* src: url('assets/Product Sans Regular.eot'); */
+		src: url('assets/Product Sans Regular.ttf') format('truetype');
+			/* url('assets/Product Sans Regular.eot?#iefix') format('embedded-opentype'),
+			url('assets/Product Sans Regular.woff2') format('woff2'),
+			url('assets/Product Sans Regular.woff') format('woff'), */
+	}
 
 	main {
 		/* max-width: 70em; */
@@ -183,6 +190,7 @@
 		color: #1f2025;
 		display: flex;
 		flex-direction: column;
+		font-family: "Product Sans", Helvetica, Arial, sans-serif;
 		/* align-items: center; */
 		/* text-align: center; */
 		/* background: #f3f8fb; */
