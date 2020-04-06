@@ -385,7 +385,7 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
     left: 50%;
     appearance: none;
     font-size: 1.3em;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     background: none;
     border: none;

@@ -415,7 +415,7 @@
     text-transform: uppercase;
     letter-spacing: 0.1em;
     font-size: 0.7em;
-    font-weight: 600;
+    font-weight: 700;
     user-select: none;
   }
   .hidden {

@@ -173,14 +173,18 @@
 {/if}
 
 <style>
+	/* @font-face {
+		font-family: "Product Sans";
+		src: url('product_regular.woff2') format('woff2'),
+			url('Product Sans Regular.ttf') format('truetype');
+			font-weight: 500;
+	}
 	@font-face {
 		font-family: "Product Sans";
-		/* src: url('assets/Product Sans Regular.eot'); */
-		src: url('assets/Product Sans Regular.ttf') format('truetype');
-			/* url('assets/Product Sans Regular.eot?#iefix') format('embedded-opentype'),
-			url('assets/Product Sans Regular.woff2') format('woff2'),
-			url('assets/Product Sans Regular.woff') format('woff'), */
-	}
+		src: url('product_bold.woff2') format('woff2'),
+			url('Product Sans Bold.ttf') format('truetype');
+			font-weight: 700;
+	} */
 
 	main {
 		/* max-width: 70em; */

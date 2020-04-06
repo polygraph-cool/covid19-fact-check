@@ -241,7 +241,7 @@
       </g>
     {/each}
 
-    <!-- <text transform={`translate(${ width / 2 }, 20)`} style={"font-weight: 600"}>
+    <!-- <text transform={`translate(${ width / 2 }, 20)`} style={"font-weight: 700"}>
       Medical Consensus
     </text>
       <text transform={`translate(${xPositions[c]}, ${60})`}>
@@ -249,7 +249,7 @@
       </text>
     {/each} -->
 
-    <!-- <text transform={`translate(${ 0 }, ${height / 2}) rotate(-90)`} style={"font-weight: 600"}>
+    <!-- <text transform={`translate(${ 0 }, ${height / 2}) rotate(-90)`} style={"font-weight: 700"}>
       Medical Consensus
     </text>
       <text transform={`translate(${60}, ${yPositions[c]})`}>

@@ -113,7 +113,7 @@
     /* text-transform: uppercase; */
     /* letter-spacing: 0.06em; */
     font-size: 0.6em;
-    /* font-weight: 600; */
+    /* font-weight: 700; */
     height: 1em;
     width: 1em;
     display: flex;

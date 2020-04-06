@@ -458,7 +458,7 @@
     /* fill: #171c4f; */
     /* mix-blend-mode: multiply; */
     text-anchor: middle;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 0.86em;
     dominant-baseline: middle;
   }

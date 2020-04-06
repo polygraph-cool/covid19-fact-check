@@ -244,7 +244,7 @@
     left: -0.3em;
     color: #8b87c5;
     font-size: 0.7em;
-    font-weight: 600;
+    font-weight: 700;
     /* opacity: 0; */
     /* transform: translateY(-50%); */
   }
@@ -253,7 +253,7 @@
     letter-spacing: 0.16em;
     color: #8b87c5;
     font-size: 0.7em;
-    font-weight: 600;
+    font-weight: 700;
   }
   .scroll-list-item-label {
     font-size: 1.1em;
@@ -316,7 +316,7 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    /* font-weight: 600; */
+    /* font-weight: 700; */
     text-align: center;
     opacity: 0.6;
     font-style: italic;
@@ -327,7 +327,7 @@
     top: 0;
     left: 50%;
     text-align: center;
-    font-weight: 600;
+    font-weight: 700;
     /* text-transform: uppercase;
     letter-spacing: 0.1em; */
     transform: translateX(-50%);

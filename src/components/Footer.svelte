@@ -67,12 +67,12 @@
   }
   .org {
     padding: 0.6em 1em;
-    font-weight: 600;
+    font-weight: 700;
     opacity: 0.6;
   }
   .inline-link {
     color: inherit;
-    font-weight: 600;
+    font-weight: 700;
   }
   .gni {
     margin-top: 2em;

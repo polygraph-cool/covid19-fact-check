@@ -181,7 +181,7 @@
     font-size: 1.4em;
     line-height: 1.4em;
     /* font-family: Georgia, serif; */
-    /* font-weight: 600; */
+    /* font-weight: 700; */
     color: inherit;
     text-decoration: none;
     margin-bottom: 0.5em;
@@ -276,7 +276,7 @@
     background: #1d1e24;
     color: white;
     font-size: 0.9em;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
   }
