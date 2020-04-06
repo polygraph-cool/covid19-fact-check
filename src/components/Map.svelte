@@ -127,6 +127,7 @@
     data.forEach(d => {
       const country = countryAccessor(d)
       if (!country) return
+      if (isFiltered && !filterFunction(d)) return
       if (!claimsByCountry[country]) claimsByCountry[country] = []
       claimsByCountry[country].push(d)
     })
@@ -199,7 +200,7 @@
     // range(0, 220).forEach(i => simulation.tick())
     // console.log("simu Map")
   }
-  $: iteration, isVertical, updateBubbles()
+  $: iteration, filterIteration, isVertical, updateBubbles()
 
   let delaunay = []
 
