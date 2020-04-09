@@ -154,11 +154,12 @@
 			</div>
 		{/if}
 
+		<p class="map-title" style="margin-top: 3em; margin-bottom: -3em">
+			We also looked at what country each fact check primarily originated in.
+		</p>
+
 		{#if sections.includes("map")}
 			<div class="section" id="countries">
-				<p class="map-title">
-					We also looked at what country each fact check primarily originated in.
-				</p>
 				<Map {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
 			</div>
 		{/if}
