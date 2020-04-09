@@ -1,4 +1,5 @@
 import { timeParse } from "d3-time-format"
+import { color, hsl } from "d3-color"
 import { flatten } from "./utils"
 // import rawData from "./../data/data.json"
 
@@ -216,40 +217,90 @@ export const organizationLogos = {
   "Demagog": "https://demagog.org.pl/wp-content/uploads/2018/12/cropped-logo_demagog.png",
 }
 
-const tagMap = {
-  // "Face masks": [ "face mask" ],
-  "Prevention": [ "gloves", "prevent", "gargling", "disinfectant", "protect", "will not kill", "dies at a temperature" ],
-  "Cures": [ "cure", "cured", "gargling", "remedy", "treat", "treatment", ],
-  "Lockdown": [ "lock down", "stay inside", "suspend operations", "confinement", "quarantine", "quarantined", ],
-  "Vaccines": [ "vaccines", ],
-  "Respirator": [ "respirators", ],
-  "Medicine": [ "medication", "medicine", ],
-  "Alcohol": [ "alcoholic" ],
-  // "Detection": [ "detect", "test", "tests", ],
-  "Hospitals": [ "hospital", ],
-  "Painkillers": [ "ibuprofen", "tylenol", "nsaid", "nsaids" ],
-  "Religion": [ "muslim", "muslims", "christians", "religion", ],
-  "Animals": [ "dog", "dogs", "bat", "bats", "cat", "cats", ],
-  // "Origins": [ "was created", "invented by", ],
-  "Predictions": [ "predicted", ],
-  "Laws": [ "law", ],
-  // "Aid": [ "donation", "donations", ],
-  "Food": [ "supermarket", "grocery", ],
-  "Travel bans": [ "borders", "enter or leave", ]
+const allTags = {
+  Medical: {
+    "Medical equipment": [ "respirator", "respirators", "ventilator", "ventilators", "face mask", "masks", ],
+    "Medicine": [ "medication", "medicines", "ibuprofen", "tylenol", "nsaid", "nsaids", ],
+    "Hospitals": [ "hospital", "doctor", "doctors", "nurse", "nurses", ],
+    "Insurance": [],
+    "Vaccines": [ "vaccine", ],
+  },
+  Governments: {
+    "Crime": [ "steal", "murder", "murdered", "rob", "robbed", "robbery", "killing", "cannibalism", "cocaine", "scam", "looting", ],
+    "Aid": [ "donation", "donations", "donated", "donate", "donating", "giving away", "give you free", "for free", "free internet", ],
+    "Laws": [ "law", "arrested", ],
+    "Governments": ["government", "goverment", "shortage", "governor", "senator", "cdc", "election", "elections", "military", "suspended", "minister", "ministry", "citizen", "president", "department of health", "police", "officials", ],
+    "Lockdown": [ "lock down", "locked down", "stay inside", "suspend operations", "confinement", "quarantine", "quarantined", "gatherings are banned", "must remain in their homes", "gatherings", "curfew",  ],
+  },
+  C: {
+    "Prevention": [ "gloves", "prevent", "gargling", "disinfectant", "disinfectants", "protect", "will not kill", "dies at a temperature", "ward off", "prevents", "summer", "degrees", "combatting", "avoid", "social distancing", "santizer", "sanitization", "disinfect", "kill corona", "gargle", "gargling", "preventing", "can kill", "eliminates corona", "contaminated", "weed kills", "on any surface", "kills the virus", "immunity", "can be slowed", "preventative", "preventive", "kills the 2019", "leave your shoes outside", "fight against corona", "kill all the virus", "desinfectants", "sanitizer", "disinfection", "warm climate", "disinfected", "warm places", "kill the virus", "kills the new corona", "contain corona", "contain the corona", "sterilize", "kills corona", "helps against corona", "against the virus", "helps fight against corona", "stop the new corona", "fumigated", "kill the corona", ],
+    "Cures": [ "cure", "cured", "remedy", "treat", "treatment", "chloroquine", "onion", "drug", "heal", "healed", "garlic", "treating", "antidote", ],
+    "Symptoms": ["runny nose", "cough", ],
+    "Detection": [ "detect", "test", "tests", "testing", "antibodies", "diagnose", "diagnosis", "to check if you have corona", "tell you if you have", "check for corona", "holding your breath", "hold your breath", ],
+    "Risk factors": ["airborne", "in air", "increases risk", "increases coronavirus risk", "transmitted", "increases your chances of getting", "exposes people to", "prone to get", ],
+  },
+  D: {
+    "Origins": [ "was created", "invented by", "started because", "invented the corona", "came from", "was produced by", "created the virus", "it was lab created", "lab-made corona", "responsible for the pandemic", "caused the corona", "biological warfare", "origin", "was engineered by scientists", "patented the virus", "virus is patented", "is man made", "reason for corona", "covid 19 was invented", ],
+    "Conspiracies": ["chinese secret program", "weapon", "permission to kill", "spies", "cover up", "conspiracy", "bioweapon", "political war", "secret invasion", "cov is man made", "train marked with covid", ],
+    "Predictions": [ "predicted", "predicts", "foresaw", "caused by", "originated in", "forseen", ],
+    "Other diseases": ["the flu", "common cold", "cholera", "hiv", "rabies", "common flu", "a cold", "the cold", "the damn flu", "seasonal flu", "h1n1", ],
+    "Spread": [ "tested positive", "positive", "transmit", "transmitted", "appears in", "was infected",  "new case", "confirmed cases", "is a person with", "a case", "spreading", "confirmed case", "have died", "death toll", "is in", "are infected", "cases in", "cases were reported", "are cases in", "first cases", "first case", "first corona", "infected", "fatality rate", "has reached", "died in", "case infects", "numbers", "first", "cases", "case of cov", "corpse", "corpses", "lying in street", "lying on the ground", "lying on the streets", "coffins", ],
+    "Individuals": ["in intensive care", "was diagnosed", "has been diagnosed", "employee with covid", "has the corona", "has corona", "has the new corona", "has covid", ],
+  },
+  Other: {
+    "Animals": [ "dog", "dogs", "bat", "bats", "cat", "cats", "chicken", "chickens", "deer", "deers", "lions", "crocodiles", "coyotes", "pig", "pigs", "crab", "orangutan", "whales", "pets", "sheep", "pangolin", "hornets", "fish", "dolphins", ],
+    "Food": [ "supermarket", "supermarkets", "grocery", "beer", "meat", "vegetable", "fruit", "market", "markets", "alcohol", "alcoholic", "foods", "ice cream", "cabbage", "herbs", ],
+    "Religion": [ "muslim", "muslims", "christians", "religion", "pray for", "islam", "islamic", "ritual", "mecca", "quran", "saint", "pilgrimage", "prayer group", ],
+    "Travel": [ "borders", "enter or leave", "airport", "airports", "flights", "flight", "tourist", "tourists", "tourism", ],
+    "Videos": ["video", ],
+  }
 }
 
-export const tags = Object.keys(tagMap)
+export const tags = flatten(Object.values(allTags).map(Object.keys))
+export const tagCategories = Object.keys(allTags)
 
-export const tagsAccessor = d => {
-  const str = titleAccessor(d).toLowerCase()
-  const words = (str.toLowerCase().match(/\S+\s*/g) || []).map(d => d.trim())
+let tagMap = {}
+let tagColors = {}
+let tagCategoryMap = {}
+const tweakColor = (initialColor, numSteps) => {
+  let hslColor = hsl(initialColor)
+  hslColor.h +=  13 * numSteps
+  hslColor.s -=  0.1 * numSteps
+  hslColor.l +=  0.1 * numSteps
+  return hslColor.formatHex()
+}
+Object.keys(allTags).forEach((category, i) => {
+  let categoryColor = color(colors[i % (colors.length - 1)]).darker(-1).brighter(-1).formatHex()
+  Object.keys(allTags[category]).map(tag => {
+    tagMap[tag] = allTags[category][tag]
+    tagCategoryMap[tag] = category
+    // tagColors[tag] = tweakColor(colors[i % (colors.length - 1)], i - 2)
+    tagColors[tag] = colors[i % (colors.length - 1)]
+  })
+})
+tagColors[""] = "#656275"
+export {tagCategoryMap}
+export {tagColors}
+
+export const getMatchingTags = str => {
+  const normalizedStr = str.toLowerCase().replace(/-/g, " ").replace(/[^0-9a-z ]/gi, '')
+  const words = (normalizedStr.match(/\S+\s*/g) || []).map(d => d.trim())
   const matchingTags = tags.filter(tag => (
-    [tag.toLowerCase(), ...tagMap[tag]].filter(keyword => (
-      words.includes(keyword)
-    )).length > 0
+      [tag.toLowerCase(), ...tagMap[tag]].filter(keyword => (
+        keyword.split(" ").length > 1
+          ? normalizedStr.includes(keyword)
+          : words.includes(keyword)
+      )).length > 0
   ))
+
   return matchingTags
 }
+export const tagsAccessor = d => d["tags"] || []
+//   const str = titleAccessor(d).toLowerCase()
+//   return getMatchingTags(str)
+// }
+
+export const tagAccessor = d => tagsAccessor(d)[0] || ""
 
 
 export const countryNameMap = {

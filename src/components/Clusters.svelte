@@ -30,7 +30,7 @@
   )
 
   const types = categories
-  $: bubbleSize = Math.round(width / 300)
+  $: bubbleSize = Math.round(width / 250)
   let hoveredClaim = null
   let canvasElement
 
@@ -121,7 +121,7 @@
     let simulation = forceSimulation(groupBubbles)
       // .force("x", forceX(d => d.x).strength(1))
       .force("x", forceX(d => d.x).strength(isVertical ? 0.5 : 0.1))
-      .force("y", forceY(d => d.y).strength(isVertical ? 0.1 : 0.4))
+      .force("y", forceY(d => d.y).strength(isVertical ? 0.1 : 0.6))
       .force("collide", forceCollide(d => d.r * 1.2).strength(0.4))
       // .force("r", forceRadial(d => d.distance).strength(5))
       .stop()
@@ -131,7 +131,7 @@
       groupBubblesByCategory[d.type] = d
     })
 
-    range(0, 50).forEach(i => simulation.tick())
+    range(60).forEach(i => simulation.tick())
 
     const runningCategoryIndices = {}
     const claims = [...data].reverse().map((d, i) => {
@@ -322,13 +322,13 @@
           ].join(" ")}
           fill="none"
           id={`path-${type}`}
-          transform={`rotate(-75)`}
+          transform={`rotate(-145)`}
         />
         <text transition:fade={{ duration: 1000 + 300 * i }}>
           <textPath
             href={`#path-${type}`}
             class="boundary-label"
-            startOffset="20%"
+            startOffset="40%"
             fill={darkerColor}
           >
             { type || "Other" }

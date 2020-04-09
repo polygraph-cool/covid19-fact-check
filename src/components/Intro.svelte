@@ -213,7 +213,7 @@
     /* left: 50%;
     transform: translateX(-50%); */
     padding: 0.5em 3em 0.5em 0;
-    background: #f4f5fa;
+    background: #fff;
     font-size: 1.2em;
     /* max-width: 100%; */
     /* width: 80em; */
@@ -291,7 +291,7 @@
     height: 7em;
     background: linear-gradient(
       to bottom,
-      #f4f5fa 30%,
+      #fff 30%,
       rgba(244, 245, 250, 0.01) 100%
     );
     z-index: 100;
@@ -306,7 +306,7 @@
     height: 5em;
     background: linear-gradient(
       to top,
-      #f4f5fa 0%,
+      #fff 0%,
       rgba(244, 245, 250, 0.01) 100%
     );
     z-index: 100;
@@ -404,7 +404,7 @@
       width: 5vw;
       background: linear-gradient(
         to right,
-        #f4f5fa -10%,
+        #fff -10%,
         rgba(244, 245, 250, 0.01) 100%
       );
     }
@@ -416,7 +416,7 @@
       width: 5vw;
       background: linear-gradient(
         to left,
-        #f4f5fa -10%,
+        #fff -10%,
         rgba(244, 245, 250, 0.01) 100%
       );
     }

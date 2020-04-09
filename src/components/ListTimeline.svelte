@@ -4,7 +4,7 @@
   import { area, line, curveMonotoneX } from "d3-shape"
   import { timeFormat, timeParse } from "d3-time-format"
   import { timeDay, timeMonth } from "d3-time"
-  import { dateAccessor, parseDate, categories, categoryAccessor, categoryColors, countriesAccessor, ratings, ratingAccessor, sources, sourceAccessor, sourceColors, organizationAccessor, tags, tagsAccessor } from "./data-utils"
+  import { dateAccessor, parseDate, categories, categoryAccessor, categoryColors, tags, tagAccessor, tagColors, countriesAccessor, ratings, ratingAccessor, sources, sourceAccessor, sourceColors, organizationAccessor } from "./data-utils"
   import { debounce, scaleCanvas } from "./utils"
 
   export let filterFunction
@@ -93,14 +93,14 @@
       color: "#dbdbeb",
     },
     ...(!isFiltered ?
-      categories.map(category => {
-        const barHeight = height - yScale(bin.filter(d => categoryAccessor(d) == category).length)
+      tags.map(tag => {
+        const barHeight = height - yScale(bin.filter(d => tagAccessor(d) == tag).length)
         runningY -= barHeight
         return {
           y: runningY,
           height: barHeight,
-          color: categoryColors[category] || "#dbdbeb",
-          isCategory: true,
+          color: tagColors[tag] || "#dbdbeb",
+          isTag: true,
         }
       })
     : [])
@@ -112,15 +112,15 @@
     }
   })
 
-  // $: categoryBins = bins.map(bin => {
+  // $: tagBins = bins.map(bin => {
   //   let runningY = 0
-  //   return categories.map(category => {
-  //     const numberInCategory = bin.filter(d => categoryAccessor(d) == category).length
-  //     runningY += numberInCategory
+  //   return tags.map(tag => {
+  //     const numberInTag = bin.filter(d => tagAccessor(d) == tag).length
+  //     runningY += numberInTag
   //     return {
-  //       start: runningY - numberInCategory,
+  //       start: runningY - numberInTag,
   //       end: runningY,
-  //       color: categoryColors[category],
+  //       color: tagColors[tag],
   //     }
   //   })
   // })
@@ -146,15 +146,15 @@
     parsedBins.forEach(({ x, bars }, i) => {
       // const x = xScale(bin.x0)
       // const numberOfFilteredItems = (filteredBins[i] || []).length
-      bars.forEach(({ y, height, color: barColor, isCategory }, j) => {
+      bars.forEach(({ y, height, color: barColor, isTag }, j) => {
 
         ctx.fillStyle = barColor
         ctx.fillRect(x, y, itemWidth, height)
 
-        // const category = categoryAccessor(item)
+        // const tag = tagAccessor(item)
           // ? numberOfFilteredItems >= j ? (color || "#57a039") : "#dbdbeb"
-          // : (categoryBins[i][
-          //   categoryBins[i].findIndex(({ start, end }) => start < j && end >= j)
+          // : (tagBins[i][
+          //   tagBins[i].findIndex(({ start, end }) => start < j && end >= j)
           // ] || {}).color || "#dbdbeb"
         // const y = height + -j * 2
       })
@@ -179,14 +179,14 @@
 <div class="c" bind:clientWidth={containerWidth} style={`height: ${containerHeight}px`}>
   <svg {height} {width}>
     <!-- {#each parsedBins as { x, bars }, i}
-      {#each bars as { y, height, color, isCategory }}
+      {#each bars as { y, height, color, isTag }}
         <rect
           class="full-area"
           x={x}
           y={y}
           width={itemWidth}
           height={height}
-          style={`fill: ${!isFiltered || !isCategory ? color : ""}`}
+          style={`fill: ${!isFiltered || !isTag ? color : ""}`}
         />
       {/each}
       <rect

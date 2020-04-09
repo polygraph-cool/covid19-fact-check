@@ -4,14 +4,14 @@
 
 	// // import Header from "./Header.svelte"
 	import Intro from "./Intro.svelte"
-	import Clusters from "./Clusters.svelte"
+	import Clusters from "./Clusters--topics.svelte"
 	import MapClusters from "./MapClusters.svelte"
 	import Map from "./Map.svelte"
 	import List from "./List.svelte"
 	import ListFilter from "./ListFilter.svelte"
 	import Footer from "./Footer.svelte"
   import { debounce, flatten, getUrlParams } from "./utils"
-  import { categoryAccessor, categoryColors, categories, dateAccessor, ratings, sources, titleAccessor, countriesAccessor, organizationAccessor, ratingAccessor, sourceAccessor } from "./data-utils"
+  import { categoryAccessor, categoryColors, categories, dateAccessor, ratings, sources, titleAccessor, countriesAccessor, organizationAccessor, ratingAccessor, sourceAccessor, getMatchingTags, tags, tagAccessor, tagColors } from "./data-utils"
 
 	// const dataUrl = "https://pudding.cool/misc/covid-fact-checker/data.json"
 	const dataUrl = "https://pudding.cool/misc/covid-fact-checker/data.csv"
@@ -30,7 +30,8 @@
 		"list",
 		"footer",
 	]
-	let sections = ["intro"]
+	// let sections = ["intro"]
+	let sections = []
 
 	onMount(() => {
 		// const res = await fetch(dataUrl)
@@ -49,6 +50,7 @@
 			url: d["URL to fact-checked article (in your language)"],
 			source: d["Who said/posted it?"],
 			title: d["What did you fact-check?"],
+			tags: getMatchingTags(d["What did you fact-check?"]),
 		}))
 		.get(resJson => {
 			data = resJson
@@ -75,13 +77,14 @@
 	const debouncedOnUpdateSearchString = debounce(onUpdateSearchString, 300)
 	$: searchStringRaw, debouncedOnUpdateSearchString()
 
-	let selectedCategory = null
+	// let selectedCategory = null
+	let selectedTag = null
 	let selectedCountry = null
 	let selectedRating = null
 	let selectedSource = null
 	let selectedOrg = null
 	$: filterFunction = d => (
-		(!selectedCategory || (categoryAccessor(d) == selectedCategory))
+		(!selectedTag || (tagAccessor(d) == selectedTag))
 		&& (!selectedCountry || (countriesAccessor(d).includes(selectedCountry)))
 		&& (!selectedRating || (ratingAccessor(d) == selectedRating))
 		&& (!selectedOrg || (organizationAccessor(d) == selectedOrg))
@@ -89,11 +92,11 @@
 		&& (!searchString || ((titleAccessor(d).toLowerCase().includes(searchString.toLowerCase()))))
 	)
 
-	$: isFiltered = searchString || selectedCategory || selectedCountry || selectedRating || selectedOrg || selectedSource
+	$: isFiltered = searchString || selectedTag || selectedCountry || selectedRating || selectedOrg || selectedSource
 	$: filterColor = isFiltered && (
-		selectedCategory && !(searchString || selectedCountry) ? categoryColors[selectedCategory] : null
+		selectedTag && !(searchString || selectedCountry) ? tagColors[selectedTag] : null
 	)
-	$: selectedCategory, selectedCountry, selectedRating, selectedOrg, selectedSource, filterIteration++
+	$: selectedTag, selectedCountry, selectedRating, selectedOrg, selectedSource, filterIteration++
 </script>
 
 <!-- <Header /> -->
@@ -114,9 +117,9 @@
 						type="input"
 					/>
 					<ListFilter
-						label="Category"
-						options={categories}
-						bind:value={selectedCategory}
+						label="Main Topic"
+						options={tags}
+						bind:value={selectedTag}
 					/>
 					<ListFilter
 						label="Primary Country"
@@ -223,7 +226,7 @@
 		top: 0;
 		margin-top: 0.5em;
 		padding: 0.8em 1em 0.7em;
-    background: #f4f5fa;
+    background: #fff;
     box-shadow: 0px 8px 10px -8px rgba(52, 73, 94, .2), 0 1px 1px rgba(52, 73, 94, 0.1);
 		z-index: 500;
 	}
