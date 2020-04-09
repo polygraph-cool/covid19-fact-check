@@ -154,9 +154,11 @@
 			</div>
 		{/if}
 
-		<p class="map-title" style="margin-top: 3em; margin-bottom: -3em">
-			We also looked at what country each fact check primarily originated in.
-		</p>
+		{#if sections.includes("map") && sections.includes("clusters")}
+			<p class="map-title" style="margin: 3em auto -3em">
+				We also looked at what country each fact check primarily originated in.
+			</p>
+		{/if}
 
 		{#if sections.includes("map")}
 			<div class="section" id="countries">
