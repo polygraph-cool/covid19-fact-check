@@ -176,7 +176,6 @@
     }).filter(d => d)
 
     bubbles = [...claims]
-    console.log(bubbles.length / data.length)
     // let bubbleSimulation = forceSimulation(bubbles)
     //   // .force("x", forceX(d => d.x).strength(1))
     //   .force("x", forceX(d => d.x).strength(0.1))

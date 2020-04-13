@@ -1,6 +1,5 @@
 <script>
   import { onMount } from "svelte"
-  import { draw, fade } from "svelte/transition"
   import { scaleOrdinal, scaleLinear, scaleSqrt, scaleTime } from "d3-scale"
   import { extent, max, range } from "d3-array"
   import { color } from "d3-color"
@@ -26,7 +25,7 @@
   export let isFiltered
   export let filterIteration
   export let filterFunction
-  export let filterColor
+  export let countries
   export let iteration
   export let isEmbedded
 
@@ -75,7 +74,9 @@
   })
 
   let bubbles = []
+  let countryData = {}
   const updateBubbles = () => {
+    countryData = {}
     const claimsByCountry = {}
 
     data.forEach(d => {
@@ -87,43 +88,24 @@
     })
     const rScale = scaleSqrt()
       .domain([0, max(Object.values(claimsByCountry).map(d => d.length))])
-      .range([1, 37])
+      .range([0, 37])
+
     const colorScale = scaleLinear()
       .domain([0, max(Object.values(claimsByCountry).map(d => d.length))])
       .range(["#d9e7e4", "#67B244"])
       .interpolate(interpolateHclLong)
 
-    const countries = Object.keys(claimsByCountry)
-    const claims = countries.map(country => {
+    countries.forEach(country => {
       const countryCentroid = isVertical ? countryCentroidsVertical[country] : countryCentroids[country]
-      // if (!countryCentroid) console.log(country, countryCentroid)
-      // if (!Number.isFinite((countryCentroid || [])[0])) console.log(country, countryCentroid)
-      if (!countryCentroid) return
+      if (!countryCentroid) return {x: 0, y: 0, r: 0}
+      if (!countryCentroid[0] && !countryCentroid[1]) return {x: 0, y: 0, r: 0}
 
-      const numberOfPoints = claimsByCountry[country]
-        .filter(categoryAccessor)
+      const numberOfPoints = (claimsByCountry[country] || [])
         .length
 
       const r = rScale(numberOfPoints * 3)
-      let runningAngle = 0
-      let angles = categories.map(cat => {
-        const nInCat = claimsByCountry[country].filter(d => categoryAccessor(d) == cat).length
-        const percentInCat = nInCat / numberOfPoints
-        const angleIncrement = percentInCat * (Math.PI * 2)
-        runningAngle += angleIncrement
-        return {
-          start: runningAngle - angleIncrement,
-          end: runningAngle,
-          color: categoryColors[cat],
-        }
-      })
-      angles = [...angles, {
-        start: angles.slice(-1)[0].end,
-        end: Math.PI * 2,
-        color: "#eaeaee",
-      }]
 
-      return {
+      countryData[country] = {
         name: country,
         x: countryCentroid[0],
         y: countryCentroid[1],
@@ -131,13 +113,8 @@
         r: r / width,
         labelR: (r + 19) / width,
         color: colorScale(numberOfPoints),
-        angles,
       }
     })
-    .sort((a,b) => b.r - a.r)
-    .filter(d => d)
-
-    bubbles = claims.filter(d => d.x && d.y)
 
     // // bubbles = claims
     // bubbles = [...claims]
@@ -152,51 +129,12 @@
     //   .on("tick", drawBubbles)
 
     // range(0, 220).forEach(i => simulation.tick())
-    // console.log("simu Map")
   }
   $: iteration, filterIteration, isVertical, updateBubbles()
-
-  let delaunay = []
-
-  $: data, width, (() => {
-    delaunay = Delaunay.from(
-      bubbles,
-      d => d.x * width,
-      d => d.y * width,
-    )
-  })()
-
-  $: onMouseMove = e => {
-    const x = e.clientX
-      - canvasElement.getBoundingClientRect().left
-    const y = e.clientY
-      - canvasElement.getBoundingClientRect().top
-
-    const mousePosition = [x, y]
-    const pointIndex = delaunay.find(...mousePosition)
-    if (pointIndex == -1) return null
-    const hoveredBubble = bubbles[pointIndex] || {}
-    const distance = getDistanceBetweenPoints(
-      mousePosition,
-      [hoveredBubble.x * width, hoveredBubble.y * width],
-    )
-    if (distance < 30) {
-      // hoveredClaim = hoveredBubble
-    } else {
-      hoveredClaim = null
-    }
-
-    hasHovered = true
-    // if (interval) {
-    //   clearInterval(interval)
-    //   interval = null
-    // }
-  }
 
   let blankMap
 
   const drawCanvas = () => {
-    // console.log("drawCanvas Map")
     if (!canvasElement) return
     const ctx = canvasElement.getContext("2d")
     scaleCanvas(canvasElement, ctx, width, height)
@@ -249,90 +187,38 @@
 
   $: highlightedClaim = hoveredClaim || (!hasHovered && bubbles[highlightIndex])
 
-  $: topLeftBubble = bubbles.find(d => d.name == "United States of America")
-    || bubbles.sort((a,b) => a.x - b.x)[0]
+  $: topLeftBubble = (countryData["United States of America"] || {}).r ? countryData["United States of America"]
+    : (Object.values(countryData).filter(d => (d || {}).r).sort((a,b) => a.x - b.x)[0] || {}).r ? Object.values(countryData).filter(d => d.r).sort((a,b) => a.x - b.x)[0]
+    : null
 </script>
-
 
 <svelte:window on:scroll={clearTooltip} />
 
 <!-- <svelte:window bind:innerWidth={windowWidth} /> -->
 
 <div class="c"
-  on:mousemove={onMouseMove}
   bind:clientWidth={width}>
   <canvas style={`width: ${width}px; height: ${height}px`} bind:this={canvasElement} />
-  {#if highlightedClaim}
-    <ItemTooltip
-      item={highlightedClaim}
-      x={Math.min(width - 160, Math.max(160, highlightedClaim.x * width))}
-      y={highlightedClaim.y * width - bubbleSize}
-    />
-    <!-- <ItemTooltip item={highlightedClaim} {...highlightedClaim} y={highlightedClaim.y - bubbleSize} /> -->
-    <div
-      class="hovered-claim-highlight"
-      style={`
-        height: ${bubbleSize * 2.5}px;
-        width: ${bubbleSize * 2.5}px;
-        margin: ${-(bubbleSize * 1.75)}px;
-        transform: translate(${highlightedClaim.x * width}px, ${highlightedClaim.y * width}px);
-      `}
-    />
-  {/if}
-
   <svg {width} {height}>
-    {#each bubbles as { name, x, y, count, r, labelR, color }, i}
-      <g class="bubble-group" transform={`translate(${x * width}, ${y * width})`}>
-        <circle
-          class="bubble"
-          r={r * width}
-          fill={color}
-        />
+    {#each countries as country}
+      {#if countryData[country]}
+        <g class="bubble-group" transform={`translate(${countryData[country].x * width}, ${countryData[country].y * width})`}>
+          <circle
+            class="bubble"
+            r={countryData[country].r * width}
+            fill={countryData[country].color}
+          />
 
-        <g class="label">
-          {#if (labelR * width) > 30}
-            <path
-              class="hidden"
-              d={[
-                ["M", 0, -((labelR * width) - 16)].join(" "),
-                ["A", ((labelR * width) - 16), ((labelR * width) - 16), 0, 0, 1, 0, ((labelR * width) - 16)].join(" "),
-                ["A", ((labelR * width) - 16), ((labelR * width) - 16), 0, 0, 1, 0, -((labelR * width) - 16)].join(" "),
-              ].join(" ")}
-              fill="none"
-              id={`path-${name}`}
-              transform={`rotate(-95)`}
-            />
-            <text transition:fade={{ duration: 1000 + 300 * i }}>
-              <textPath
-                href={`#path-${name}`}
-                class="text-bg"
-                startOffset="20%"
-              >
-                { name }
-              </textPath>
+          <g class="label">
+            <text y="-13" class="text-middle text-bg">
+              { country } ({ countryData[country].count })
             </text>
-            <text transition:fade={{ duration: 1000 + 300 * i }}>
-              <textPath
-                href={`#path-${name}`}
-                class="text-fg"
-                startOffset="20%"
-              >
-                { name }
-              </textPath>
+            <text y="-13" class="text-middle text-fg">
+              { country } ({ countryData[country].count })
             </text>
-            <text transform={`translate(0, ${-r * width * 0})`} class="text-number">
-              { format(",")(count) }
-            </text>
-          {:else}
-            <text y="-10" class="text-middle text-bg" transition:fade={{ duration: 1000 + 300 * i }}>
-              { name } ({ count })
-            </text>
-            <text y="-10" class="text-middle text-fg" transition:fade={{ duration: 1000 + 300 * i }}>
-              { name } ({ count })
-            </text>
-          {/if}
+          </g>
         </g>
-      </g>
+      {/if}
     {/each}
     {#if topLeftBubble && Number.isFinite(topLeftBubble.x)}
       <path
@@ -347,7 +233,7 @@
   </svg>
 
   {#if topLeftBubble}
-    <div class="annotation" style={`transform: translate(${Math.max(130, (topLeftBubble.x - topLeftBubble.r) * width - (isVertical ? 0 : 50))}px, ${topLeftBubble.y * width - 50}px)`}>
+    <div class="annotation" style={`transform: translate(${Math.max(150, (topLeftBubble.x - topLeftBubble.r) * width - (isVertical ? 0 : 50))}px, ${topLeftBubble.y * width - 50}px)`}>
       <div class="annotation-contents">
         Each circle represents the number of fact checks {#if isFiltered} (with the applied filters){/if} that primarily originated in a country
       </div>
@@ -362,8 +248,8 @@
 <style>
   .c {
     position: relative;
-    width: 90%;
-    margin: 0 auto;
+    width: 99%;
+    margin: -2em auto 0;
     /* height: 65%; */
     /* overflow: hidden; */
   }
@@ -421,6 +307,7 @@
 
   .bubble {
     mix-blend-mode: multiply;
+    transition: all 0.3s ease-out;
   }
 
   text {

@@ -72,13 +72,13 @@
   }
   .label {
     padding-left: 0.7em;
-    font-size: 0.9em;
+    font-size: 0.8em;
     margin-bottom: 0.5em;
   }
   select {
     width: 100%;
     padding: 0.6em 0.1em 0.6em 0.6em;
-    background: white;
+    background: #f4f4f4;
     border: none;
   }
   .options {
@@ -104,7 +104,8 @@
     padding: 0.56em 0.6em;
 		font-size: 0.9em;
 		line-height: 1em;
-		border: none;
+    border: none;
+    background: #f4f4f4;
 	}
   .clear {
     position: absolute;

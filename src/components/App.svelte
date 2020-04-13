@@ -11,7 +11,7 @@
 	import ListFilter from "./ListFilter.svelte"
 	import Footer from "./Footer.svelte"
   import { debounce, flatten, getUrlParams } from "./utils"
-  import { categoryAccessor, categoryColors, categories, dateAccessor, ratings, sources, titleAccessor, countriesAccessor, organizationAccessor, ratingAccessor, sourceAccessor, getMatchingTags, tags, tagAccessor, tagColors } from "./data-utils"
+  import { categoryAccessor, categoryColors, categories, dateAccessor, ratings, sources, titleAccessor, countryAccessor, countriesAccessor, organizationAccessor, ratingAccessor, sourceAccessor, getMatchingTags, tags, tagAccessor, tagColors } from "./data-utils"
 
 	// const dataUrl = "https://pudding.cool/misc/covid-fact-checker/data.json"
 	const dataUrl = "https://pudding.cool/misc/covid-fact-checker/data.csv"
@@ -85,7 +85,7 @@
 	let selectedOrg = null
 	$: filterFunction = d => (
 		(!selectedTag || (tagAccessor(d) == selectedTag))
-		&& (!selectedCountry || (countriesAccessor(d).includes(selectedCountry)))
+		&& (!selectedCountry || (countryAccessor(d) == selectedCountry))
 		&& (!selectedRating || (ratingAccessor(d) == selectedRating))
 		&& (!selectedOrg || (organizationAccessor(d) == selectedOrg))
 		&& (!selectedSource || (sourceAccessor(d) == selectedSource))
@@ -109,28 +109,35 @@
 	{#if sections.includes("filters")}
 			<div class="sticky">
 				<div class="sticky-contents">
-					<ListFilter
+					<div class="filters-label">
+						Filter the {#if sections.filter(d => d != "filters").length == 1}
+							{ sections.filter(d => d != "filters") }
+						{:else}
+							fact checks
+						{/if}
+					</div>
+					<!-- <ListFilter
 						label="Filter the fact checks"
 						options={categories}
 						placeholder="Search for a fact check..."
 						bind:value={searchStringRaw}
 						type="input"
-					/>
+					/> -->
 					<ListFilter
 						label="Main Topic"
 						options={tags}
 						bind:value={selectedTag}
 					/>
-					<ListFilter
+					<!-- <ListFilter
 						label="Primary Country"
 						options={countries}
 						bind:value={selectedCountry}
-					/>
-					<ListFilter
+					/> -->
+					<!-- <ListFilter
 						label="Rating"
 						options={ratings}
 						bind:value={selectedRating}
-					/>
+					/> -->
 					<ListFilter
 						label="Source"
 						options={sources}
@@ -162,7 +169,8 @@
 
 		{#if sections.includes("map")}
 			<div class="section" id="countries">
-				<Map {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} isEmbedded={sections.length < allSections.length} />			</div>
+				<Map {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} {countries} isEmbedded={sections.length < allSections.length} />
+			</div>
 		{/if}
 
 		{#if sections.includes("list")}
@@ -212,6 +220,8 @@
 		flex-direction: column;
 		align-items: center;
 		min-height: 6em;
+	}
+	.section + .section {
 		margin: 3em 0 2em;
 	}
 	p {
@@ -226,8 +236,8 @@
 	.sticky {
 		position: sticky;
 		top: 0;
-		margin-top: 0.5em;
-		padding: 0.8em 1em 0.7em;
+		margin-top: 0.2em;
+		padding: 0.3em 1em 0.5em;
     background: #fff;
     box-shadow: 0px 8px 10px -8px rgba(52, 73, 94, .2), 0 1px 1px rgba(52, 73, 94, 0.1);
 		z-index: 500;
@@ -238,6 +248,9 @@
 		align-items: flex-end;
 		max-width: 60em;
 		margin: 0 auto;
+	}
+	.filters-label {
+    margin: 0 1em 0.5em 0;
 	}
 	.search {
 		flex: 1;
