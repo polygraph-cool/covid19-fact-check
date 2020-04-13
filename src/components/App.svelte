@@ -162,8 +162,7 @@
 
 		{#if sections.includes("map")}
 			<div class="section" id="countries">
-				<Map {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
-			</div>
+				<Map {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} isEmbedded={sections.length < allSections.length} />			</div>
 		{/if}
 
 		{#if sections.includes("list")}

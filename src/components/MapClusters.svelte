@@ -114,7 +114,7 @@
 
   $: ageScale = scaleTime()
     .domain(extent(data.map(dateAccessor)))
-    .range(["#fff", "#778beb"])
+    .range(["#fff", "#67B244"])
 
   let categoryOffsets = {}
   categories.forEach((category, i) => {

@@ -28,6 +28,7 @@
   export let filterFunction
   export let filterColor
   export let iteration
+  export let isEmbedded
 
   // const parseDate = timeParse("%Y-%m-%d")
   const formatDate = timeFormat("%A %B %-d, %Y")
@@ -49,21 +50,6 @@
   const windowGlobal = typeof window !== "undefined" && window
   const pixelRatio = windowGlobal.devicePixelRatio || 1
 
-  const getSpiralPositions = (n=3000) => {
-    let angle = 0
-    return new Array(n).fill(0).map((_, i) => {
-      const radius = Math.sqrt(i + 0.3) * 2.3
-      angle += Math.asin(1 / radius) * 4
-      angle = angle % (Math.PI * 2)
-      return [
-        Math.cos(angle) * radius,
-        Math.sin(angle) * radius,
-        angle,
-      ]
-    })
-  }
-  const spiralPositions = getSpiralPositions()
-
   const sphere = ({type: "Sphere"})
   $: projection = isVertical ? (
     geoOrthographic()
@@ -80,39 +66,7 @@
       .translate([width / 2, height * 0.7])
       .rotate([90, -20])
   )
-// const countryCentroids = {}
-//     let countries = []
-//     $: data, (() => {
-//       countries = countryShapes.map(shape => {
-//         const countryData = data.find(d => (
-//           countryAccessor(data) == shape.properties["geounit"]
-//         )) || {}
-//         let centroid = svgPathGenerator.centroid(shape)
-//         const secondProjectionCountries = [
-//           "United States of America",
-//           "Canada",
-//         ]
-//         if (!Number.isFinite(centroid[0]) || secondProjectionCountries.includes(shape.properties["geounit"])) {
-//           centroid = svgPathGenerator2.centroid(shape)
-//         }
-//         const scaledCentroid = [
-//           centroid[0] / width,
-//           centroid[1] / width,
-//         ]
-//         countryCentroids[shape.properties["geounit"]] = scaledCentroid
-
-//         return centroid[0] ? shape : null
-//           // name: shape.properties["geounit"],
-//           // shape,
-//           // centroid: scaledCentroid,
-//           // ...countryData,
-
-//       }).filter(d => d)
-
-//     })()
-//     $:console.log("countries", countries, countryCentroids)
   $: svgPathGenerator = geoPath(projection)
-  // $: svgPathGenerator2 = geoPath(projection2)
 
   let categoryOffsets = {}
   categories.forEach((category, i) => {
@@ -133,10 +87,10 @@
     })
     const rScale = scaleSqrt()
       .domain([0, max(Object.values(claimsByCountry).map(d => d.length))])
-      .range([1, 50])
+      .range([1, 37])
     const colorScale = scaleLinear()
       .domain([0, max(Object.values(claimsByCountry).map(d => d.length))])
-      .range(["#cacde8", "#778beb"])
+      .range(["#d9e7e4", "#67B244"])
       .interpolate(interpolateHclLong)
 
     const countries = Object.keys(claimsByCountry)
@@ -183,7 +137,7 @@
     .sort((a,b) => b.r - a.r)
     .filter(d => d)
 
-    bubbles = claims
+    bubbles = claims.filter(d => d.x && d.y)
 
     // // bubbles = claims
     // bubbles = [...claims]
@@ -285,51 +239,10 @@
     blankMap = ctx.getImageData(0, 0, width * 2, height * 2)
   }
 
-  const drawBubbles = () => {
-    if (!canvasElement) return
-    if (!blankMap) return
-    // console.log("drawBubbles Map")
-    const ctx = canvasElement.getContext("2d")
-    ctx.putImageData(blankMap, 0, 0)
-
-    bubbles.forEach((d, i) => {
-      const { x, y, r, angles } = d
-      // const isBubbleFilteredOut = isFiltered && !filterFunction(d)
-      // const isBubbleFilteredIn = isFiltered && !isBubbleFilteredOut
-
-      ctx.beginPath()
-      ctx.arc(x * width, y * width, r * width, 0, 2 * Math.PI, false)
-
-// console.log(angles)
-      // angles.forEach(({ start, end, color }) => {
-      //   ctx.beginPath()
-      //   ctx.moveTo(x * width, y * width)
-      //   ctx.arc(x * width, y * width, r * width, start, end, false)
-      //   ctx.lineTo(x * width, y * width)
-
-      //   ctx.fillStyle = color
-      //   ctx.fill()
-      // })
-
-      ctx.globalCompositeOperation = "multiply"
-      // ctx.globalAlpha = 0.9
-      // ctx.fillStyle = "#778beb"
-      ctx.fillStyle = d.color
-      ctx.fill()
-    })
-  }
   const debouncedDrawCanvas = debounce(drawCanvas, 500)
-  const debouncedDrawBubbles = debounce(drawBubbles, 500)
-  // $: (() => {{
-  //   const _ = width
-  //   drawCanvas()
-  // }})
-  // onMount(drawCanvas)
   $: debouncedDrawCanvas()
-  $: initTransitionProgress, drawBubbles()
   $: width, bubbles, filterIteration, (() => {
     debouncedDrawCanvas()
-    debouncedDrawBubbles()
   })()
 
   const clearTooltip = () => hoveredClaim = null
@@ -337,6 +250,7 @@
   $: highlightedClaim = hoveredClaim || (!hasHovered && bubbles[highlightIndex])
 
   $: topLeftBubble = bubbles.find(d => d.name == "United States of America")
+    || bubbles.sort((a,b) => a.x - b.x)[0]
 </script>
 
 
@@ -367,45 +281,57 @@
   {/if}
 
   <svg {width} {height}>
-    {#each bubbles.slice(0, 10) as { name, x, y, count, r, labelR }, i}
-      <g transform={`translate(${x * width}, ${y * width})`}>
-        <!-- <circle
-          r={r}
-          fill-opacity="0.1"
-        /> -->
-
-        <path
-          class="hidden"
-          d={[
-            ["M", 0, -((labelR * width) - 16)].join(" "),
-            ["A", ((labelR * width) - 16), ((labelR * width) - 16), 0, 0, 1, 0, ((labelR * width) - 16)].join(" "),
-            ["A", ((labelR * width) - 16), ((labelR * width) - 16), 0, 0, 1, 0, -((labelR * width) - 16)].join(" "),
-          ].join(" ")}
-          fill="none"
-          id={`path-${name}`}
-          transform={`rotate(-95)`}
+    {#each bubbles as { name, x, y, count, r, labelR, color }, i}
+      <g class="bubble-group" transform={`translate(${x * width}, ${y * width})`}>
+        <circle
+          class="bubble"
+          r={r * width}
+          fill={color}
         />
-        <text transition:fade={{ duration: 1000 + 300 * i }}>
-          <textPath
-            href={`#path-${name}`}
-            class="text-bg"
-            startOffset="20%"
-          >
-            { name }
-          </textPath>
-        </text>
-        <text transition:fade={{ duration: 1000 + 300 * i }}>
-          <textPath
-            href={`#path-${name}`}
-            class="text-fg"
-            startOffset="20%"
-          >
-            { name }
-          </textPath>
-        </text>
-        <text transform={`translate(0, ${-r * width * 0})`} class="text-number">
-          { format(",")(count) }
-        </text>
+
+        <g class="label">
+          {#if (labelR * width) > 30}
+            <path
+              class="hidden"
+              d={[
+                ["M", 0, -((labelR * width) - 16)].join(" "),
+                ["A", ((labelR * width) - 16), ((labelR * width) - 16), 0, 0, 1, 0, ((labelR * width) - 16)].join(" "),
+                ["A", ((labelR * width) - 16), ((labelR * width) - 16), 0, 0, 1, 0, -((labelR * width) - 16)].join(" "),
+              ].join(" ")}
+              fill="none"
+              id={`path-${name}`}
+              transform={`rotate(-95)`}
+            />
+            <text transition:fade={{ duration: 1000 + 300 * i }}>
+              <textPath
+                href={`#path-${name}`}
+                class="text-bg"
+                startOffset="20%"
+              >
+                { name }
+              </textPath>
+            </text>
+            <text transition:fade={{ duration: 1000 + 300 * i }}>
+              <textPath
+                href={`#path-${name}`}
+                class="text-fg"
+                startOffset="20%"
+              >
+                { name }
+              </textPath>
+            </text>
+            <text transform={`translate(0, ${-r * width * 0})`} class="text-number">
+              { format(",")(count) }
+            </text>
+          {:else}
+            <text y="-10" class="text-middle text-bg" transition:fade={{ duration: 1000 + 300 * i }}>
+              { name } ({ count })
+            </text>
+            <text y="-10" class="text-middle text-fg" transition:fade={{ duration: 1000 + 300 * i }}>
+              { name } ({ count })
+            </text>
+          {/if}
+        </g>
       </g>
     {/each}
     {#if topLeftBubble && Number.isFinite(topLeftBubble.x)}
@@ -423,12 +349,14 @@
   {#if topLeftBubble}
     <div class="annotation" style={`transform: translate(${Math.max(130, (topLeftBubble.x - topLeftBubble.r) * width - (isVertical ? 0 : 50))}px, ${topLeftBubble.y * width - 50}px)`}>
       <div class="annotation-contents">
-        Each circle represents the number of fact checks that primarily originated in a country
+        Each circle represents the number of fact checks {#if isFiltered} (with the applied filters){/if} that primarily originated in a country
       </div>
     </div>
   {/if}
 
-  <DataSource />
+  {#if !isEmbedded}
+    <DataSource />
+  {/if}
 </div>
 
 <style>
@@ -451,7 +379,7 @@
   }
   .text-bg {
     stroke: white;
-    stroke-width: 2;
+    stroke-width: 3;
   }
   .text-number {
     fill: white;
@@ -475,6 +403,7 @@
     position: absolute;
     top: 0;
     left: 0;
+    pointer-events: none;
     z-index: 5;
   }
   .annotation-contents {
@@ -486,7 +415,29 @@
   }
   .annotation-line {
     fill: none;
-    stroke: #6b6780;
+    stroke: #171c4f;
     stroke-width: 1;
+  }
+
+  .bubble {
+    mix-blend-mode: multiply;
+  }
+
+  text {
+    pointer-events: none;
+    font-weight: 700;
+  }
+  .bubble-group .label {
+    opacity: 0;
+  }
+  .bubble-group:hover .label {
+    opacity: 1;
+  }
+  .bubble-group:hover .bubble {
+    mix-blend-mode: normal;
+    stroke: #171c4f;
+  }
+  .text-middle {
+    text-anchor: middle;
   }
 </style>
