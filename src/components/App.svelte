@@ -32,6 +32,8 @@
 	]
 	// let sections = ["intro"]
 	let sections = []
+	const sortedTags = tags.sort()
+	const sortedSources = sources.sort()
 
 	onMount(() => {
 		// const res = await fetch(dataUrl)
@@ -65,7 +67,7 @@
 				}))
 			isLoading = false
 			countries = [...new Set(flatten(data.map(countriesAccessor)))].sort()
-			organizations = [...new Set(data.map(organizationAccessor))]
+			organizations = [...new Set(data.map(organizationAccessor))].sort()
 			iteration++
 		})
 	})
@@ -128,7 +130,7 @@
 					/> -->
 					<ListFilter
 						label="Main Topic"
-						options={tags}
+						options={sortedTags}
 						bind:value={selectedTag}
 					/>
 					<!-- <ListFilter
@@ -143,7 +145,7 @@
 					/> -->
 					<ListFilter
 						label="Source"
-						options={sources}
+						options={sortedSources}
 						bind:value={selectedSource}
 					/>
 					<ListFilter
@@ -303,7 +305,7 @@
 		}
 	}
 
-	.embedded {
+	:global(.embedded) {
 		overflow: hidden;
 	}
 </style>

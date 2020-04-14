@@ -329,13 +329,18 @@
   }
 	@media (max-width: 800px) {
     .c {
-      margin-top: 2em;
+      margin-top: -1em;
     }
     .annotation {
       font-size: 0.7em;
     }
     .annotation-line {
       display: none;
+    }
+  }
+	@media (max-width: 590px) {
+    .c {
+      margin-top: 0;
     }
   }
 </style>
