@@ -37,6 +37,9 @@
 		// const res = await fetch(dataUrl)
 		const urlParams = getUrlParams()
 		sections = urlParams["embed"] ? urlParams["embed"].split(",") : allSections
+		if (sections.length < 3) {
+			document.body.classList.add("embedded")
+		}
 
 		csv(dataUrl)
 		.row(d => ({
@@ -252,6 +255,15 @@
 	.filters-label {
     margin: 0 1em 0.5em 0;
 	}
+	@media (max-width: 800px) {
+		.sticky-contents {
+			font-size: 0.8em;
+		}
+		.filters-label {
+			width: 100%;
+			margin: 1em 0 0 1em;
+		}
+	}
 	.search {
 		flex: 1;
 		/* padding-right: 0.6em; */
@@ -289,5 +301,9 @@
 		.map-title {
 			margin-bottom: 2em;
 		}
+	}
+
+	.embedded {
+		overflow: hidden;
 	}
 </style>

@@ -35,7 +35,7 @@
   let canvasElement = null
   // let windowWidth = 1200
   let width = 1200
-  $: isVertical = width < 800
+  $: isVertical = width < 474
   $: height = width * (
     isVertical ? 2 : 0.7
   )
@@ -326,5 +326,16 @@
   }
   .text-middle {
     text-anchor: middle;
+  }
+	@media (max-width: 800px) {
+    .c {
+      margin-top: 2em;
+    }
+    .annotation {
+      font-size: 0.7em;
+    }
+    .annotation-line {
+      display: none;
+    }
   }
 </style>

@@ -143,4 +143,9 @@
       width: 100%;
     }
   }
+	@media (max-width: 600px) {
+    .filter {
+      margin: 0.6em;
+    }
+  }
 </style>
