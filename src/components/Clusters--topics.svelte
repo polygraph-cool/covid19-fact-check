@@ -8,7 +8,7 @@
   import { timeParse } from "d3-time-format"
   import { timeDay } from "d3-time"
   import { debounce, getDistanceBetweenPoints, getPositionFromAngle, scaleCanvas } from "./utils"
-  import { dateAccessor, parseDate, tags, tagCategories, tagCategoryMap, tagAccessor, tagColors, ratings, ratingAccessor, ratingPaths, titleAccessor } from "./data-utils"
+  import { dateAccessor, parseDate, tags, tagCategories, tagCategoryMap, tagsAccessor, tagColors, ratings, ratingAccessor, ratingPaths, titleAccessor } from "./data-utils"
 
   import ItemTooltip from "./ItemTooltip.svelte"
   import DataSource from "./DataSource.svelte"
@@ -19,6 +19,7 @@
   export let filterFunction
   export let filterColor
   export let iteration
+  export let isEmbedded
 
   let width = 1200
   $: constant = width / 1000
@@ -33,6 +34,7 @@
   const types = tags
   $: bubbleSize = Math.round(width / 700)
   let hoveredClaim = null
+  let hoveredClaimIsFlipped = false
   let canvasElement
 
   const updateSpiralPositions = (n=2000) => {
@@ -60,17 +62,13 @@
       min([new Date(), max(data.map(dateAccessor))]),
       min(data.map(dateAccessor)),
     ])
-    .range([0.2, 1])
-  $: rAgeScale = scaleLinear()
-    .domain([1, 60])
-    .range([-0.1, 0.1])
-    .clamp(true)
+    .range([1, 0.2])
   $: rScale = scaleSqrt()
     .domain(extent(data.map(d => d)))
     .range([10, 20])
   $: groupRScale = scaleSqrt()
     .domain([0, max(types.map(type => (
-      data.filter(d => tagAccessor(d) == type).length
+      data.filter(d => tagsAccessor(d).includes(type)).length
     )))])
     .range([10, width * 0.4])
 
@@ -98,7 +96,7 @@
       // const [x, y] = getPositionFromAngle(angle, 100)
       const [x, y] = categoryOffsets[tagCategoryMap[type]]
 
-      const bubbleCount = data.filter(d => tagAccessor(d) == type).length
+      const bubbleCount = data.filter(d => tagsAccessor(d).includes(type)).length
       const r = Math.max(
         Math.sqrt(bubbleCount * Math.PI * Math.pow(bubbleSize * 1.2, 2) * (Math.sqrt(7) / Math.PI)) + 20,
         36
@@ -135,47 +133,52 @@
 
     range(0, 100).forEach(i => simulation.tick())
 
-    const runningCategoryIndices = {}
-    const claims = [...data].reverse().map((d, i) => {
-      const category = tagAccessor(d)
-      if (!category) return
-      if (!runningCategoryIndices[category]) runningCategoryIndices[category] = 0
+    let runningTopicIndices = {}
+    let claims = []
+    data.forEach((d, i) => {
+      const topics = tagsAccessor(d)
+      if (!topics.length) return
 
-      const groupPosition = groupBubblesByCategory[category]
-      if (!groupPosition) return
-
-      const spiralPosition = spiralPositions[runningCategoryIndices[category]] || []
-
-      const [x, y] = [
-        groupPosition.x + spiralPosition[0] / constant,
-        groupPosition.y + spiralPosition[1] / constant,
-      ]
-      runningCategoryIndices[category]++
-      // if (!d.category) return
       const rating = ratingAccessor(d)
+      const title = titleAccessor(d)
+      const r = bubbleSize / constant
+      const opacity = ageScale(dateAccessor(d))
 
-      const parsedColor = typeColors[category]
-      const darkerColor = color(parsedColor)
-        .darker(0.3)
-        .formatHex()
+      topics.forEach(topic => {
+        const groupPosition = groupBubblesByCategory[topic]
+        if (!groupPosition) return
 
-      return {
-        ...d,
-        r: bubbleSize / constant,
-        x: x,
-        y: y,
-        // x: x + ((ratingOffsets[rating] || [])[0] || 0),
-        // y: y + ((ratingOffsets[rating] || [])[1] || 0),
-        category,
-        title: titleAccessor(d),
-        color: parsedColor,
-        opacity: ageScale(dateAccessor(d)),
-        // opacity: 1,
-        darkerColor,
-      }
-    }).filter(d => d)
+        if (!runningTopicIndices[topic]) runningTopicIndices[topic] = 0
 
-    bubbles = [...claims]
+        const spiralPosition = spiralPositions[runningTopicIndices[topic]] || []
+
+        const [x, y] = [
+          groupPosition.x + spiralPosition[0] / constant,
+          groupPosition.y + spiralPosition[1] / constant,
+        ]
+        runningTopicIndices[topic]++
+
+        let typeColor = color(typeColors[topic])
+        typeColor.opacity = opacity
+
+        const parsedColor = typeColor.formatRgb()
+        const darkerColor = typeColor.darker(0.3).formatRgb()
+        console.log(parsedColor, dateAccessor(d))
+
+        claims.push({
+          ...d,
+          r,
+          x,
+          y,
+          category: topic,
+          title,
+          color: parsedColor,
+          darkerColor,
+        })
+      })
+    })
+
+    bubbles = claims
     // let bubbleSimulation = forceSimulation(bubbles)
     //   // .force("x", forceX(d => d.x).strength(1))
     //   .force("x", forceX(d => d.x).strength(0.1))
@@ -202,7 +205,7 @@
   const debounceUpdateDelaunay = debounce(updateDelaunay, 100)
   $: iteration, bubbles, width, debounceUpdateDelaunay()
 
-  $: iteration, isVertical, updateGroups()
+  $: iteration, width, isVertical, updateGroups()
 
   const drawCanvas = () => {
     if (!canvasElement) return
@@ -235,10 +238,10 @@
     ctx.globalAlpha = 1
 
     bubbles.forEach((d, i) => {
-      const { x, y, color, darkerColor, opacity } = d
+      const { x, y, color, darkerColor } = d
       const isBubbleFilteredOut = isFiltered && !filterFunction(d)
       const isBubbleFilteredIn = isFiltered && !isBubbleFilteredOut
-      if (!isFiltered) ctx.globalAlpha = opacity
+
       ctx.beginPath()
       // if (Path2D) {
       //   ctx.moveTo(x * constant, y * constant)
@@ -254,7 +257,9 @@
 
       ctx.beginPath()
       ctx.arc(x * constant, y * constant, bubbleSize, 0, 2 * Math.PI, false)
-      ctx.strokeStyle = darkerColor
+      ctx.strokeStyle = isBubbleFilteredOut ? "#eaeaea" :
+        isBubbleFilteredIn && filterColor ? filterColor || darkerColor :
+                                            darkerColor
       ctx.stroke()
     })
   }
@@ -276,6 +281,7 @@
 
   $: onMouseMove = e => {
     if (!delaunay) return
+    if (!canvasElement) return
 
     const x = e.clientX
       - canvasElement.getBoundingClientRect().left
@@ -293,6 +299,7 @@
     )
     if (distance < 30) {
       hoveredClaim = hoveredBubble
+      hoveredClaimIsFlipped = y < 300
     } else {
       hoveredClaim = null
     }
@@ -355,7 +362,8 @@
     <ItemTooltip
       item={hoveredClaim}
       x={Math.min(width - 200, Math.max(200, hoveredClaim.x * constant))}
-      y={hoveredClaim.y * constant - bubbleSize}
+      y={hoveredClaim.y * constant - (bubbleSize * (hoveredClaimIsFlipped ? -1 : 1))}
+      isFlipped={hoveredClaimIsFlipped}
     />
     <div
       class="hovered-claim-highlight"
@@ -375,7 +383,9 @@
     </div>
   {/if}
 
-  <DataSource />
+  {#if !isEmbedded}
+    <DataSource />
+  {/if}
 </div>
 
 <style>

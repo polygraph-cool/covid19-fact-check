@@ -1,6 +1,6 @@
 <script>
   import { timeFormat } from "d3-time-format"
-  import { parseDate, dateAccessor, countriesAccessor, countryAccessor, categoryAccessor, categoryColors, organizationAccessor, organizationLogos, ratingAccessor, ratingPaths, sourceAccessor, sourceColors, titleAccessor, urlAccessor, tags, tagColors, tagAccessor } from "./data-utils"
+  import { parseDate, dateAccessor, countriesAccessor, countryAccessor, categoryAccessor, categoryColors, organizationAccessor, organizationLogos, ratingAccessor, ratingPaths, sourceAccessor, sourceColors, titleAccessor, urlAccessor, tagColors, tagsAccessor } from "./data-utils"
   import { getOrdinal } from "./utils"
 
   // import flags from "./flags/all.js"
@@ -32,8 +32,8 @@
   $: titleParts = titleAccessor(item, true).split("*")
 
   $: category = categoryAccessor(item)
-  $: tag = tagAccessor(item)
-  $: color = tagColors[tag] || "#000"
+  $: tags = tagsAccessor(item)
+  $: color = tagColors[tags[0]] || "#000"
   // $: color = categoryColors[category] || "#000"
   $: matchingSources = sourceAccessor(item)
   $: rating = ratingAccessor(item) || "?? " + item.rating
@@ -113,7 +113,7 @@
         </div> -->
 
         <div class="category">
-          { tag }
+          { tags.join(" & ") }
         </div>
 
         <div class="country">

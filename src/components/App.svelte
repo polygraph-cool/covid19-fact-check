@@ -8,10 +8,11 @@
 	import MapClusters from "./MapClusters.svelte"
 	import Map from "./Map.svelte"
 	import List from "./List.svelte"
+	import ListTimeline from "./ListTimeline.svelte"
 	import ListFilter from "./ListFilter.svelte"
 	import Footer from "./Footer.svelte"
   import { debounce, flatten, getUrlParams } from "./utils"
-  import { categoryAccessor, categoryColors, categories, dateAccessor, ratings, sources, titleAccessor, countryAccessor, countriesAccessor, organizationAccessor, ratingAccessor, sourceAccessor, getMatchingTags, tags, tagAccessor, tagColors } from "./data-utils"
+  import { categoryAccessor, categoryColors, categories, dateAccessor, ratings, sources, titleAccessor, countryAccessor, countriesAccessor, organizationAccessor, ratingAccessor, sourceAccessor, getMatchingTags, tags, tagsAccessor, tagColors } from "./data-utils"
 
 	// const dataUrl = "https://pudding.cool/misc/covid-fact-checker/data.json"
 	const dataUrl = "https://pudding.cool/misc/covid-fact-checker/data.csv"
@@ -27,12 +28,13 @@
 		"filters",
 		"clusters",
 		"map",
+		"timeline",
 		"list",
 		"footer",
 	]
 	// let sections = ["intro"]
 	let sections = []
-	const sortedTags = tags.sort()
+	const sortedTags = [...tags].sort()
 	const sortedSources = sources.sort()
 
 	onMount(() => {
@@ -89,7 +91,7 @@
 	let selectedSource = null
 	let selectedOrg = null
 	$: filterFunction = d => (
-		(!selectedTag || (tagAccessor(d) == selectedTag))
+		(!selectedTag || (tagsAccessor(d).includes(selectedTag)))
 		&& (!selectedCountry || (countryAccessor(d) == selectedCountry))
 		&& (!selectedRating || (ratingAccessor(d) == selectedRating))
 		&& (!selectedOrg || (organizationAccessor(d) == selectedOrg))
@@ -129,7 +131,7 @@
 						type="input"
 					/> -->
 					<ListFilter
-						label="Main Topic"
+						label="Topic"
 						options={sortedTags}
 						bind:value={selectedTag}
 					/>
@@ -143,11 +145,11 @@
 						options={ratings}
 						bind:value={selectedRating}
 					/> -->
-					<ListFilter
+					<!-- <ListFilter
 						label="Source"
 						options={sortedSources}
 						bind:value={selectedSource}
-					/>
+					/> -->
 					<ListFilter
 						label="Fact-checker"
 						options={organizations}
@@ -157,12 +159,15 @@
 			</div>
 		{/if}
 
-		{#if sections.includes("clusters")}
-			<div class="section" id="categories">
-				<p style="margin-bottom: 3em; margin-top: 3em;">
+		{#if sections.includes("map") && sections.includes("clusters")}
+				<p style="margin-bottom: 3em; margin-top: 0;">
 					We've grouped each of these fact-checks into categories:
 				</p>
-				<Clusters {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
+		{/if}
+
+		{#if sections.includes("clusters")}
+			<div class="section" id="categories">
+				<Clusters {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} isEmbedded={sections.length < allSections.length} />
 			</div>
 		{/if}
 
@@ -176,6 +181,16 @@
 			<div class="section" id="countries">
 				<Map {data} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} {countries} isEmbedded={sections.length < allSections.length} />
 			</div>
+		{/if}
+
+		{#if sections.includes("timeline")}
+			<ListTimeline
+				{data}
+				{filterFunction}
+				iteration={filterIteration + iteration}
+				color={filterColor}
+				{isFiltered}
+			/>
 		{/if}
 
 		{#if sections.includes("list")}
@@ -264,6 +279,7 @@
 		.filters-label {
 			width: 100%;
 			margin: 1em 0 0 1em;
+			margin-bottom: 1em;
 		}
 	}
 	.search {

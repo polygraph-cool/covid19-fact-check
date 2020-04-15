@@ -132,7 +132,7 @@
   }
 	@media (max-width: 900px) {
     .filter {
-      margin: 1em;
+      /* margin: 1em; */
       width: 100%;
     }
     select {
@@ -145,7 +145,7 @@
   }
 	@media (max-width: 600px) {
     .filter {
-      margin: 0.6em;
+      margin-left: 0.6em;
     }
   }
 </style>

@@ -14,7 +14,7 @@
   export let overrideWidth
   export let iteration
 
-  let containerHeight = 120
+  let containerHeight = 190
   let height = containerHeight - 20
   let containerWidth = 1200
   let canvasElement
@@ -59,7 +59,7 @@
       .range([0, width])
 
     itemWidth = bins[1] ? Math.floor(
-      xScale(bins[1].x0) - xScale(bins[0].x0) - 1
+      xScale(bins[1].x0) - xScale(bins[0].x0) - (width < 500 ? 0 : 1)
     ) : 10
 
     xTicks = timeMonth.range(
@@ -280,5 +280,11 @@
     /* text-anchor: end; */
     text-anchor: start;
     /* dominant-baseline: middle; */
+  }
+
+  @media (min-width: 800px) {
+    .c {
+      margin-top: 3.6em;
+    }
   }
 </style>

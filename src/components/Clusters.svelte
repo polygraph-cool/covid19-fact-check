@@ -19,6 +19,7 @@
   export let filterFunction
   export let filterColor
   export let iteration
+  export let isEmbedded
 
   let width = 1200
   $: constant = width / 1000
@@ -373,7 +374,9 @@
     </div>
   {/if}
 
-  <DataSource />
+  {#if !isEmbedded}
+    <DataSource />
+  {/if}
 </div>
 
 <style>

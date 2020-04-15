@@ -132,30 +132,6 @@ import { dateAccessor, countriesAccessor, ratings, ratingAccessor, sources, sour
 <svelte:window bind:innerWidth={windowWidth} />
 
 <div class="c" style={`width: ${listWidth}px`} bind:this={containerElement}>
-  <div class="top">
-    <ListTimeline
-      {data}
-      {filterFunction}
-      iteration={filterIteration + iteration}
-      color={filterColor}
-      {isFiltered}
-      overrideWidth={listWidth}
-    />
-    <!-- <div class="input">
-      <input placeholder="Search for a fact check..." on:keydown={debouncedOnUpdateSearchString} />
-      {#if !isLoading}
-        <div class="count">
-          Showing
-          {#if showingItemsCount == itemsCount}
-            <Number number={ itemsCount } />
-          {:else}
-            <Number number={ showingItemsCount } /> of <Number number={ itemsCount } />
-          {/if}
-          fact checks about Covid-19
-        </div>
-      {/if}
-    </div> -->
-  </div>
   <div class="main-list">
     <!-- <div class="filters">
       <ListFilter

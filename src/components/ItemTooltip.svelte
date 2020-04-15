@@ -5,6 +5,7 @@
   export let x
   export let y
   export let item
+  export let isFlipped
 
   $: sources = sourceAccessor(item)
   $: rating = ratingAccessor(item)
@@ -12,7 +13,7 @@
 
 </script>
 
-<div class="wrapper" style={`transform: translate(${x}px, ${y}px)`}>
+<div class="wrapper" class:flipped={isFlipped} style={isFlipped ? `transform: translate(${x}px, calc(100% + ${y}px))` : `transform: translate(${x}px, ${y}px)`}>
   <div class="contents">
     <ListItem
       {item}
@@ -42,6 +43,9 @@
     transition: all 0.1s ease-out;
     pointer-events: none;
     z-index: 50;
+  }
+  .wrapper.flipped .contents {
+    margin-top: 1.5em;
   }
   .contents {
     /* background: #fff; */
