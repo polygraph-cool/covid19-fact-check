@@ -27,7 +27,7 @@
   $: height = width * (
     isVertical ? 1.25 :
     width < 1200 ? 0.66 :
-      0.5
+      0.6
   )
 
   // const types = [...tags, "none"]
@@ -163,7 +163,6 @@
 
         const parsedColor = typeColor.formatRgb()
         const darkerColor = typeColor.darker(0.3).formatRgb()
-        console.log(parsedColor, dateAccessor(d))
 
         claims.push({
           ...d,
@@ -205,7 +204,7 @@
   const debounceUpdateDelaunay = debounce(updateDelaunay, 100)
   $: iteration, bubbles, width, debounceUpdateDelaunay()
 
-  $: iteration, width, isVertical, updateGroups()
+  $: iteration, isVertical, updateGroups()
 
   const drawCanvas = () => {
     if (!canvasElement) return
