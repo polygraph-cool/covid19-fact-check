@@ -23,7 +23,7 @@
 
   let width = 1200
   $: constant = width / 1000
-  $: isVertical = width < 551
+  $: isVertical = width < 666
   $: height = width * (
     width < 333  ? (503 - width) / 70 :
     isVertical   ? 1.25 :
