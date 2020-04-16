@@ -57,7 +57,7 @@
 			url: d["URL to fact-checked article (in your language)"],
 			source: d["Who said/posted it?"],
 			title: d["What did you fact-check?"],
-			tags: getMatchingTags(d["What did you fact-check?"]),
+			tags: d["manual topic override"] ? [d["manual topic override"]] : getMatchingTags(d["What did you fact-check?"]),
 		}))
 		.get(resJson => {
 			data = resJson

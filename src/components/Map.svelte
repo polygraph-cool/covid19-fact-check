@@ -158,18 +158,18 @@
       }
       drawPath(sphere)
       fill("#fff")
-      stroke("#b4b7c9")
+      stroke("#bbb")
       drawPath(geoGraticule10())
-      stroke("#eaedff")
+      stroke("#eee")
       countryShapes.forEach((shape) => {
         drawPath(shape)
-        fill("#f8f8fb")
-        stroke("#c9cde2")
+        fill("#f8f8f8")
+        stroke("#ccc")
       })
       ctx.restore() // stop clipping
 
       drawPath(sphere)
-      stroke("#c9cde2")
+      stroke("#ccc")
     }
     drawMap(projection)
     if (projection2) drawMap(projection2)
@@ -210,11 +210,17 @@
           />
 
           <g class="label">
-            <text y="-13" class="text-middle text-bg">
-              { country } ({ countryData[country].count })
+            <text y={(country == "United States of America" ? 0 : -countryData[country].r * width) - 20} class="text-middle text-bg">
+              { country }
             </text>
-            <text y="-13" class="text-middle text-fg">
-              { country } ({ countryData[country].count })
+            <text y={(country == "United States of America" ? 0 : -countryData[country].r * width) - 20} class="text-middle text-fg">
+              { country }
+            </text>
+            <text y={(country == "United States of America" ? 0 : -countryData[country].r * width) - 6} class="text-middle text-bg">
+              { countryData[country].count } fact checks
+            </text>
+            <text y={(country == "United States of America" ? 0 : -countryData[country].r * width) - 6} class="text-middle text-fg">
+              { countryData[country].count } fact checks
             </text>
           </g>
         </g>
