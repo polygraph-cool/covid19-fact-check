@@ -206,18 +206,16 @@
 {/if}
 
 <style>
-	/* @font-face {
-		font-family: "Product Sans";
-		src: url('product_regular.woff2') format('woff2'),
-			url('Product Sans Regular.ttf') format('truetype');
-			font-weight: 500;
+	@font-face {
+		font-family: "Poynter Gothic";
+		src: url('assets/PoynterGothicText-Regular.woff') format('woff');
+		font-weight: 500;
 	}
 	@font-face {
-		font-family: "Product Sans";
-		src: url('product_bold.woff2') format('woff2'),
-			url('Product Sans Bold.ttf') format('truetype');
-			font-weight: 700;
-	} */
+		font-family: "Poynter Gothic";
+		src: url('assets/PoynterGothicText-Bold.woff') format('woff');
+		font-weight: 700;
+	}
 
 	main {
 		/* max-width: 70em; */
@@ -227,7 +225,7 @@
 		color: #1f2025;
 		display: flex;
 		flex-direction: column;
-		font-family: "Product Sans", Helvetica, Arial, sans-serif;
+		font-family: "Poynter Gothic", Helvetica, Arial, sans-serif;
 		/* align-items: center; */
 		/* text-align: center; */
 		/* background: #f3f8fb; */
