@@ -23,16 +23,17 @@
 
   let width = 1200
   $: constant = width / 1000
-  $: isVertical = width < 800
+  $: isVertical = width < 600
   $: height = width * (
-    isVertical ? 1.25 :
+    width < 333  ? (503 - width) / 70 :
+    isVertical   ? 1.25 :
     width < 1200 ? 0.66 :
       0.6
   )
 
   // const types = [...tags, "none"]
   const types = tags
-  $: bubbleSize = Math.round(width / 700)
+  $: bubbleSize = Math.max(1, Math.round(width / 700))
   let hoveredClaim = null
   let hoveredClaimIsFlipped = false
   let canvasElement
@@ -109,7 +110,7 @@
       return {
         type,
         r: r / constant,
-        labelR: Math.max(r + 13, 30) / constant,
+        labelR: Math.max(r + (height * 0.002), 30) / constant,
         x: (x + width / 2) / constant,
         y: (y + height / 2) / constant,
         color: parsedColor,
@@ -126,12 +127,18 @@
       // .force("r", forceRadial(d => d.distance).strength(5))
       .stop()
 
+    range(0, 100).forEach(i => {
+      simulation.tick()
+      groupBubbles.forEach(d => {
+        d.x = Math.max(d.labelR, Math.min((width / constant) - d.labelR, d.x))
+        d.y = Math.max(d.labelR, Math.min((height / constant) - d.labelR, d.y))
+      })
+    })
+
     let groupBubblesByCategory = {}
     groupBubbles.forEach(d => {
       groupBubblesByCategory[d.type] = d
     })
-
-    range(0, 100).forEach(i => simulation.tick())
 
     let runningTopicIndices = {}
     let claims = []
@@ -204,7 +211,7 @@
   const debounceUpdateDelaunay = debounce(updateDelaunay, 100)
   $: iteration, bubbles, width, debounceUpdateDelaunay()
 
-  $: iteration, isVertical, updateGroups()
+  $: iteration, width, updateGroups()
 
   const drawCanvas = () => {
     if (!canvasElement) return
@@ -330,13 +337,13 @@
           ].join(" ")}
           fill="none"
           id={`path-${type}`}
-          transform={`rotate(-75)`}
+          transform={`rotate(-95)`}
         />
         <text transition:fade={{ duration: 1000 + 300 * i }}>
           <textPath
             href={`#path-${type}`}
             class="boundary-label"
-            startOffset="20%"
+            startOffset="30%"
             fill={darkerColor}
           >
             { type || "Other" }
@@ -375,7 +382,7 @@
   {/if}
 
   {#if topLeftBubble}
-    <div class="annotation" style={`transform: translate(${Math.max(100, topLeftBubble.x * constant - (isVertical ? 0 : 50))}px, ${topLeftBubble.y * constant - 50}px)`}>
+    <div class="annotation" style={`transform: translate(${Math.max(130, topLeftBubble.x * constant - (isVertical ? 0 : 50))}px, ${topLeftBubble.y * constant - 50}px)`}>
       <div class="annotation-contents">
         Each fact check is represented as a circle, which fades with age
       </div>
@@ -449,5 +456,34 @@
     fill: none;
     stroke: #b9b6ca;
     stroke-width: 1;
+  }
+
+  @media (max-width: 800px) {
+    .c {
+      margin-top: 3em;
+    }
+    .annotation {
+      font-size: 0.8em;
+    }
+    text {
+      font-size: 0.6em;
+    }
+  }
+  @media (max-width: 600px) {
+    .c {
+      margin-top: 5em;
+    }
+  }
+
+  @media (max-width: 486px) {
+    .c {
+      pointer-events: none;
+    }
+    .annotation {
+      margin-top: -1em;
+    }
+    .annotation-line {
+      display: none;
+    }
   }
 </style>

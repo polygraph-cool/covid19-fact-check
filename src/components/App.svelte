@@ -198,7 +198,6 @@
 				<List {data} {isLoading} {isFiltered} {filterIteration} {filterFunction} {filterColor} {iteration} />
 			</div>
 		{/if}
-
 </main>
 
 {#if sections.includes("footer")}

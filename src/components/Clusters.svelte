@@ -25,7 +25,7 @@
   $: constant = width / 1000
   $: isVertical = width < 600
   $: height = width * (
-    isVertical ? 1.25 :
+    isVertical ? 1.3 :
     width < 1200 ? 0.66 :
       0.5
   )
@@ -99,8 +99,8 @@
 
       const bubbleCount = data.filter(d => categoryAccessor(d) == type).length
       const r = Math.max(
-        Math.sqrt(bubbleCount * Math.PI * Math.pow(bubbleSize * 1.2, 2) * (Math.sqrt(12) / Math.PI)) + 20,
-        36
+        Math.sqrt(bubbleCount * Math.PI * Math.pow(bubbleSize * 1.2, 2) * (Math.sqrt(12) / Math.PI)) + (width * 0.05),
+        width * 0.06
       )
       const parsedColor = typeColors[type]
       const darkerColor = color(parsedColor)
@@ -132,7 +132,15 @@
       groupBubblesByCategory[d.type] = d
     })
 
-    range(60).forEach(i => simulation.tick())
+    range(60).forEach(() => {
+      simulation.tick()
+        groupBubbles = groupBubbles.map(d => ({
+          ...d,
+          x: Math.max(d.labelR, Math.min(width - d.labelR, d.x)),
+          y: Math.max(d.labelR, Math.min(height - d.labelR, d.y)),
+        }))
+        console.log(groupBubbles[0])
+    })
 
     const runningCategoryIndices = {}
     const claims = [...data].reverse().map((d, i) => {
