@@ -23,7 +23,7 @@
 
   let width = 1200
   $: constant = width / 1000
-  $: isVertical = width < 800
+  $: isVertical = width < 600
   $: height = width * (
     isVertical ? 1.25 :
     width < 1200 ? 0.66 :
@@ -31,7 +31,7 @@
   )
 
   const types = categories
-  $: bubbleSize = Math.round(width / 250)
+  $: bubbleSize = Math.max(1, Math.round(width / 250))
   let hoveredClaim = null
   let canvasElement
 
@@ -441,5 +441,8 @@
     fill: none;
     stroke: #b9b6ca;
     stroke-width: 1;
+  }
+  @media (max-width: 533px) {
+    margin-top: 5em;
   }
 </style>
