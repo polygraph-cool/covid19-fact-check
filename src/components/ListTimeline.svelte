@@ -149,7 +149,7 @@
       bars.forEach(({ y, height, color: barColor, isTag }, j) => {
 
         ctx.fillStyle = barColor
-        ctx.fillRect(x, y, itemWidth, height)
+        ctx.fillRect(x, y, itemWidth, height + 1)
 
         // const tag = tagAccessor(item)
           // ? numberOfFilteredItems >= j ? (color || "#57a039") : "#dbdbeb"
@@ -158,6 +158,11 @@
           // ] || {}).color || "#dbdbeb"
         // const y = height + -j * 2
       })
+
+      ctx.fillStyle = "#fff"
+      ctx.fillRect(x + itemWidth, 0, 1, height)
+      ctx.fillStyle = "#fff"
+      ctx.fillRect(x - 1, 0, 1, height)
 
       ctx.fillStyle = color || "#656275"
       const y = isFiltered ? yScale((filteredBins[i] || []).length) : height

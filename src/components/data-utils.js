@@ -70,11 +70,13 @@ export const sources = Object.keys(sourceKeywords)
 export const categories = ["Authorities", "Causes", "Conspiracy theory", "Cures", "Spread", "Symptoms", "Other"]
 // const colors = ["#58B19F", "#778beb", "#e77f67", "#FDA7DF", "#cf6a87", "#A3CB38", "#786fa6", "#4b7bec", "#778ca3", "#0fb9b1"]
 // const colors = ["#1AC29A", "#778beb", "#E58F29", "#FDA7DF", "#cf6a87", "#AED027", "#786fa6", "#778ca3"]
-const colors = ["#E58F29", "#E1538F", "#358DDE", "#6F57B0", "#91BF0D", "#20C29B", "#CD424A", "#778ca3"]
+// const colors = ["#E58F29", "#E1538F", "#358DDE", "#6F57B0", "#91BF0D", "#20C29B", "#CD424A", "#778ca3"]
+const colors = ["#AE6DED", "#ED423E", "#57A13A", "#4DA3A2", "#A38345"]
 let categoryColors = {}
 categories.forEach((category, i) => {
-  categoryColors[category] = colors[i % (colors.length - 1)]
+  categoryColors[category] = colors[i % (colors.length)]
 })
+console.log(categoryColors)
 categoryColors[""] = "#656275"
 export {categoryColors}
 
@@ -270,12 +272,12 @@ const tweakColor = (initialColor, numSteps) => {
   return hslColor.formatHex()
 }
 Object.keys(allTags).forEach((category, i) => {
-  let categoryColor = color(colors[i % (colors.length - 1)]).darker(-1).brighter(-1).formatHex()
+  let categoryColor = color(colors[i % (colors.length)]).darker(-1).brighter(-1).formatHex()
   Object.keys(allTags[category]).map(tag => {
     tagMap[tag] = allTags[category][tag]
     tagCategoryMap[tag] = category
-    // tagColors[tag] = tweakColor(colors[i % (colors.length - 1)], i - 2)
-    tagColors[tag] = colors[i % (colors.length - 1)]
+    // tagColors[tag] = tweakColor(colors[i % (colors.length)], i - 2)
+    tagColors[tag] = colors[i % (colors.length)]
   })
 })
 tagColors[""] = "#656275"
