@@ -35,7 +35,7 @@
   let canvasElement = null
   // let windowWidth = 1200
   let width = 1200
-  $: isVertical = width < 474
+  $: isVertical = width < 445
   $: height = width * (
     isVertical ? 2 : 0.7
   )
