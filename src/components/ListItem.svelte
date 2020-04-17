@@ -33,7 +33,8 @@
 
   $: category = categoryAccessor(item)
   $: tags = tagsAccessor(item)
-  $: color = tagColors[tags[0]] || "#000"
+  // $: color = tagColors[tags[0]] || "#000"
+  $: color = "#000"
   // $: color = categoryColors[category] || "#000"
   $: matchingSources = sourceAccessor(item)
   $: rating = ratingAccessor(item) || "?? " + item.rating

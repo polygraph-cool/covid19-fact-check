@@ -92,8 +92,7 @@
 
     const colorScale = scaleLinear()
       .domain([0, max(Object.values(claimsByCountry).map(d => d.length))])
-      .range(["#d9e7e4", "#67B244"])
-      .interpolate(interpolateHclLong)
+      .range(["#67B244", "#67B244"])
 
     countries.forEach(country => {
       const countryCentroid = isVertical ? countryCentroidsVertical[country] : countryCentroids[country]
@@ -190,6 +189,8 @@
   $: topLeftBubble = (countryData["United States of America"] || {}).r ? countryData["United States of America"]
     : (Object.values(countryData).filter(d => (d || {}).r).sort((a,b) => a.x - b.x)[0] || {}).r ? Object.values(countryData).filter(d => d.r).sort((a,b) => a.x - b.x)[0]
     : null
+
+  $: sortedCountries = countries.sort((a,b) => (countryData[a] || {}).r > (countryData[b] || {}).r ? -1 : 1)
 </script>
 
 <svelte:window on:scroll={clearTooltip} />
@@ -200,7 +201,7 @@
   bind:clientWidth={width}>
   <canvas style={`width: ${width}px; height: ${height}px`} bind:this={canvasElement} />
   <svg {width} {height}>
-    {#each countries as country}
+    {#each sortedCountries as country}
       {#if countryData[country]}
         <g class="bubble-group" transform={`translate(${countryData[country].x * width}, ${countryData[country].y * width})`}>
           <circle
