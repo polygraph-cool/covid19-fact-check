@@ -337,13 +337,13 @@
           ].join(" ")}
           fill="none"
           id={`path-${type}`}
-          transform={`rotate(-95)`}
+          transform={`rotate(-147)`}
         />
         <text transition:fade={{ duration: 1000 + 300 * i }}>
           <textPath
             href={`#path-${type}`}
             class="boundary-label"
-            startOffset="30%"
+            startOffset="40%"
             fill={darkerColor}
           >
             { type || "Other" }
