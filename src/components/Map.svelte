@@ -75,6 +75,7 @@
 
   let bubbles = []
   let countryData = {}
+  let numberOfTotalClaimsByCountry = {}
   const updateBubbles = () => {
     countryData = {}
     const claimsByCountry = {}
@@ -82,6 +83,7 @@
     data.forEach(d => {
       const country = countryAccessor(d)
       if (!country) return
+      numberOfTotalClaimsByCountry[country] = (numberOfTotalClaimsByCountry[country] || 0) + 1
       if (isFiltered && !filterFunction(d)) return
       if (!claimsByCountry[country]) claimsByCountry[country] = []
       claimsByCountry[country].push(d)
@@ -218,10 +220,10 @@
               { country }
             </text>
             <text y={(country == "United States of America" ? 0 : -countryData[country].r * width) - 6} class="text-middle text-bg">
-              { countryData[country].count } fact checks
+              { format(",")(countryData[country].count) } {#if isFiltered}{` of ${format(",")(numberOfTotalClaimsByCountry[country])}`}{/if} fact checks
             </text>
             <text y={(country == "United States of America" ? 0 : -countryData[country].r * width) - 6} class="text-middle text-fg">
-              { countryData[country].count } fact checks
+              { format(",")(countryData[country].count) } {#if isFiltered}{` of ${format(",")(numberOfTotalClaimsByCountry[country])}`}{/if} fact checks
             </text>
           </g>
         </g>

@@ -123,13 +123,13 @@
 							fact checks
 						{/if}
 					</div>
-					<!-- <ListFilter
+					<ListFilter
 						label="Filter the fact checks"
 						options={categories}
 						placeholder="Search for a fact check..."
 						bind:value={searchStringRaw}
 						type="input"
-					/> -->
+					/>
 					<ListFilter
 						label="Topic"
 						options={sortedTags}
