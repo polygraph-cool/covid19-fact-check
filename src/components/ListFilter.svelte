@@ -139,8 +139,10 @@
       max-width: none;
       width: 100%;
     }
+  }
+	@media (max-width: 800px) {
     input {
-      width: 100%;
+      padding: 0.9em 0.1em 0.9em 0.6em;
     }
   }
 	@media (max-width: 600px) {
