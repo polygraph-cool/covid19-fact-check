@@ -43,7 +43,7 @@
     "d3-time": "^1.1.0",
     "d3-time-format": "^2.2.3",
     "d3-timer": "^1.0.10",
-    "node-sass": "^4.13.1",
+    "node-sass": "^7.0.0",
     "polka": "^0.5.2",
     "prettier": "^1.19.1",
     "prettier-plugin-svelte": "^0.7.0",
