@@ -2,7 +2,7 @@
   "name": "svelte-app",
   "version": "1.0.0",
   "dependencies": {
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "sirv": "^0.4.2"
   },
   "engines": {
